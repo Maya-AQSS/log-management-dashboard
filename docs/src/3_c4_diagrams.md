@@ -1,7 +1,7 @@
 # 📐 Documentación Visual — Log Management Dashboard
 
 **Proyecto:** Panel de Administración y Gestión de Logs Multi-Aplicación
-**Fecha:** 2026-03-03
+**Fecha:** 2026-03-03 · **Actualizado:** 2026-03-14 (stack Laravel + Livewire 3)
 **Skill:** System Architect — C4 Model + Flujos
 **Estado:** FASE 4 Completada
 
@@ -15,20 +15,24 @@
 C4Context
     title System Context — Log Management Dashboard
 
-    Person(admin, "Administrador", "Usuario único que revisa,\ngestiona y archiva logs de error.")
+    Person(admin, "Administrador", "Usuario que revisa,\ngestiona y archiva logs de error.\nSe autentica en sistema externo.")
 
-    System(dashboard, "Log Management Dashboard", "Panel web para visualizar logs en\ntiempo real, filtrarlos y archivarlos\ncon comentarios enriquecidos.")
+    System(dashboard, "Log Management Dashboard", "Panel web SSR para visualizar logs en\ntiempo real, filtrarlos, archivarlos\ncon comentarios enriquecidos y gestionar\nel catálogo de códigos de error.")
+
+    System_Ext(auth_ext, "Sistema de Autenticación Externa", "API externa que gestiona usuarios.\nEl panel no tiene pantalla de login propia.\nEn desarrollo: mock de sesión en Laravel.")
 
     System_Ext(n8n, "n8n (Automatización)", "Orquesta flujos de datos.\nInserta logs en PostgreSQL\ndesde múltiples aplicaciones.")
 
     System_Ext(apps, "Aplicaciones Monitorizadas", "Servicios que generan errores\n(api-gateway, workers, etc.).\nNo interactúan directamente con el panel.")
 
-    System_Ext(postgres, "PostgreSQL", "Base de datos compartida.\nContiene tabla `logs` (ingesta de n8n)\ny tablas `archived_logs` y `comments`\n(gestionadas por el panel).")
+    System_Ext(postgres, "PostgreSQL", "Base de datos compartida.\nContiene tabla logs (ingesta de n8n)\ny tablas archived_logs, comments, error_codes\ny users (gestionadas por el panel).")
 
-    Rel(admin, dashboard, "Usa", "HTTPS / Navegador")
+    Rel(admin, auth_ext, "Se autentica", "HTTPS")
+    Rel(auth_ext, dashboard, "Redirige con sesión activa", "HTTPS / cookie")
+    Rel(admin, dashboard, "Usa el panel", "HTTPS / Navegador")
     Rel(apps, n8n, "Envían eventos de error", "HTTP / Webhook")
     Rel(n8n, postgres, "Inserta logs", "SQL / TCP")
-    Rel(dashboard, postgres, "Lee logs activos,\nescribe archivados y comentarios", "SQL / TCP")
+    Rel(dashboard, postgres, "Lee logs activos,\nescribe archivados, comentarios y error_codes", "SQL / TCP")
 ```
 
 ---
@@ -41,63 +45,63 @@ C4Context
 C4Container
     title Container Diagram — Log Management Dashboard
 
-    Person(admin, "Administrador", "Usuario único del panel.")
+    Person(admin, "Administrador", "Usuario del panel.")
 
+    System_Ext(auth_ext, "Auth Externa", "Gestiona usuarios y sesión.")
     System_Ext(n8n, "n8n", "Inserta logs en PostgreSQL.")
 
-    System_Boundary(dashboard, "Log Management Dashboard (Monorepo)") {
-        Container(frontend, "Frontend SPA", "React 19 + Vite", "Interfaz de usuario.\nDashboard, listado, detalle,\nhistórico y editor rich text (TipTap 2).\nCompilado por Vite a public/build/.")
+    System_Boundary(dashboard, "Log Management Dashboard") {
+        Container(laravel, "Laravel App", "Laravel 12 + Livewire 3 + Blade", "Sirve vistas SSR reactivas (Livewire).\nGestiona logs, archivado, comentarios,\nError Codes. Rutas web convencionales.\nSin SPA ni build Vite separado.")
 
-        Container(backend, "Backend + Static Server", "Laravel 12 (PHP)", "Sirve la SPA compilada en public/build.\nExpone API REST autenticada con Sanctum.\nGestiona logs, archivado, comentarios\ny streaming SSE. Sin CORS necesario.")
-
-        Container(sse_worker, "SSE Worker", "Laravel Artisan Command\n(Supervisor)", "Escucha pg_notify de PostgreSQL\ny emite eventos al cliente SSE\ncuando hay nuevos logs.")
+        Container(sse_worker, "SSE Worker", "Laravel Artisan Command\n(Supervisor)", "Escucha pg_notify de PostgreSQL\ny emite eventos SSE al navegador\ncuando hay nuevos logs.")
     }
 
-    SystemDb_Ext(postgres, "PostgreSQL", "BD compartida.\nTablas: `logs`, `archived_logs`, `comments`.")
+    SystemDb_Ext(postgres, "PostgreSQL", "BD compartida.\nTablas: logs, archived_logs,\ncomments, error_codes, users.")
 
-    Rel(admin, frontend, "Usa", "HTTPS / Navegador")
-    Rel(frontend, backend, "Peticiones API REST\ny conexión SSE", "HTTPS / JSON")
-    Rel(backend, postgres, "Lee y escribe\n(Eloquent ORM)", "TCP / SQL")
-    Rel(sse_worker, postgres, "Escucha NOTIFY\nen tabla `logs`", "TCP / pg_notify")
-    Rel(sse_worker, backend, "Notifica nuevos logs\npara broadcast SSE", "Proceso interno")
-    Rel(n8n, postgres, "INSERT en `logs`", "TCP / SQL")
+    Rel(admin, auth_ext, "Autentica", "HTTPS")
+    Rel(auth_ext, laravel, "Redirige con sesión", "HTTPS cookie")
+    Rel(admin, laravel, "Navega el panel", "HTTPS / Navegador")
+    Rel(admin, laravel, "Conexión SSE (Dashboard)", "EventSource / HTTPS")
+    Rel(sse_worker, laravel, "Publica actualizaciones SSE", "Proceso Artisan")
+    Rel(laravel, postgres, "Lee y escribe\n(Eloquent ORM)", "TCP / SQL")
+    Rel(sse_worker, postgres, "Escucha NOTIFY en tabla logs", "TCP / pg_notify")
+    Rel(n8n, postgres, "INSERT en logs", "TCP / SQL")
 ```
 
 ---
 
-## 3. Flujo 1 — Archivado de un Log
+## 3. Flujo 1 — Archivado de un Log (Livewire Action)
 
-> Secuencia completa desde que el admin decide archivar hasta que el log desaparece de la vista activa.
+> Secuencia desde que el admin decide archivar hasta que el log desaparece de la vista activa.
 
 ```mermaid
 sequenceDiagram
     actor Admin
-    participant FE as Frontend (React)
-    participant BE as Backend (Laravel 12)
+    participant LW as Livewire LogDetail
+    participant BE as Laravel (Action)
     participant DB as PostgreSQL
 
-    Admin->>FE: Pulsa "Archivar en Histórico" con comentario
-    FE->>FE: Valida que el comentario no esté vacío
-    FE->>BE: POST /api/logs/{id}/archive\n{ comment: "..." }
-    BE->>BE: Autentica sesión Sanctum
-    BE->>BE: Valida FormRequest (comentario obligatorio)
+    Admin->>LW: wire:click "Guardar en Histórico"
+    LW->>LW: Muestra modal de confirmación (Alpine.js x-show)
+    Admin->>LW: Confirma acción
+    LW->>BE: Livewire Action: archiveLog(id)
+    BE->>BE: Valida sesión activa (middleware auth)
     BE->>BE: Sanitiza HTML del comentario (HTMLPurifier)
     BE->>DB: BEGIN TRANSACTION
     DB-->>BE: OK
-    BE->>DB: INSERT INTO archived_logs (...)
-    BE->>DB: INSERT INTO comments (archived_log_id, content, ...)
-    BE->>DB: UPDATE logs SET archived = true WHERE id = {id}
+    BE->>DB: INSERT INTO archived_logs (application_id, archived_by_id, error_code_id, severity, message, ...)
+    BE->>DB: INSERT INTO comments (archived_log_id, user_id, content)
+    BE->>DB: DELETE FROM logs WHERE id = {id}
     BE->>DB: COMMIT
     DB-->>BE: OK
-    BE-->>FE: 201 Created { archived_log: {...} }
-    FE->>FE: Elimina el log de la lista activa (estado local)
-    FE->>FE: Muestra notificación "Log archivado correctamente"
-    Note over FE,BE: El contador del dashboard se actualiza\nvía SSE en < 2s
+    BE-->>LW: Livewire re-render (log desaparece de la lista)
+    LW-->>Admin: Flash message "Log archivado correctamente"
+    Note over LW,BE: El contador del dashboard se actualiza\nvía SSE en < 2s
 ```
 
 ---
 
-## 4. Flujo 2 — Actualización en Tiempo Real (SSE)
+## 4. Flujo 2 — Actualización en Tiempo Real (SSE + Livewire)
 
 > Cómo un nuevo log insertado por n8n llega al dashboard del administrador.
 
@@ -106,139 +110,224 @@ sequenceDiagram
     participant N8N as n8n
     participant DB as PostgreSQL
     participant Worker as SSE Worker (Artisan)
-    participant BE as Backend (Laravel 12)
-    participant FE as Frontend (React)
+    participant BE as Laravel (SSE endpoint)
+    participant JS as Alpine.js (cliente)
     actor Admin
 
-    N8N->>DB: INSERT INTO logs (type, app_source, message, ...)
+    N8N->>DB: INSERT INTO logs (severity, application_id, message, ...)
     DB->>Worker: NOTIFY 'logs_channel' (pg_notify)
-    Worker->>BE: Señaliza nuevo evento disponible
-    BE->>DB: SELECT COUNT(*) GROUP BY type (query agregada)
+    Worker->>BE: Emite evento al stream SSE abierto
+    BE->>DB: SELECT COUNT(*) GROUP BY severity (query agregada)
     DB-->>BE: Contadores actualizados
-    BE-->>FE: SSE event: { type: "log_counts", data: {...} }
-    FE->>FE: Actualiza contadores de cards en el dashboard
-    FE-->>Admin: Cards actualizadas en < 2s sin recarga
+    BE-->>JS: SSE event: { type: "log_counts", data: {...} }
+    JS->>JS: $wire.dispatch('refreshCounts', data)
+    JS-->>Admin: Cards del dashboard actualizadas en < 2s
 ```
 
 ---
 
-## 5. Flujo 3 — Autenticación SPA (Sanctum)
+## 5. Flujo 3 — Autenticación Externa + Mock de Desarrollo
 
-> Login del administrador y protección de rutas.
+> El panel no gestiona login. El usuario llega con sesión activa del sistema externo.
 
 ```mermaid
 sequenceDiagram
     actor Admin
-    participant FE as Frontend (React)
-    participant BE as Backend (Laravel 12)
-    participant DB as PostgreSQL
+    participant Ext as Auth Externa
+    participant LW as Laravel Panel
 
-    Admin->>FE: Introduce usuario y contraseña
-    FE->>BE: GET /sanctum/csrf-cookie
-    BE-->>FE: Cookie XSRF-TOKEN
-    FE->>BE: POST /login { email, password }
-    BE->>BE: Throttle check (rate limiting)
-    BE->>DB: Verifica credenciales
-    DB-->>BE: Usuario válido
-    BE-->>FE: 200 OK + Set-Cookie: session (httpOnly, SameSite=Strict)
-    FE->>FE: Redirige al dashboard
-    Note over FE,BE: Todas las peticiones posteriores\nincluyen la cookie de sesión automáticamente
-    Admin->>FE: Pulsa "Cerrar sesión"
-    FE->>BE: POST /logout
-    BE->>DB: Invalida sesión
-    BE-->>FE: 200 OK + Clear cookie
-    FE->>FE: Redirige al login
+    Admin->>Ext: Login en sistema externo
+    Ext-->>Admin: Token / Cookie de sesión
+    Admin->>LW: Accede al panel con cookie
+    LW->>LW: Middleware verifica sesión externa
+    LW-->>Admin: Acceso concedido → Dashboard
+
+    Note over LW: En DESARROLLO: el middleware devuelve\nun usuario mockeado sin validar auth real.\n"$user = User::find(1);" en AuthMock middleware.
+
+    Admin->>LW: Pulsa "Cerrar sesión"
+    LW->>LW: Invalida sesión local
+    LW-->>Admin: Redirige a portal externo
 ```
 
 ---
 
 ## 6. Diagrama de Base de Datos (Entity-Relationship)
 
-> Schema completo de PostgreSQL. La tabla `logs` es de solo lectura para el panel (la gestiona n8n). Las tablas `archived_logs` y `comments` son creadas y gestionadas por el panel.
+> Schema completo de PostgreSQL actualizado. La tabla `logs` es de solo lectura para el panel (la gestiona n8n).
 
 ```mermaid
 erDiagram
+    applications {
+        bigserial   id          PK
+        varchar     name        "UK - nombre único"
+        text        description
+        timestamptz created_at
+    }
+
     users {
         bigserial   id              PK
         varchar     name
-        varchar     email           "Único. Usado como login"
-        varchar     password        "Hash bcrypt"
+        varchar     email           "UK"
+        varchar     external_id     "ID auth externo"
         timestamptz created_at
         timestamptz updated_at
     }
 
-    personal_access_tokens {
+    error_codes {
         bigserial   id              PK
-        varchar     tokenable_type  "App\\Models\\User"
-        bigint      tokenable_id    FK
+        varchar     code            "UNIQUE con application_id"
+        bigint      application_id  FK
         varchar     name
-        varchar     token           "Hash SHA-256 del token"
-        text        abilities
-        timestamptz last_used_at
+        text        description
+        severity    severity        "enum: Critical/High/Medium/Low"
+        bigint      default_role_id FK "rol responsable"
         timestamptz created_at
         timestamptz updated_at
     }
 
     logs {
-        bigserial   id              PK
-        varchar     type            "Critical | High | Medium | Low | Others"
-        varchar     app_source      "Aplicación origen"
-        text        message         "Mensaje del error"
-        jsonb       metadata        "Datos adicionales (stack trace, etc.)"
-        boolean     archived        "false = activo, true = archivado"
+        bigserial   id                      PK
+        bigint      error_code_id           FK "nullable - si está catalogado"
+        bigint      application_id          FK
+        severity    severity                "enum"
+        text        message
+        varchar     file                    "Fichero donde ocurre"
+        integer     line                    "Línea del fichero"
+        jsonb       metadata                "Stack trace, contexto"
+        bigint      matched_archived_log_id FK "nullable - issue conocido"
+        boolean     resolved                "false por defecto"
         timestamptz created_at
     }
 
     archived_logs {
-        bigserial   id              PK
-        bigint      original_log_id "Referencia al log original (sin FK obligatoria)"
-        bigint      archived_by_id  FK "Usuario que archivó"
-        varchar     type            "Copia del tipo en el momento del archivado"
-        varchar     app_source      "Copia de la app origen"
-        text        message         "Copia del mensaje completo"
-        jsonb       metadata        "Copia de los metadatos"
+        bigserial   id                  PK
+        bigint      application_id      FK
+        bigint      archived_by_id      FK
+        bigint      error_code_id       FK "nullable - copia del log original"
+        severity    severity
+        text        message
+        jsonb       metadata
+        text        description         "Editable por admin"
+        varchar     url_tutorial        "nullable"
+        timestamptz original_created_at
         timestamptz archived_at
-        timestamptz created_at      "Fecha del log original"
+        timestamptz updated_at
     }
 
     comments {
         bigserial   id              PK
         bigint      archived_log_id FK
-        bigint      user_id         FK "Usuario que escribió el comentario"
-        text        content         "HTML sanitizado (TipTap output)"
+        bigint      user_id         FK
+        text        content         "HTML sanitizado"
         timestamptz created_at
         timestamptz updated_at
     }
 
-    users ||--o{ personal_access_tokens : "tiene"
+    error_code_comments {
+        bigserial   id              PK
+        bigint      error_code_id   FK
+        bigint      user_id         FK
+        text        content         "HTML sanitizado"
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    applications ||--o{ error_codes : "tiene"
+    applications ||--o{ logs : "genera"
+    applications ||--o{ archived_logs : "tiene"
     users ||--o{ archived_logs : "archiva"
     users ||--o{ comments : "escribe"
+    users ||--o{ error_code_comments : "escribe"
+    error_codes ||--o{ logs : "cataloga"
+    error_codes ||--o{ error_code_comments : "tiene"
     archived_logs ||--o{ comments : "tiene"
+    archived_logs ||--o{ logs : "enlaza logs futuros"
 ```
 
 > **Notas de diseño:**
-> - `users` es gestionada por Laravel 12 (migración estándar). Un único registro de administrador creado via seeder.
-> - `personal_access_tokens` es la tabla estándar de **Laravel Sanctum** para autenticación SPA con cookies. Se crea automáticamente con `php artisan migrate`.
-> - `logs.archived` se marca `true` al archivar. El panel nunca hace DELETE sobre `logs`.
-> - `archived_logs` almacena una **copia desnormalizada** de los campos clave del log original para garantizar que el histórico es independiente aunque la tabla `logs` sea purgada por n8n en el futuro.
-> - `original_log_id` no tiene FK obligatoria para no generar errores de integridad si n8n limpia la tabla `logs`.
-> - `archived_by_id` y `comments.user_id` referencian `users.id` con FK. Permiten auditar quién hizo qué (NFR-OBS-02).
-> - El panel **no tiene permiso DELETE ni TRUNCATE** sobre `archived_logs` ni `comments` (STRIDE T-DB-01).
+>
+> - `users` contiene los usuarios del panel (sincronizados o mockeados desde auth externa). Sin contraseña local.
+> - `logs` usa **DELETE físico** en dos situaciones:
+>   1. **Al archivar** (acción del admin): se hace INSERT en `archived_logs` y DELETE inmediato del log original dentro de la misma transacción.
+>   2. **Script de purga** (tarea programada — diaria/semanal/mensual): elimina los logs con `resolved = true` más antiguos de N días que no fueron archivados. Se implementa como un `php artisan logs:purge --days=30` registrado en `routes/console.php` con `->daily()`.
+> - `logs.resolved` (boolean): estado que el admin puede activar sin archivar. El script de purga usa este flag + `created_at` como criterio de eliminación.
+> - **No hay soft delete en `logs`**: la tabla puede recibir miles de logs de múltiples apps y debe mantenerse compacta. El histórico duradero vive en `archived_logs`.
+> - `archived_logs` almacena una **copia desnormalizada completa** (`severity`, `message`, `metadata`, `error_code_id`, etc.) para que el histórico sea autónomo una vez que el log original se elimine.
+> - `error_codes` tiene **unique constraint en `(code, application_id)`** — clave compuesta de negocio.
+> - `archived_logs.url_tutorial` y `description` son editables solo desde la vista de Histórico.
+> - El enum de severidad se declara una vez y se reutiliza en `logs` y `archived_logs`:
+>
+>   ```sql
+>   CREATE TYPE severity AS ENUM ('critical', 'high', 'medium', 'low', 'other');
+>   ```
+>
+>   En las migraciones Laravel, usar `$table->enum('severity', ['critical','high','medium','low','other'])`
+>   o un cast personalizado con `use HasCasts` + `SeverityEnum::class`.
+
+### Índices recomendados
+
+> Definir en las migraciones Laravel con `Schema::table('logs', ...)` tras crear las columnas.
+
+```php
+// logs — rendimiento de los listados principales
+$table->index('error_code_id');                               // búsquedas por catálogo
+$table->index(['application_id', 'created_at']);              // listado principal (desc)
+$table->index(['severity', 'resolved']);                      // filtros combinados
+$table->index('matched_archived_log_id');                     // join de enlace a issue
+
+// error_codes — integridad de catálogo
+$table->unique(['code', 'application_id']);                   // unicidad de negocio
+```
+
+### Matching de logs con issues conocidos (asistido desde la vista de detalle)
+
+> **El log insertado por n8n no tiene contexto** para saber si ya existe un issue archivado similar; ese conocimiento lo tiene el administrador cuando abre la vista de detalle. Por tanto, el campo `matched_archived_log_id` **se rellena manualmente o con sugerencia asistida desde `LogDetail`**, no en el momento del INSERT.
+
+**Flujo en la vista de detalle (`/logs/{id}`):**
+
+1. El admin abre un log activo.
+2. Si el log tiene `error_code_id`, el componente Livewire consulta en segundo plano los `archived_logs` con la misma `application_id` + `error_code_id` y los presenta como sugerencias.
+3. El admin selecciona el issue conocido (o ignora las sugerencias).
+4. El Livewire Action actualiza `logs.matched_archived_log_id`.
+
+```php
+// En el componente Livewire LogDetail
+public function loadSuggestedMatches(): void
+{
+    if ($this->log->error_code_id) {
+        $this->suggestedMatches = ArchivedLog::where('application_id', $this->log->application_id)
+            ->where('error_code_id', $this->log->error_code_id)
+            ->latest('archived_at')
+            ->limit(5)
+            ->get();
+    }
+}
+
+public function linkToArchivedLog(int $archivedLogId): void
+{
+    $this->log->update(['matched_archived_log_id' => $archivedLogId]);
+    $this->dispatch('matchLinked');
+}
+```
+
+> `matched_archived_log_id` puede seguir siendo `null` si el admin no encuentra un issue relacionado. Es un campo informativo, no un requisito para archivar.
 
 ---
 
-## 7. Mapa de Rutas — Frontend (React Router)
+## 7. Mapa de Rutas — Laravel Web Routes
 
 ```mermaid
 graph TD
-    A["/login"] -->|Autenticado| B["/dashboard"]
-    B --> C["/logs?type=Critical"]
-    B --> D["/logs (sin filtro)"]
-    C --> E["/logs/:id (detalle)"]
-    D --> E
-    E --> F["Acción: Archivar\n→ Vuelve a /logs"]
-    B --> G["/historico"]
-    G --> H["/historico?type=High&app=api-gateway"]
-    H --> I["/historico/:id (detalle archivado)"]
-    I --> J["Añadir comentario al hilo"]
+    A["/ (redirect → /dashboard)"] --> B["/dashboard\n@livewire DashboardCards"]
+    B --> C["/logs\n@livewire LogsTable\n?type=&app=&from=&to=&q="]
+    C --> D["/logs/{id}\n@livewire LogDetail\nVer · Guardar · Solucionado"]
+    D -->|"Guardar en histórico"| E["/historico"]
+    B --> E
+    E --> F["/historico\n@livewire ArchivedLogsTable\n?type=&app=&from=&to=&q="]
+    F --> G["/historico/{id}\n@livewire ArchivedLogDetail\n+ CommentSection"]
+    B --> H["/error-codes\n@livewire ErrorCodesTable\n?app=&q="]
+    H --> I["Modal crear error code\n@livewire ErrorCodeForm"]
+    H --> J["/error-codes/{id}\n@livewire ErrorCodeForm (editar)\n+ ErrorCodeCommentSection"]
 ```
+
+> **Navegación global:** `x-nav` (componente Blade) con enlaces a Dashboard / Logs / Histórico / Error Codes / Cerrar Sesión.
