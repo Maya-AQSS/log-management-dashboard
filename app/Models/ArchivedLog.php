@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class ArchivedLog extends Model
 {
@@ -35,23 +38,28 @@ class ArchivedLog extends Model
         ];
     }
 
-    public function application()
+    public function application(): BelongsTo
     {
         return $this->belongsTo(Application::class);
     }
 
-    public function archivedBy()
+    public function archivedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'archived_by_id');
     }
 
-    public function errorCode()
+    public function errorCode(): BelongsTo
     {
         return $this->belongsTo(ErrorCode::class);
     }
 
-    public function comments()
+    public function comments(): MorphMany
     {
-        return $this->hasMany(Comment::class);
+        return $this->morphMany(Comment::class, 'commentable');
+    }
+
+    public function logs(): HasMany
+    {
+        return $this->hasMany(Log::class, 'matched_archived_log_id');
     }
 }

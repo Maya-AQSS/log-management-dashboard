@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('comments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('archived_log_id')->constrained('archived_logs')->cascadeOnDelete();
+            $table->morphs('commentable'); // archived_logs o error_codes
             $table->foreignId('user_id')->constrained('users')->restrictOnDelete();
             $table->text('content');
             $table->timestamps();

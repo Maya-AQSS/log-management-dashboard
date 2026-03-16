@@ -40,7 +40,7 @@ return new class extends Migration
             $table->jsonb('metadata')->nullable();
             $table->unsignedBigInteger('matched_archived_log_id')->nullable();
             $table->boolean('resolved')->default(false);
-            $table->timestampTz('created_at')->nullable();
+            $table->timestamptz('created_at')->nullable();
 
             $table->index('error_code_id');
             $table->index(['application_id', 'created_at']);

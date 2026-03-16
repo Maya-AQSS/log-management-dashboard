@@ -15,7 +15,6 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->enum('severity', ['critical', 'high', 'medium', 'low', 'other'])->nullable();
-            $table->unsignedBigInteger('default_role_id')->nullable();
             $table->timestamps();
 
             $table->unique(['code', 'application_id']);

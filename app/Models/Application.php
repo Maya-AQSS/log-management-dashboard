@@ -9,9 +9,9 @@ class Application extends Model
 {
     use HasFactory;
 
-    public $timestamps = false;
+    public const UPDATED_AT = null;
 
-    protected $fillable = ['name', 'description', 'created_at'];
+    protected $fillable = ['name', 'description'];
 
     protected function casts(): array
     {

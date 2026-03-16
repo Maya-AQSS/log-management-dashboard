@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->text('description')->nullable();
-            $table->timestampTz('created_at')->nullable();
+            $table->timestamptz('created_at');
         });
     }
 

@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class ErrorCode extends Model
 {
@@ -15,26 +18,21 @@ class ErrorCode extends Model
         'name',
         'description',
         'severity',
-        'default_role_id',
     ];
 
-    public function application()
+    public function application(): BelongsTo
     {
         return $this->belongsTo(Application::class);
     }
 
-    public function logs()
+    public function logs(): HasMany
     {
         return $this->hasMany(Log::class);
     }
 
-    public function archivedLogs()
-    {
-        return $this->hasMany(ArchivedLog::class);
-    }
 
-    public function comments()
+    public function comments(): MorphMany
     {
-        return $this->hasMany(ErrorCodeComment::class);
+        return $this->morphMany(Comment::class, 'commentable');
     }
 }

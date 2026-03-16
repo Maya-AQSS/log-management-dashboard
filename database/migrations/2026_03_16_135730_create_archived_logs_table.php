@@ -18,9 +18,9 @@ return new class extends Migration
             $table->jsonb('metadata')->nullable();
             $table->text('description')->nullable();
             $table->string('url_tutorial', 500)->nullable();
-            $table->timestampTz('original_created_at');
-            $table->timestampTz('archived_at');
-            $table->timestampTz('updated_at')->nullable();
+            $table->timestamptz('original_created_at');
+            $table->timestamptz('archived_at');
+            $table->timestamptz('updated_at')->nullable();
 
             $table->index(['application_id', 'archived_at']);
         });

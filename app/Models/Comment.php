@@ -3,8 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Comment extends Model
 {
@@ -14,18 +15,27 @@ class Comment extends Model
     protected $table = 'comments';
 
     protected $fillable = [
-        'archived_log_id',
+        'commentable_type',
+        'commentable_id',
         'user_id',
         'content',
     ];
 
-    public function archivedLog(): BelongsTo
+    public function commentable(): MorphTo
     {
-        return $this->belongsTo(ArchivedLog::class);
+        return $this->morphTo();
     }
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function allowedTypes(): array
+    {
+        return [
+            ArchivedLog::class,
+            ErrorCode::class,
+        ];
     }
 }
