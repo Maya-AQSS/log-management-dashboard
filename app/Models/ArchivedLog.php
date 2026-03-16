@@ -4,48 +4,54 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-
 
 class ArchivedLog extends Model
 {
-    /** @use HasFactory<\Database\Factories\ArchivedLogFactory> */
     use HasFactory;
 
-    protected $table = 'archived_logs';
-    
+    const CREATED_AT = null;
+    const UPDATED_AT = 'updated_at';
+
     protected $fillable = [
-        'original_log_id',
+        'application_id',
         'archived_by_id',
-        'type',
-        'app_source',
+        'error_code_id',
+        'severity',
         'message',
         'metadata',
+        'description',
+        'url_tutorial',
+        'original_created_at',
         'archived_at',
     ];
 
-    protected $casts = [
-        'metadata' => 'array',
-        'archived_at' => 'datetime',
-        'archived_by_id' => 'integer',
-    ];
-
-
-    public function log(): BelongsTo
+    protected function casts(): array
     {
-        return $this->belongsTo(Log::class, 'original_log_id');
+        return [
+            'metadata' => 'array',
+            'original_created_at' => 'datetime',
+            'archived_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
     }
 
-    public function user(): BelongsTo
+    public function application()
+    {
+        return $this->belongsTo(Application::class);
+    }
+
+    public function archivedBy()
     {
         return $this->belongsTo(User::class, 'archived_by_id');
     }
 
-    public function comments(): HasMany
+    public function errorCode()
+    {
+        return $this->belongsTo(ErrorCode::class);
+    }
+
+    public function comments()
     {
         return $this->hasMany(Comment::class);
     }
-
-
 }
