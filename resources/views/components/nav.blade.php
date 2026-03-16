@@ -28,7 +28,7 @@
                 @csrf
                 <button
                     type="submit"
-                    class="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-medium"
+                    class="px-3 py-1.5 rounded-full bg-[#f7a736] hover:bg-[#e28f1f] text-xs font-semibold text-[#1e1a24] shadow-sm"
                 >
                     Cerrar sesión
                 </button>
@@ -50,23 +50,13 @@
     <nav
         x-show="open"
         x-transition
-        class="md:hidden border-t border-white/10 bg-gradient-to-r from-purple-800 to-purple-600"
+        class="md:hidden border-t border-white/10 bg-gradient-to-r from-[#714b67] to-[#5b3853] text-white shadow-sm"
     >
         <div class="px-4 py-3 space-y-2">
             <a href="/" class="block {{ $linkClasses('dashboard*') }}">Dashboard</a>
             <a href="#" class="block {{ $linkClasses('logs*') }}">Logs</a>
             <a href="#" class="block {{ $linkClasses('historico*') }}">Histórico</a>
             <a href="#" class="block {{ $linkClasses('error-codes*') }}">Error Codes</a>
-
-            <form method="POST" action="#" class="pt-2 border-t border-white/10">
-                @csrf
-                <button
-                    type="submit"
-                    class="w-full text-left px-3 py-2 rounded-full bg-white/10 hover:bg-white/20 text-xs font-medium"
-                >
-                    Cerrar sesión
-                </button>
-            </form>
         </div>
     </nav>
 </header>
