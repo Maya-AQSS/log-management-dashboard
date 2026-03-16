@@ -180,7 +180,6 @@ erDiagram
         varchar     name
         text        description
         severity    severity        "enum: Critical/High/Medium/Low"
-        bigint      default_role_id FK "rol responsable"
         timestamptz created_at
         timestamptz updated_at
     }
@@ -216,16 +215,8 @@ erDiagram
 
     comments {
         bigserial   id              PK
-        bigint      archived_log_id FK
-        bigint      user_id         FK
-        text        content         "HTML sanitizado"
-        timestamptz created_at
-        timestamptz updated_at
-    }
-
-    error_code_comments {
-        bigserial   id              PK
-        bigint      error_code_id   FK
+        text        comentable_type   "Enum: 'archived_log' o 'error_code'"
+        bigint      comentable_id FK
         bigint      user_id         FK
         text        content         "HTML sanitizado"
         timestamptz created_at
@@ -236,8 +227,8 @@ erDiagram
     applications ||--o{ logs : "genera"
     applications ||--o{ archived_logs : "tiene"
     users ||--o{ archived_logs : "archiva"
-    users ||--o{ comments : "escribe"
-    users ||--o{ error_code_comments : "escribe"
+    users ||--o{ comments : "escribe comentarios en logs"
+    users ||--o{ comments : "escribe comentarios en error codes"
     error_codes ||--o{ logs : "cataloga"
     error_codes ||--o{ error_code_comments : "tiene"
     archived_logs ||--o{ comments : "tiene"
@@ -253,7 +244,6 @@ erDiagram
 > - `logs.resolved` (boolean): estado que el admin puede activar sin archivar. El script de purga usa este flag + `created_at` como criterio de eliminación.
 > - **No hay soft delete en `logs`**: la tabla puede recibir miles de logs de múltiples apps y debe mantenerse compacta. El histórico duradero vive en `archived_logs`.
 > - `archived_logs` almacena una **copia desnormalizada completa** (`severity`, `message`, `metadata`, `error_code_id`, etc.) para que el histórico sea autónomo una vez que el log original se elimine.
-> - `error_codes` tiene **unique constraint en `(code, application_id)`** — clave compuesta de negocio.
 > - `archived_logs.url_tutorial` y `description` son editables solo desde la vista de Histórico.
 > - El enum de severidad se declara una vez y se reutiliza en `logs` y `archived_logs`:
 >
