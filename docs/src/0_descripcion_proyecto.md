@@ -16,3 +16,29 @@ Después habrá otra pestaña que permitirá ver los errores del histórico orde
 | ¿Múltiples comentarios por log archivado? | **Sí**, hilo de comentarios por entrada archivada |
 | ¿Cuántos usuarios? | **Un único usuario** administrador |
 | ¿Tiempo real? | **SSE (Server-Sent Events)** para el dashboard — eficiente y sin complejidad de WebSockets |
+
+## Estructura esperada de la tabla `logs` (gestionada por n8n)
+
+La tabla `logs` **no es creada por el panel** — existe previamente en producción, insertada y mantenida por el flujo n8n. La migración `2026_03_16_135340_create_logs_table.php` usa `Schema::hasTable('logs')` para evitar recrearla; únicamente documenta su estructura y la crea en entornos limpios de desarrollo/test.
+
+| Columna | Tipo | Restricciones |
+| --- | --- | --- |
+| `id` | bigserial | PK |
+| `error_code_id` | bigint | FK nullable → `error_codes.id` (nullOnDelete) |
+| `application_id` | bigint | FK → `applications.id` (cascadeOnDelete) |
+| `severity` | enum | `critical`, `high`, `medium`, `low`, `other` |
+| `message` | text | NOT NULL |
+| `file` | varchar | nullable |
+| `line` | integer | nullable |
+| `metadata` | jsonb | nullable |
+| `matched_archived_log_id` | bigint | nullable, sin FK (referencia débil al histórico) |
+| `resolved` | boolean | default `false` |
+| `created_at` | timestamptz | nullable |
+
+**Sin `deleted_at`**: los logs se eliminan físicamente al archivar o por el script de purga programada (no se usa soft delete).
+
+**Índices críticos** (NFR-ESC-02):
+- `logs(error_code_id)`
+- `logs(application_id, created_at)`
+- `logs(severity, resolved)`
+- `logs(matched_archived_log_id)`
