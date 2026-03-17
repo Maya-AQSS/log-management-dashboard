@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            /* TODO: external_id deberia ser unique() no? */
             $table->string('external_id')->nullable();
             $table->timestamps();
         });
