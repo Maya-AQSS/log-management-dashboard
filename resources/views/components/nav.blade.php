@@ -12,10 +12,10 @@
 
         {{-- Menú centrado (oculto en mobile) --}}
         <nav class="hidden md:flex items-center gap-3">
-            <a href="/" class="{{ $linkClasses('dashboard*') }}">Dashboard</a>
-            <a href="#" class="{{ $linkClasses('logs*') }}">Logs</a>
-            <a href="#" class="{{ $linkClasses('historico*') }}">Histórico</a>
-            <a href="#" class="{{ $linkClasses('error-codes*') }}">Error Codes</a>
+            <a href="{{ route('dashboard') }}" class="{{ $linkClasses('dashboard*') }}">Dashboard</a>
+            <a href="{{ route('logs.index') }}" class="{{ $linkClasses('logs*') }}">Logs</a>
+            <a href="{{ route('archived-logs.index') }}" class="{{ $linkClasses('archived-logs*') }}">Histórico</a>
+            <a href="{{ route('error-codes.index') }}" class="{{ $linkClasses('error-codes*') }}">Error Codes</a>
         </nav>
 
         {{-- Zona derecha: usuario + logout + hamburguesa --}}
@@ -53,10 +53,10 @@
         class="md:hidden border-t border-white/10 bg-gradient-to-r from-[#714b67] to-[#5b3853] text-white shadow-sm"
     >
         <div class="px-4 py-3 space-y-2">
-            <a href="/" class="block {{ $linkClasses('dashboard*') }}">Dashboard</a>
-            <a href="#" class="block {{ $linkClasses('logs*') }}">Logs</a>
-            <a href="#" class="block {{ $linkClasses('historico*') }}">Histórico</a>
-            <a href="#" class="block {{ $linkClasses('error-codes*') }}">Error Codes</a>
+            <a href="{{ route('dashboard') }}" class="block {{ $linkClasses('dashboard*') }}">Dashboard</a>
+            <a href="{{ route('logs.index') }}" class="block {{ $linkClasses('logs*') }}">Logs</a>
+            <a href="{{ route('archived-logs.index') }}" class="block {{ $linkClasses('archived-logs*') }}">Histórico</a>
+            <a href="{{ route('error-codes.index') }}" class="block {{ $linkClasses('error-codes*') }}">Error Codes</a>
         </div>
     </nav>
 </header>
