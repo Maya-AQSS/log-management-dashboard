@@ -16,3 +16,4 @@ Después habrá otra pestaña que permitirá ver los errores del histórico orde
 | ¿Múltiples comentarios por log archivado? | **Sí**, hilo de comentarios por entrada archivada |
 | ¿Cuántos usuarios? | **Un único usuario** administrador |
 | ¿Tiempo real? | **SSE (Server-Sent Events)** para el dashboard — eficiente y sin complejidad de WebSockets |
+
