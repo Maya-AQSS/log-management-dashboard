@@ -30,7 +30,7 @@
                     type="submit"
                     class="px-3 py-1.5 rounded-full bg-[#f7a736] hover:bg-[#e28f1f] text-xs font-semibold text-[#1e1a24] shadow-sm"
                 >
-                    Cerrar sesión
+                    Cerrar Sesión
                 </button>
             </form>
 
