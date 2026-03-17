@@ -24,7 +24,7 @@
                 {{ auth()->user()->name ?? 'Usuario' }}
             </span>
 
-            <form method="POST" action="#" class="hidden sm:block">
+            <form method="POST" action="{{ route('logout') }}" class="hidden sm:block">
                 @csrf
                 <button
                     type="submit"
