@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
 
-class MockAuthUser
+class AuthMock
 {
     /**
      * Handle an incoming request.
@@ -16,8 +16,8 @@ class MockAuthUser
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check() && env('AUTH_MOCK_USER_ID')) {
-            Auth::loginUsingId(env('AUTH_MOCK_USER_ID'));
+        if (!Auth::check()) {
+            Auth::loginUsingId((int) env('AUTH_MOCK_USER_ID', 1));
         }
 
         return $next($request);
