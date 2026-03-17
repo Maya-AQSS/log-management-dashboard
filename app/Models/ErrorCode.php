@@ -30,6 +30,10 @@ class ErrorCode extends Model
         return $this->hasMany(Log::class);
     }
 
+    public function archivedLogs(): HasMany
+    {
+        return $this->hasMany(ArchivedLog::class);
+    }
 
     public function comments(): MorphMany
     {
