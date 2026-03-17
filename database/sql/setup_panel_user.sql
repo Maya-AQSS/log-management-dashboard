@@ -4,7 +4,7 @@ CREATE USER panel_user WITH PASSWORD 'your_secure_password';
 -- logs: solo lectura (gestionada por n8n)
 GRANT SELECT ON logs TO panel_user;
 
--- applications: solo lectura
+-- applications: solo lectura?
 GRANT SELECT ON applications TO panel_user;
 
 -- archived_logs: lectura/escritura, sin DELETE por diseño (Escenario 2)
@@ -24,10 +24,6 @@ GRANT USAGE, SELECT ON SEQUENCE archived_logs_id_seq TO panel_user;
 GRANT USAGE, SELECT ON SEQUENCE comments_id_seq TO panel_user;
 GRANT USAGE, SELECT ON SEQUENCE error_codes_id_seq TO panel_user;
 GRANT USAGE, SELECT ON SEQUENCE users_id_seq TO panel_user;
-
--- error_code_comments: lectura/escritura (requisito técnico F-00.2)
-GRANT SELECT, INSERT, UPDATE ON error_code_comments TO panel_user;
-GRANT USAGE, SELECT ON SEQUENCE error_code_comments_id_seq TO panel_user;
 
 
 -- NOTA F-04.9 (COULD): si se implementa borrar histórico, añadir:
