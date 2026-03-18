@@ -54,4 +54,11 @@
             Back
         </a>
     </div>
+
+    <div class="mt-6">
+        <livewire:comment-thread
+            commentableType="archived-log"
+            :commentableId="$archivedLog->id"
+        />
+    </div>
 </x-layout>
