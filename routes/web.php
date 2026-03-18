@@ -1,26 +1,25 @@
 <?php
 
+use App\Http\Controllers\ArchivedLogController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ErrorCodeController;
 use App\Http\Controllers\LanguageController;
-use App\Models\Comment;
+use App\Http\Controllers\LogController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/dashboard');
-
-Route::middleware(['auth.gateway', 'auth'])->group(function () {
-    Route::view('/dashboard', 'dashboard')->name('dashboard');
-    Route::view('/logs', 'logs.index')->name('logs.index');
-    Route::view('/archived-logs', 'archived-logs.index')->name('archived-logs.index');
-    Route::view('/error-codes', 'error-codes.index')->name('error-codes.index');
-
-    Route::get('/test-comment-update', function () {
-        $comment = Comment::findOrFail(1);
-        Gate::authorize('update', $comment);
-
-        return 'Puedes editar este comentario';
-    });
+Route::middleware('auth')->group(function () {
+    Route::get('/', [DashboardController::class, 'index'])->name('home');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
+    Route::get('/logs/{id}', [LogController::class, 'show'])->whereNumber('id')->name('logs.show');
+    Route::get('/historico', [ArchivedLogController::class, 'index'])->name('archived-logs.index');
+    Route::get('/historico/{id}', [ArchivedLogController::class, 'show'])->whereNumber('id')->name('archived-logs.show');
+    Route::delete('/historico/{id}', [ArchivedLogController::class, 'destroy'])->whereNumber('id')->name('archived-logs.destroy');
+    Route::get('/error-codes', [ErrorCodeController::class, 'index'])->name('error-codes.index');
+    Route::get('/error-codes/{id}', [ErrorCodeController::class, 'show'])->whereNumber('id')->name('error-codes.show');
+    Route::get('/sse/logs', [LogController::class, 'stream'])->name('logs.stream');
 
     Route::post('/logout', function (Request $request) {
         Auth::guard('web')->logout();
