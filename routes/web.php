@@ -8,7 +8,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
 
-Route::middleware(['auth.gateway', 'auth'])->group(function () {
+$panelAuthMiddleware = app()->environment('local')
+    ? ['auth.mock', 'auth']
+    : ['auth.gateway', 'auth'];
+
+Route::middleware($panelAuthMiddleware)->group(function () {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
     Route::view('/logs', 'logs.index')->name('logs.index');
     Route::view('/archived-logs', 'archived-logs.index')->name('archived-logs.index');
