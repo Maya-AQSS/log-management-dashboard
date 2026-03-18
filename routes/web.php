@@ -1,33 +1,30 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-use App\Models\User;
+use App\Http\Controllers\LanguageController;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
 use App\Models\Comment;
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
-/* Rutas protegidas por el middleware MockAuthUser */
+/* Rutas protegidas por el middleware AuthMock */
 Route::middleware('auth.mock')->group(function () {
-    /* TODDO: Rutas directas a las vistas porque no hay controladores para probar el componente Layout */
-    Route::view('/dashboard', 'dashboard')->name('dashboard');
+    // Home del panel
+    Route::view('/', 'dashboard')->name('dashboard');
     Route::view('/logs', 'logs.index')->name('logs.index');
     Route::view('/archived-logs', 'archived-logs.index')->name('archived-logs.index');
     Route::view('/error-codes', 'error-codes.index')->name('error-codes.index');
-});
 
-Route::post('/logout', function () {
-    return redirect()->route('dashboard')->with('status', 'Sesión cerrada');
-})->name('logout');
+    Route::post('/logout', function () {
+        return redirect()->route('dashboard')->with('status', __('app.flash.logged_out'));
+    })->name('logout');
 
+    Route::post('/lang/{locale}', [LanguageController::class, 'switch'])
+        ->name('lang.switch');
 
-/* TODO: Ruta después de probar la policy para comprobar que funciona */
-Route::get('/test-comment-update', function () {
-    $comment = Comment::findOrFail(2);
-    Gate::authorize('update', $comment);
-    
-    return 'Puedes editar este comentario';
+    // Ruta de prueba de policy (temporal)
+    Route::get('/test-comment-update', function () {
+        $comment = Comment::findOrFail(2);
+        Gate::authorize('update', $comment);
+
+        return 'Puedes editar este comentario';
+    });
 });
