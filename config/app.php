@@ -86,6 +86,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Supported Locales
+    |--------------------------------------------------------------------------
+    |
+    | This array contains all the locales that are supported by your
+    | application. This is used by the language switcher to validate
+    | that the requested locale is valid.
+    |
+    */
+
+    'supported_locales' => ['es', 'en', 'va'],
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     |

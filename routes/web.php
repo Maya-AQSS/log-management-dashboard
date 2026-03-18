@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Http\Controllers\LanguageController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -15,8 +16,12 @@ Route::middleware('mock.auth')->group(function () {
     Route::view('/logs', 'logs.index')->name('logs.index');
     Route::view('/archived-logs', 'archived-logs.index')->name('archived-logs.index');
     Route::view('/error-codes', 'error-codes.index')->name('error-codes.index');
+
+    Route::post('/logout', function () {
+        return redirect()->route('dashboard')->with('status', 'Sesión cerrada');
+    })->name('logout');
+
+    Route::post('/lang/{locale}', [LanguageController::class, 'switch'])
+        ->name('lang.switch');
 });
 
-Route::post('/logout', function () {
-    return redirect()->route('dashboard')->with('status', 'Sesión cerrada');
-})->name('logout');

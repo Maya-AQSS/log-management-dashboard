@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\MockAuthUser;
+use App\Http\Middleware\SetLocale;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,6 +13,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Middleware global para establecer el idioma de la aplicación
+        $middleware->web(append: [
+            SetLocale::class,
+        ]);
+
+        // Middleware con alias
         $middleware->alias([
             'mock.auth' => MockAuthUser::class,
         ]);
