@@ -16,6 +16,10 @@ class AuthMock
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if ($request->is('sse/*')) {
+            return $next($request);
+        }
+
         if (!Auth::check()) {
             Auth::loginUsingId((int) env('AUTH_MOCK_USER_ID', 1));
         }
