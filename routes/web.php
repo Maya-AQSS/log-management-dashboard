@@ -1,30 +1,37 @@
 <?php
 
 use App\Http\Controllers\LanguageController;
+use App\Models\Comment;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
-use App\Models\Comment;
 
-/* Rutas protegidas por el middleware AuthMock */
-Route::middleware('auth.mock')->group(function () {
-    // Home del panel
-    Route::view('/', 'dashboard')->name('dashboard');
+Route::redirect('/', '/dashboard');
+
+Route::middleware(['auth.gateway', 'auth'])->group(function () {
+    Route::view('/dashboard', 'dashboard')->name('dashboard');
     Route::view('/logs', 'logs.index')->name('logs.index');
     Route::view('/archived-logs', 'archived-logs.index')->name('archived-logs.index');
     Route::view('/error-codes', 'error-codes.index')->name('error-codes.index');
 
-    Route::post('/logout', function () {
-        return redirect()->route('dashboard')->with('status', __('app.flash.logged_out'));
-    })->name('logout');
-
-    Route::post('/lang/{locale}', [LanguageController::class, 'switch'])
-        ->name('lang.switch');
-
-    // Ruta de prueba de policy (temporal)
     Route::get('/test-comment-update', function () {
-        $comment = Comment::findOrFail(2);
+        $comment = Comment::findOrFail(1);
         Gate::authorize('update', $comment);
 
         return 'Puedes editar este comentario';
     });
+
+    Route::post('/logout', function (Request $request) {
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->away(
+            rtrim((string) env('AUTH_EXTERNAL_URL', 'http://auth.example.com'), '/') . '/login'
+        );
+    })->name('logout');
+
+    Route::post('/lang/{locale}', [LanguageController::class, 'switch'])
+        ->name('lang.switch');
 });
