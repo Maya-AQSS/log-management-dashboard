@@ -1,13 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 use App\Http\Controllers\LanguageController;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
+use App\Models\Comment;
 
-/* Rutas protegidas por el middleware MockAuthUser */
-Route::middleware('mock.auth')->group(function () {
-    /* TODDO: Rutas directas a las vistas porque no hay controladores para probar el componente Layout */
+/* Rutas protegidas por el middleware AuthMock */
+Route::middleware('auth.mock')->group(function () {
+    // Home del panel
     Route::view('/', 'dashboard')->name('dashboard');
     Route::view('/logs', 'logs.index')->name('logs.index');
     Route::view('/archived-logs', 'archived-logs.index')->name('archived-logs.index');
@@ -19,5 +19,12 @@ Route::middleware('mock.auth')->group(function () {
 
     Route::post('/lang/{locale}', [LanguageController::class, 'switch'])
         ->name('lang.switch');
-});
 
+    // Ruta de prueba de policy (temporal)
+    Route::get('/test-comment-update', function () {
+        $comment = Comment::findOrFail(2);
+        Gate::authorize('update', $comment);
+
+        return 'Puedes editar este comentario';
+    });
+});

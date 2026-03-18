@@ -3,7 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use App\Http\Middleware\MockAuthUser;
+use App\Http\Middleware\AuthMock;
 use App\Http\Middleware\SetLocale;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -13,14 +13,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Middleware global para establecer el idioma de la aplicación
+        if (env('APP_ENV') !== 'production') {
+            $middleware->alias([
+                'auth.mock' => AuthMock::class,
+            ]);
+        }
+
+        // Middleware global para establecer el idioma (requiere sesión -> append)
         $middleware->web(append: [
             SetLocale::class,
-        ]);
-
-        // Middleware con alias
-        $middleware->alias([
-            'mock.auth' => MockAuthUser::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
