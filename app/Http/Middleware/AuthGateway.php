@@ -10,8 +10,12 @@ use Illuminate\Support\Facades\Http;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
+use App\Http\Middleware\AuthMock;
+
 class AuthGateway
 {
+    public function __construct(private AuthMock $authMock){}
+
     public function handle(Request $request, Closure $next): Response
     {
         if (Auth::check()) {
@@ -19,8 +23,7 @@ class AuthGateway
         }
 
         if (app()->environment('local')) {
-            Auth::loginUsingId((int) env('AUTH_MOCK_USER_ID', 1));
-            return $next($request);
+            return ($this->authMock)->handle($request, $next);
         }
 
         $token = $request->cookie('session_token') ?: $request->bearerToken();
