@@ -1,0 +1,149 @@
+<?php
+
+namespace App\Livewire;
+
+use App\Models\ArchivedLog;
+use App\Models\Comment;
+use App\Models\ErrorCode;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Component;
+
+class CommentThread extends Component
+{
+    use AuthorizesRequests;
+
+    public string $commentableType;
+
+    public int $commentableId;
+
+    public string $content = '';
+
+    public ?int $editingCommentId = null;
+
+    public string $editingContent = '';
+
+    public ?int $commentIdToDelete = null;
+
+    public function mount(string $commentableType, int $commentableId): void
+    {
+        $this->commentableType = $commentableType;
+        $this->commentableId = $commentableId;
+        $this->resolveCommentableModel();
+    }
+
+    public function addComment(): void
+    {
+        $validated = $this->validate([
+            'content' => ['required', 'string', 'min:3', 'max:1000'],
+        ]);
+
+        $this->resolveCommentableModel()
+            ->comments()
+            ->create([
+                'user_id' => auth()->id(),
+                'content' => $validated['content'],
+            ]);
+
+        $this->reset('content');
+    }
+
+    public function startEditing(int $commentId): void
+    {
+        $this->editingCommentId = $commentId;
+
+        $validated = $this->validate([
+            'editingCommentId' => ['required', 'integer', 'exists:comments,id'],
+        ]);
+
+        $comment = $this->findCommentOrFail($validated['editingCommentId']);
+
+        $this->authorize('update', $comment);
+
+        $this->editingContent = $comment->content;
+    }
+
+    public function updateComment(): void
+    {
+        $validated = $this->validate([
+            'editingCommentId' => ['required', 'integer', 'exists:comments,id'],
+            'editingContent' => ['required', 'string', 'min:3', 'max:1000'],
+        ]);
+
+        $comment = $this->findCommentOrFail($validated['editingCommentId']);
+
+        $this->authorize('update', $comment);
+
+        $comment->update([
+            'content' => $validated['editingContent'],
+        ]);
+
+        $this->cancelEditing();
+    }
+
+    public function deleteComment(int $commentId): void
+    {
+        $this->commentIdToDelete = $commentId;
+
+        $validated = $this->validate([
+            'commentIdToDelete' => ['required', 'integer', 'exists:comments,id'],
+        ]);
+
+        $comment = $this->findCommentOrFail($validated['commentIdToDelete']);
+
+        $this->authorize('delete', $comment);
+
+        $comment->delete();
+
+        if ($this->editingCommentId === $commentId) {
+            $this->cancelEditing();
+        }
+
+        $this->reset('commentIdToDelete');
+    }
+
+    public function cancelEditing(): void
+    {
+        $this->reset(['editingCommentId', 'editingContent']);
+    }
+
+    public function render(): View
+    {
+        return view('livewire.comment-thread', [
+            'comments' => $this->commentsQuery()->get(),
+        ]);
+    }
+
+    private function commentsQuery(): Builder
+    {
+        return Comment::query()
+            ->with('user')
+            ->where('commentable_type', $this->resolveCommentableClass())
+            ->where('commentable_id', $this->commentableId)
+            ->latest();
+    }
+
+    private function findCommentOrFail(int $commentId): Comment
+    {
+        return $this->commentsQuery()
+            ->whereKey($commentId)
+            ->firstOrFail();
+    }
+
+    private function resolveCommentableModel(): ArchivedLog|ErrorCode
+    {
+        $class = $this->resolveCommentableClass();
+
+        return $class::query()->findOrFail($this->commentableId);
+    }
+
+    private function resolveCommentableClass(): string
+    {
+        return match ($this->commentableType) {
+            'archived-log' => ArchivedLog::class,
+            'error-code' => ErrorCode::class,
+            default => abort(404),
+        };
+    }
+}
