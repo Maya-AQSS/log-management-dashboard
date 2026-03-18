@@ -15,4 +15,11 @@ interface LogServiceInterface
      * Prepare SSE payload (already mapped to arrays for response).
      */
     public function streamPayload(int $limit = 10): array;
+
+    /**
+     * Counts grouped by severity, including zeros for all enum values.
+     *
+     * @return array<string,int>
+     */
+    public function severityCounts(): array;
 }

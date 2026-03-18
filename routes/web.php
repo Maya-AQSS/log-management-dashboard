@@ -26,11 +26,12 @@ Route::middleware(['auth.gateway', 'auth'])->group(function () {
     // SSE
     Route::get('/sse/logs', [LogController::class, 'stream'])->name('logs.stream');
 
-    // Dashboard / Error codes
-    Route::view('/dashboard', 'dashboard')->name('dashboard');
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
     Route::view('/error-codes', 'error-codes.index')->name('error-codes.index');
 
-    // Temporary policy test
+    // Temporary policy test    
     Route::get('/test-comment-update', function () {
         $comment = Comment::findOrFail(1);
         Gate::authorize('update', $comment);

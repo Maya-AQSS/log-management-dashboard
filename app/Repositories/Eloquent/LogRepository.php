@@ -32,4 +32,23 @@ class LogRepository implements LogRepositoryInterface
             ->limit($limit)
             ->get();
     }
+
+    public function severityCounts(): array
+    {
+        // Enum según migración: (critical, high, medium, low, other)
+        $severities = ['critical', 'high', 'medium', 'low', 'other'];
+
+        $counts = Log::query()
+            ->selectRaw('severity, count(*) as count')
+            ->whereIn('severity', $severities)
+            ->groupBy('severity')
+            ->pluck('count', 'severity');
+
+        $result = [];
+        foreach ($severities as $severity) {
+            $result[$severity] = (int) ($counts[$severity] ?? 0);
+        }
+
+        return $result;
+    }
 }

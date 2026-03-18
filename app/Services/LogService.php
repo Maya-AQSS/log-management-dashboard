@@ -38,4 +38,9 @@ class LogService implements LogServiceInterface
             ];
         })->all();
     }
+
+    public function severityCounts(): array
+    {
+        return $this->logRepository->severityCounts();
+    }
 }

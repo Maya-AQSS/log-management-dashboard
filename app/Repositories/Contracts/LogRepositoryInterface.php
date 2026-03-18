@@ -16,4 +16,11 @@ interface LogRepositoryInterface
      * Logs list for SSE stream.
      */
     public function latestForStream(int $limit = 10): Collection;
+
+    /**
+     * Counts grouped by severity, including zeros for all enum values.
+     *
+     * @return array<string,int>
+     */
+    public function severityCounts(): array;
 }
