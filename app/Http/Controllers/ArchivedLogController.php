@@ -2,20 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ArchivedLog;
+
+use App\Services\Contracts\ArchivedLogServiceInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
 
 class ArchivedLogController extends Controller
 {
+    public function __construct(private ArchivedLogServiceInterface $archivedLogService) {}
+
     public function index(): View
     {
-        $archivedLogs = ArchivedLog::query()
-            ->with(['application', 'archivedBy', 'errorCode'])
-            ->withCount('comments')
-            ->latest('archived_at')
-            ->paginate(15);
+        $archivedLogs = $this->archivedLogService->paginate(15);
 
         return view('archived-logs.index', [
             'archivedLogs' => $archivedLogs,
@@ -24,21 +22,20 @@ class ArchivedLogController extends Controller
 
     public function show(int $id): View
     {
-        ArchivedLog::query()->findOrFail($id);
+        $archivedLog = $this->archivedLogService->findOrFail($id);
 
-        return view('archived-logs.index');
+        return view('archived-logs.index', [
+            'archivedLog' => $archivedLog,
+        ]);
     }
 
     public function destroy(int $id): RedirectResponse
     {
-        $archivedLog = ArchivedLog::query()->findOrFail($id);
+        $archivedLog = $this->archivedLogService->findOrFail($id);
 
         $this->authorize('delete', $archivedLog);
 
-        DB::transaction(function () use ($archivedLog): void {
-            $archivedLog->logs()->update(['matched_archived_log_id' => null]);
-            $archivedLog->delete();
-        });
+        $this->archivedLogService->delete($archivedLog);
 
         return redirect()
             ->route('archived-logs.index')

@@ -18,7 +18,7 @@ class Nav extends Component
 
     public function linkClasses(string $pattern): string
     {
-        $base = 'px-3 py-2 rounded-full text-sm font-medium transition-colors';
+        $base = 'px-3 py-2 rounded-full text-base font-medium transition-colors';
         $active = 'bg-white/15 text-white';
         $inactive = 'text-white/80 hover:bg-white/10';
         
