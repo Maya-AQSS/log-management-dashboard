@@ -1,3 +1,4 @@
 <x-layout>
-    <h1 class="text-xl font-semibold">Error Codes</h1>
+    <h1 class="text-xl font-semibold">{{ __('error_codes.title') }}</h1>
+    <p class="text-sm text-gray-500">{{ __('error_codes.welcome') }}</p>
 </x-layout>

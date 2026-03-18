@@ -6,22 +6,22 @@
                 LM
             </div>
             <span class="text-sm font-semibold tracking-wide uppercase">
-                Log Management Dashboard
+                {{ __('app.app_name') }}
             </span>
         </div>
 
         {{-- Menú centrado (oculto en mobile) --}}
         <nav class="hidden md:flex items-center gap-3">
-            <a href="{{ route('dashboard') }}" class="{{ $linkClasses('dashboard*') }}">Dashboard</a>
-            <a href="{{ route('logs.index') }}" class="{{ $linkClasses('logs*') }}">Logs</a>
-            <a href="{{ route('archived-logs.index') }}" class="{{ $linkClasses('archived-logs*') }}">Histórico</a>
-            <a href="{{ route('error-codes.index') }}" class="{{ $linkClasses('error-codes*') }}">Error Codes</a>
+            <a href="{{ route('dashboard') }}" class="{{ $linkClasses('dashboard*') }}">{{ __('dashboard.menu') }}</a>
+            <a href="{{ route('logs.index') }}" class="{{ $linkClasses('logs*') }}">{{ __('logs.menu') }}</a>
+            <a href="{{ route('archived-logs.index') }}" class="{{ $linkClasses('archived-logs*') }}">{{ __('archived_logs.menu') }}</a>
+            <a href="{{ route('error-codes.index') }}" class="{{ $linkClasses('error-codes*') }}">{{ __('error_codes.menu') }}</a>
         </nav>
 
         {{-- Zona derecha: usuario + logout + hamburguesa --}}
         <div class="flex items-center gap-3">
             <span class="hidden sm:inline text-sm text-white/80">
-                {{ auth()->user()->name ?? 'Usuario' }}
+                {{ auth()->user()->name ?? __('app.nav_user') }}
             </span>
 
             <form method="POST" action="{{ route('logout') }}" class="hidden sm:block">
@@ -30,7 +30,7 @@
                     type="submit"
                     class="px-3 py-1.5 rounded-full bg-[#f7a736] hover:bg-[#e28f1f] text-xs font-semibold text-[#1e1a24] shadow-sm"
                 >
-                    Cerrar Sesión
+                    {{ __('app.nav_logout') }}
                 </button>
             </form>
 
@@ -40,7 +40,7 @@
                 class="md:hidden inline-flex items-center justify-center p-2 rounded-full hover:bg-white/10"
                 @click="open = ! open"
             >
-                <span class="sr-only">Abrir menú</span>
+                <span class="sr-only">{{ __('app.nav_open_menu') }}</span>
                 ☰
             </button>
         </div>
@@ -53,10 +53,10 @@
         class="md:hidden border-t border-white/10 bg-gradient-to-r from-[#714b67] to-[#5b3853] text-white shadow-sm"
     >
         <div class="px-4 py-3 space-y-2">
-            <a href="{{ route('dashboard') }}" class="block {{ $linkClasses('dashboard*') }}">Dashboard</a>
-            <a href="{{ route('logs.index') }}" class="block {{ $linkClasses('logs*') }}">Logs</a>
-            <a href="{{ route('archived-logs.index') }}" class="block {{ $linkClasses('archived-logs*') }}">Histórico</a>
-            <a href="{{ route('error-codes.index') }}" class="block {{ $linkClasses('error-codes*') }}">Error Codes</a>
+            <a href="{{ route('dashboard') }}" class="block {{ $linkClasses('dashboard*') }}">{{ __('dashboard.menu') }}</a>
+            <a href="{{ route('logs.index') }}" class="block {{ $linkClasses('logs*') }}">{{ __('logs.menu') }}</a>
+            <a href="{{ route('archived-logs.index') }}" class="block {{ $linkClasses('archived-logs*') }}">{{ __('archived_logs.menu') }}</a>
+            <a href="{{ route('error-codes.index') }}" class="block {{ $linkClasses('error-codes*') }}">{{ __('error_codes.menu') }}</a>
         </div>
     </nav>
 </header>
