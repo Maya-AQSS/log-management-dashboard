@@ -28,17 +28,12 @@ Route::middleware(['auth.gateway', 'auth'])->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
-    Route::view('/error-codes', 'error-codes.index')->name('error-codes.index');
 
-    // Temporary policy test    
-    Route::get('/test-comment-update', function () {
-        $comment = Comment::findOrFail(1);
-        Gate::authorize('update', $comment);
+    // Error codes
+    Route::get('/error-codes', [ErrorCodeController::class, 'index'])->name('error-codes.index');
+    Route::get('/error-codes/{id}', [ErrorCodeController::class, 'show'])->whereNumber('id')->name('error-codes.show');
 
-        return 'Puedes editar este comentario';
-    });
-
+    // Logout
     Route::post('/logout', function (Request $request) {
         Auth::guard('web')->logout();
         $request->session()->invalidate();
@@ -49,6 +44,7 @@ Route::middleware(['auth.gateway', 'auth'])->group(function () {
         );
     })->name('logout');
 
+    // Idiomas
     Route::post('/lang/{locale}', [LanguageController::class, 'switch'])
         ->name('lang.switch');
 });
