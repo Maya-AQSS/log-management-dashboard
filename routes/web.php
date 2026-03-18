@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LanguageController;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -30,4 +31,7 @@ Route::middleware(['auth.gateway', 'auth'])->group(function () {
             rtrim((string) env('AUTH_EXTERNAL_URL', 'http://auth.example.com'), '/') . '/login'
         );
     })->name('logout');
+
+    Route::post('/lang/{locale}', [LanguageController::class, 'switch'])
+        ->name('lang.switch');
 });
