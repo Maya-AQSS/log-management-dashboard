@@ -12,14 +12,28 @@ interface LogServiceInterface
     public function findOrFail(int $id): Log;
 
     /**
-     * Prepare SSE payload (already mapped to arrays for response).
+     * Prepare SSE payload.
      */
     public function streamPayload(int $limit = 10): array;
 
     /**
-     * Counts grouped by severity, including zeros for all enum values.
+     * Buscar y filtrar (solo logs activos).
+     */
+    public function searchAndFilter(
+        ?string $search,
+        ?string $severity,
+        int $perPage = 15
+    ): LengthAwarePaginator;
+
+    /**
+     * Counts grouped by severity, incluyendo zeros (solo logs activos).
      *
      * @return array<string,int>
      */
     public function severityCounts(): array;
+
+    /**
+     * Devuelve el id de ArchivedLog asociado al log o null si no está archivado.
+     */
+    public function archivedLogIdFor(int $logId): ?int;
 }

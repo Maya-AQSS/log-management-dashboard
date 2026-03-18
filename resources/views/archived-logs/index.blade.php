@@ -15,7 +15,6 @@
                         <th class="px-3 py-2">{{ __('archived_logs.table.severity') }}</th>
                         <th class="px-3 py-2">{{ __('archived_logs.table.message') }}</th>
                         <th class="px-3 py-2">{{ __('archived_logs.table.archived_at') }}</th>
-                        <th class="px-3 py-2">{{ __('archived_logs.table.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 bg-white">
@@ -23,7 +22,7 @@
                         <tr
                             class="align-top cursor-pointer hover:bg-slate-50"
                             data-href="{{ route('archived-logs.show', $item->id) }}"
-                            onclick="if (!event.target.closest('form')) { window.location.href=this.dataset.href; }"
+                            onclick="window.location.href=this.dataset.href"
                         >
                             <td class="px-3 py-2 text-slate-700">
                                 {{ $item->application?->name ?? '-' }}
@@ -36,24 +35,6 @@
                             </td>
                             <td class="px-3 py-2 text-slate-700 whitespace-nowrap">
                                 {{ optional($item->archived_at)->toDateTimeString() ?? '-' }}
-                            </td>
-                            <td class="px-3 py-2 whitespace-nowrap">
-                                @can('delete', $item)
-                                    <form
-                                        method="POST"
-                                        action="{{ route('archived-logs.destroy', $item->id) }}"
-                                        onsubmit="return confirm('{{ addslashes(__('archived_logs.confirm_delete')) }}')"
-                                    >
-                                        @csrf
-                                        @method('DELETE')
-                                        <button
-                                            type="submit"
-                                            class="px-3 py-1.5 rounded-full bg-red-600 hover:bg-red-500 text-base font-semibold text-white shadow-sm"
-                                        >
-                                            {{ __('archived_logs.buttons.delete') }}
-                                        </button>
-                                    </form>
-                                @endcan
                             </td>
                         </tr>
                     @endforeach

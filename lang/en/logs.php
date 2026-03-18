@@ -7,11 +7,28 @@ return [
 
     'empty' => 'No logs to display',
 
+    'archived' => 'Archived',
+
     'table' => [
         'application' => 'Application',
         'severity' => 'Severity',
         'message' => 'Message',
         'error_code' => 'Error code',
         'created_at' => 'Created at',
+        'actions' => 'Actions',
+    ],
+
+    'filters' => [
+        'search' => 'Search',
+        'search_placeholder' => 'e.g. error message',
+        'severity' => 'Severity',
+        'severity_all' => 'All',
+    ],
+
+    'buttons' => [
+        'apply' => 'Apply',
+        'reset' => 'Reset',
+        'archive' => 'Archive',
+        'edit' => 'Edit',
     ],
 ];

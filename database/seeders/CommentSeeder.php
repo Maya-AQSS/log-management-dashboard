@@ -4,15 +4,14 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
 use App\Models\Comment;
 use App\Models\ErrorCode;
 use App\Models\ArchivedLog;
 
 class CommentSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         Comment::updateOrCreate(
@@ -53,6 +52,15 @@ class CommentSeeder extends Seeder
                 'commentable_type' => ArchivedLog::class,
                 'commentable_id' => 1,
             ]
+        );
+
+        /* 
+        TODO: Necesario mientras exista el seeder porque sino el id autoincremental de la BD se desincroniza con el id de la tabla. 
+        Resync de la secuencia PostgreSQL para evitar UniqueConstraintViolation al insertar nuevos comentarios 
+        Al eliminarlo será necesario hacer "sail migrate:fresh --seed"
+        */
+        DB::statement(
+            "SELECT setval(pg_get_serial_sequence('comments', 'id'), (SELECT COALESCE(MAX(id), 1) FROM comments))"
         );
     }
 }

@@ -39,4 +39,8 @@
             Back
         </a>
     </div>
+
+    <div class="mt-4 text-center">
+        <livewire:log-archive-button :logId="$log->id" />
+    </div>
 </x-layout>

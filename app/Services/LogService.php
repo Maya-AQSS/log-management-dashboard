@@ -39,8 +39,18 @@ class LogService implements LogServiceInterface
         })->all();
     }
 
+    public function searchAndFilter(?string $search, ?string $severity, int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->logRepository->searchAndFilter($search, $severity, $perPage);
+    }
+
     public function severityCounts(): array
     {
         return $this->logRepository->severityCounts();
+    }
+
+    public function archivedLogIdFor(int $logId): ?int
+    {
+        return $this->logRepository->archivedLogIdFor($logId);
     }
 }

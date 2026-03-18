@@ -4,11 +4,11 @@ return [
     'menu' => 'Errors',
     'title' => 'Errors',
     'welcome' => 'Benvingut als errors',
-    'empty' => 'No hi ha codis d\\'error per mostrar',
+    'empty' => 'No hi ha codis d\'error per mostrar',
 
     'table' => [
         'application' => 'Aplicació',
-        'code' => 'Codi d\\'error',
+        'code' => 'Codi d\'error',
         'severity' => 'Severitat',
         'name' => 'Nom',
         'description' => 'Descripció',

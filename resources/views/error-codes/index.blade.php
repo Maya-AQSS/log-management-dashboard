@@ -1,5 +1,5 @@
 <x-layout>
-    <h1 class="text-xl font-semibold">{{ __('error_codes.title') }}</h1>
+    <h1 class="text-xl font-semibold text-center">{{ __('error_codes.title') }}</h1>
     <p class="text-base text-gray-500 text-center mb-5">{{ __('error_codes.welcome') }}</p>
 
     @php

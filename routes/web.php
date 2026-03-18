@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
 
-Route::middleware(['auth.gateway', 'auth'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     // ArchivedLogs
     Route::get('/archived-logs', [ArchivedLogController::class, 'index'])->name('archived-logs.index');
     Route::get('/archived-logs/{id}', [ArchivedLogController::class, 'show'])->whereNumber('id')->name('archived-logs.show');

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use App\Models\ArchivedLog;
 
 class ArchivedLogSeeder extends Seeder
@@ -43,6 +44,15 @@ class ArchivedLogSeeder extends Seeder
                 'original_created_at' => now()->subDay(),
                 'archived_at' => now(),
             ]
+        );
+
+        /* 
+        TODO: Necesario mientras exista el seeder porque sino el id autoincremental de la BD se desincroniza con el id de la tabla. 
+        Resync de la secuencia PostgreSQL para evitar UniqueConstraintViolation al insertar nuevos ArchivedLogs 
+        Al eliminarlo será necesario hacer "sail migrate:fresh --seed"
+        */
+        DB::statement(
+            "SELECT setval(pg_get_serial_sequence('archived_logs', 'id'), (SELECT COALESCE(MAX(id), 1) FROM archived_logs))"
         );
     }
 }

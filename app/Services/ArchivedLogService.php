@@ -27,4 +27,9 @@ class ArchivedLogService implements ArchivedLogServiceInterface
     {
         $this->archivedLogRepository->delete($archivedLog);
     }
+
+    public function archiveFromLogId(int $logId, int $archivedById): ArchivedLog
+    {
+        return $this->archivedLogRepository->archiveFromLogId($logId, $archivedById);
+    }
 }

@@ -12,7 +12,8 @@ class LogRepository implements LogRepositoryInterface
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
         return Log::query()
-            ->with(['application', 'errorCode', 'archivedLog'])
+            ->with(['application', 'errorCode'])
+            ->whereNull('matched_archived_log_id')
             ->latest('created_at')
             ->paginate($perPage);
     }
@@ -20,7 +21,9 @@ class LogRepository implements LogRepositoryInterface
     public function findOrFail(int $id): Log
     {
         return Log::query()
-            ->with(['application', 'errorCode', 'archivedLog'])
+        /* TODO: ¿Si lo archivamos desaparece de la tabla? */
+            ->with(['application', 'errorCode'])
+            ->whereNull('matched_archived_log_id')
             ->findOrFail($id);
     }
 
@@ -28,17 +31,29 @@ class LogRepository implements LogRepositoryInterface
     {
         return Log::query()
             ->with(['application', 'errorCode'])
+            ->whereNull('matched_archived_log_id')
             ->latest('created_at')
             ->limit($limit)
             ->get();
     }
 
+    public function searchAndFilter(?string $search, ?string $severity, int $perPage = 15): LengthAwarePaginator
+    {
+        return Log::query()
+            ->with(['application', 'errorCode'])
+            ->whereNull('matched_archived_log_id')
+            ->when($search, fn ($q) => $q->where('message', 'ilike', '%' . $search . '%'))
+            ->when($severity, fn ($q) => $q->where('severity', $severity))
+            ->latest('created_at')
+            ->paginate($perPage);
+    }
+
     public function severityCounts(): array
     {
-        // Enum según migración: (critical, high, medium, low, other)
         $severities = ['critical', 'high', 'medium', 'low', 'other'];
 
         $counts = Log::query()
+            ->whereNull('matched_archived_log_id')
             ->selectRaw('severity, count(*) as count')
             ->whereIn('severity', $severities)
             ->groupBy('severity')
@@ -50,5 +65,14 @@ class LogRepository implements LogRepositoryInterface
         }
 
         return $result;
+    }
+
+    public function archivedLogIdFor(int $logId): ?int
+    {
+        $matchedId = Log::query()
+            ->whereKey($logId)
+            ->value('matched_archived_log_id');
+
+        return $matchedId !== null ? (int) $matchedId : null;
     }
 }
