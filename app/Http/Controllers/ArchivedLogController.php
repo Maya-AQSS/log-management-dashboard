@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -24,7 +23,7 @@ class ArchivedLogController extends Controller
     {
         $archivedLog = $this->archivedLogService->findOrFail($id);
 
-        return view('archived-logs.index', [
+        return view('archived-logs.show', [
             'archivedLog' => $archivedLog,
         ]);
     }

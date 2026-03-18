@@ -20,7 +20,11 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100 bg-white">
                     @foreach($items as $item)
-                        <tr class="align-top">
+                        <tr
+                            class="align-top cursor-pointer hover:bg-slate-50"
+                            data-href="{{ route('archived-logs.show', $item->id) }}"
+                            onclick="if (!event.target.closest('form')) { window.location.href=this.dataset.href; }"
+                        >
                             <td class="px-3 py-2 text-slate-700">
                                 {{ $item->application?->name ?? '-' }}
                             </td>
