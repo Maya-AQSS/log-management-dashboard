@@ -14,4 +14,9 @@ return [
     'locale_es' => 'ES (Espanyol)',
     'locale_en' => 'EN (Anglés)',
     'locale_va' => 'VA (Valencià)',
+
+    /* Mensajes */
+    'flash' => [
+        'logged_out' => 'Sessió tancada correctament',
+    ],
 ];

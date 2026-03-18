@@ -13,4 +13,9 @@ return [
     'locale_es' => 'ES (Spanish)',
     'locale_en' => 'EN (English)',
     'locale_va' => 'VA (Valencian)',
+
+    /* Mensajes */
+    'flash' => [
+        'logged_out' => 'Logged out successfully',
+    ],
 ];
