@@ -6,6 +6,7 @@ use App\Models\Log;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use App\Services\Contracts\LogServiceInterface;
 use Illuminate\Contracts\View\View;
+use Throwable;
 use Livewire\Component;
 
 class LogArchiveButton extends Component
@@ -30,16 +31,22 @@ class LogArchiveButton extends Component
 
         if ($this->archived) return;
 
-        $archivedLogService = app(ArchivedLogServiceInterface::class);
-        $archivedLog = $archivedLogService->archiveFromLogId(
-            $this->logId,
-            (int) auth()->id()
-        );
+        try {
+            $archivedLogService = app(ArchivedLogServiceInterface::class);
+            $archivedLog = $archivedLogService->archiveFromLogId(
+                $this->logId,
+                (int) auth()->id()
+            );
 
-        $this->archivedLogId = $archivedLog->id;
-        $this->archived = true;
+            $this->archivedLogId = $archivedLog->id;
+            $this->archived = true;
 
-        $this->redirect(route('archived-logs.show', $archivedLog->id));
+            session()->flash('status', __('logs.archived_success'));
+            $this->redirect(route('archived-logs.show', $archivedLog->id));
+        } catch (Throwable $e) {
+            report($e);
+            session()->flash('status', __('logs.archived_error'));
+        }
     }
 
     private function refreshStatus(): void

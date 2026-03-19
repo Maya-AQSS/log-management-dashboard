@@ -8,6 +8,8 @@ return [
     'empty' => 'No logs to display',
 
     'archived' => 'Archived',
+    'archived_success' => 'Log archived successfully',
+    'archived_error' => 'The log could not be archived',
 
     'table' => [
         'application' => 'Application',

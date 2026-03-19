@@ -140,10 +140,31 @@ class CommentThread extends Component
 
     private function resolveCommentableClass(): string
     {
-        return match ($this->commentableType) {
+        $map = $this->commentableTypeMap();
+        $class = $map[$this->commentableType] ?? null;
+
+        if ($class === null) {
+            abort(404);
+        }
+
+        $allowedTypes = (new Comment())->allowedTypes();
+        if (!in_array($class, $allowedTypes, true)) {
+            abort(404);
+        }
+
+        return $class;
+    }
+
+    /**
+     * Mapa único slug -> clase para resolver el commentable.
+     *
+     * @return array<string, class-string>
+     */
+    private function commentableTypeMap(): array
+    {
+        return [
             'archived-log' => ArchivedLog::class,
             'error-code' => ErrorCode::class,
-            default => abort(404),
-        };
+        ];
     }
 }

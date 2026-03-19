@@ -1,6 +1,6 @@
 <div class="mt-4 space-y-4">
     <form wire:submit="addComment" class="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-        <label for="content" class="block text-sm font-medium text-slate-700">Nuevo comentario</label>
+        <label for="content" class="block text-sm font-medium text-slate-700">{{ __('comments.form.new_comment') }}</label>
         <textarea
             id="content"
             wire:model="content"
@@ -12,7 +12,7 @@
         @enderror
 
         <button type="submit" class="rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]">
-            Guardar comentario
+            {{ __('comments.buttons.save') }}
         </button>
     </form>
 
@@ -21,17 +21,17 @@
             <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                 <div class="flex items-start justify-between gap-4">
                     <div>
-                        <p class="text-sm font-semibold text-slate-900">{{ $comment->user?->name ?? 'Usuario' }}</p>
+                        <p class="text-sm font-semibold text-slate-900">{{ $comment->user?->name ?? __('comments.user.unknown') }}</p>
                         <p class="text-xs text-slate-500">{{ $comment->created_at?->format('Y-m-d H:i') }}</p>
                     </div>
 
                     @if (auth()->id() === $comment->user_id)
                         <div class="flex gap-2">
                             <button type="button" wire:click="startEditing({{ $comment->id }})" class="text-sm font-medium text-[#5b3853] hover:underline">
-                                Editar
+                                {{ __('comments.buttons.edit') }}
                             </button>
                             <button type="button" wire:click="deleteComment({{ $comment->id }})" class="text-sm font-medium text-rose-600 hover:underline">
-                                Eliminar
+                                {{ __('comments.buttons.delete') }}
                             </button>
                         </div>
                     @endif
@@ -50,10 +50,10 @@
 
                         <div class="flex gap-2">
                             <button type="submit" class="rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]">
-                                Actualizar
+                                {{ __('comments.buttons.update') }}
                             </button>
                             <button type="button" wire:click="cancelEditing" class="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-                                Cancelar
+                                {{ __('comments.buttons.cancel') }}
                             </button>
                         </div>
                     </form>
@@ -63,7 +63,7 @@
             </article>
         @empty
             <p class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
-                Todavía no hay comentarios para este elemento.
+                {{ __('comments.empty') }}
             </p>
         @endforelse
     </div>

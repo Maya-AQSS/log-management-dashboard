@@ -8,6 +8,8 @@ return [
     'empty' => 'No hi ha logs per mostrar',
 
     'archived' => 'Arxivat',
+    'archived_success' => 'Log arxivat correctament',
+    'archived_error' => "No s'ha pogut arxivar el log",
 
     'table' => [
         'application' => 'Aplicació',
