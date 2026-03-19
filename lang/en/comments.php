@@ -15,5 +15,11 @@ return [
         'unknown' => 'User',
     ],
     'empty' => 'There are no comments for this item yet.',
+    'flash' => [
+        'created' => 'Comment created successfully',
+        'updated' => 'Comment updated successfully',
+        'deleted' => 'Comment deleted successfully',
+        'error' => 'The comment action could not be completed',
+    ],
 ];
 

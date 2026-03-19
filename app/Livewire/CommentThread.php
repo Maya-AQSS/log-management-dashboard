@@ -8,6 +8,7 @@ use App\Models\ErrorCode;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Throwable;
 use Livewire\Component;
 
 class CommentThread extends Component
@@ -39,14 +40,20 @@ class CommentThread extends Component
             'content' => ['required', 'string', 'min:3', 'max:1000'],
         ]);
 
-        $this->resolveCommentableModel()
-            ->comments()
-            ->create([
-                'user_id' => auth()->id(),
-                'content' => $validated['content'],
-            ]);
+        try {
+            $this->resolveCommentableModel()
+                ->comments()
+                ->create([
+                    'user_id' => auth()->id(),
+                    'content' => $validated['content'],
+                ]);
 
-        $this->reset('content');
+            $this->reset('content');
+            session()->flash('status', __('comments.flash.created'));
+        } catch (Throwable $e) {
+            report($e);
+            session()->flash('status', __('comments.flash.error'));
+        }
     }
 
     public function startEditing(int $commentId): void
@@ -75,11 +82,17 @@ class CommentThread extends Component
 
         $this->authorize('update', $comment);
 
-        $comment->update([
-            'content' => $validated['editingContent'],
-        ]);
+        try {
+            $comment->update([
+                'content' => $validated['editingContent'],
+            ]);
 
-        $this->cancelEditing();
+            $this->cancelEditing();
+            session()->flash('status', __('comments.flash.updated'));
+        } catch (Throwable $e) {
+            report($e);
+            session()->flash('status', __('comments.flash.error'));
+        }
     }
 
     public function deleteComment(int $commentId): void
@@ -94,13 +107,19 @@ class CommentThread extends Component
 
         $this->authorize('delete', $comment);
 
-        $comment->delete();
+        try {
+            $comment->delete();
 
-        if ($this->editingCommentId === $commentId) {
-            $this->cancelEditing();
+            if ($this->editingCommentId === $commentId) {
+                $this->cancelEditing();
+            }
+
+            $this->reset('commentIdToDelete');
+            session()->flash('status', __('comments.flash.deleted'));
+        } catch (Throwable $e) {
+            report($e);
+            session()->flash('status', __('comments.flash.error'));
         }
-
-        $this->reset('commentIdToDelete');
     }
 
     public function cancelEditing(): void

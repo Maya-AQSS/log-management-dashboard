@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Models\Log;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use App\Services\Contracts\LogServiceInterface;
 use Illuminate\Contracts\View\View;
