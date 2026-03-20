@@ -18,6 +18,12 @@ return [
         'error_code' => 'Código de error',
         'created_at' => 'Creado',
         'actions' => 'Acciones',
+        'status' => 'Estado',
+    ],
+
+    'status' => [
+        'archived' => 'Archivado',
+        'resolved' => 'Resuelto',
     ],
 
     'filters' => [
@@ -30,6 +36,16 @@ return [
         'severity_medium' => 'Media',
         'severity_low' => 'Baja',
         'severity_other' => 'Otra',
+
+        'archived' => 'Archivado',
+        'archived_all' => 'Todos',
+        'archived_archived' => 'Archivados',
+        'archived_not_archived' => 'No archivados',
+
+        'resolved' => 'Resuelto',
+        'resolved_all' => 'Todos',
+        'resolved_resolved' => 'Resueltos',
+        'resolved_unresolved' => 'No resueltos',
     ],
 
     'buttons' => [

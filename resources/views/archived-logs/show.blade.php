@@ -57,7 +57,7 @@
             <div class="md:col-span-2">
                 <div class="font-semibold">{{ __('archived_logs.table.archived_at') }}</div>
                 <div class="text-slate-700">
-                    {{ optional($archivedLog->archived_at)->toDateTimeString() ?? '-' }}
+                    {{ optional($archivedLog->archived_at)->locale(app()->getLocale())->translatedFormat('d F Y H:i:s') ?? '-' }}
                 </div>
             </div>
 

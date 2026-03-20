@@ -19,8 +19,8 @@ class LogSeeder extends Seeder
                 'file' => 'seed.log',
                 'line' => 10,
                 'metadata' => ['seed' => true, 'source' => 'LogSeeder'],
-                'matched_archived_log_id' => null,
-                'resolved' => false,
+                'matched_archived_log_id' => 1,
+                'resolved' => true,
                 'created_at' => now(),
             ]
         );
@@ -52,7 +52,7 @@ class LogSeeder extends Seeder
                 'line' => 10,
                 'metadata' => ['seed' => true, 'source' => 'LogSeeder'],
                 'matched_archived_log_id' => null,
-                'resolved' => false,
+                'resolved' => true,
                 'created_at' => now(),
             ]
         );
@@ -67,7 +67,7 @@ class LogSeeder extends Seeder
                 'file' => 'seed.log',
                 'line' => 10,
                 'metadata' => ['seed' => true, 'source' => 'LogSeeder'],
-                'matched_archived_log_id' => null,
+                'matched_archived_log_id' => 2,
                 'resolved' => false,
                 'created_at' => now(),
             ]

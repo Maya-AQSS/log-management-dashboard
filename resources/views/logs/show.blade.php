@@ -12,7 +12,32 @@
             </div>
             <div>
                 <div class="font-semibold">{{ __('logs.table.severity') }}</div>
-                <div class="text-slate-700">{{ $log->severity ?? '-' }}</div>
+                <div class="text-slate-700">
+                    @php($severity = $log->severity ?? null)
+                    @if($severity === 'critical')
+                        <span class="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-800">
+                            {{ strtoupper($severity) }}
+                        </span>
+                    @elseif($severity === 'high')
+                        <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-xs font-semibold text-orange-800">
+                            {{ strtoupper($severity) }}
+                        </span>
+                    @elseif($severity === 'medium')
+                        <span class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-semibold text-yellow-800">
+                            {{ strtoupper($severity) }}
+                        </span>
+                    @elseif($severity === 'low')
+                        <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">
+                            {{ strtoupper($severity) }}
+                        </span>
+                    @elseif($severity === 'other')
+                        <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
+                            {{ strtoupper($severity) }}
+                        </span>
+                    @else
+                        {{ $severity ?? '-' }}
+                    @endif
+                </div>
             </div>
             <div class="md:col-span-2">
                 <div class="font-semibold">{{ __('logs.table.message') }}</div>
@@ -25,7 +50,7 @@
             <div>
                 <div class="font-semibold">{{ __('logs.table.created_at') }}</div>
                 <div class="text-slate-700">
-                    {{ optional($log->created_at)->toDateTimeString() ?? '-' }}
+                    {{ optional($log->created_at)->locale(app()->getLocale())->translatedFormat('d F Y H:i:s') ?? '-' }}
                 </div>
             </div>
         </div>

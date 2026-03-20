@@ -34,7 +34,7 @@
                                 {{ $item->message ?? '-' }}
                             </td>
                             <td class="px-3 py-2 text-slate-700 whitespace-nowrap">
-                                {{ optional($item->archived_at)->toDateTimeString() ?? '-' }}
+                                {{ optional($item->archived_at)->locale(app()->getLocale())->translatedFormat('d F Y H:i:s') ?? '-' }}
                             </td>
                         </tr>
                     @endforeach

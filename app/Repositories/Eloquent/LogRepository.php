@@ -13,7 +13,6 @@ class LogRepository implements LogRepositoryInterface
     {
         return Log::query()
             ->with(['application', 'errorCode'])
-            ->whereNull('matched_archived_log_id')
             ->latest('created_at')
             ->paginate($perPage);
     }
@@ -21,9 +20,7 @@ class LogRepository implements LogRepositoryInterface
     public function findOrFail(int $id): Log
     {
         return Log::query()
-        /* TODO: ¿Si lo archivamos desaparece de la tabla? */
             ->with(['application', 'errorCode'])
-            ->whereNull('matched_archived_log_id')
             ->findOrFail($id);
     }
 
@@ -37,13 +34,32 @@ class LogRepository implements LogRepositoryInterface
             ->get();
     }
 
-    public function searchAndFilter(?string $search, ?string $severity, int $perPage = 15): LengthAwarePaginator
+    public function searchAndFilter(
+        ?string $search,
+        ?string $severity,
+        ?string $archived,
+        ?string $resolved,
+        int $perPage = 15
+    ): LengthAwarePaginator
     {
         return Log::query()
             ->with(['application', 'errorCode'])
-            ->whereNull('matched_archived_log_id')
             ->when($search, fn ($q) => $q->where('message', 'ilike', '%' . $search . '%'))
             ->when($severity, fn ($q) => $q->where('severity', $severity))
+            ->when($archived, function ($q) use ($archived): void {
+                if ($archived === 'archived') {
+                    $q->whereNotNull('matched_archived_log_id');
+                } elseif ($archived === 'not_archived') {
+                    $q->whereNull('matched_archived_log_id');
+                }
+            })
+            ->when($resolved, function ($q) use ($resolved): void {
+                if ($resolved === 'resolved') {
+                    $q->where('resolved', true);
+                } elseif ($resolved === 'unresolved') {
+                    $q->where('resolved', false);
+                }
+            })
             ->latest('created_at')
             ->paginate($perPage);
     }

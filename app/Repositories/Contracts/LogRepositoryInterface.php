@@ -18,11 +18,13 @@ interface LogRepositoryInterface
     public function latestForStream(int $limit = 10): Collection;
 
     /**
-     * Buscar y filtrar (solo logs activos).
+     * Buscar y filtrar.
      */
     public function searchAndFilter(
         ?string $search,
         ?string $severity,
+        ?string $archived,
+        ?string $resolved,
         int $perPage = 15
     ): LengthAwarePaginator;
 

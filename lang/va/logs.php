@@ -18,6 +18,12 @@ return [
         'error_code' => "Codi d'error",
         'created_at' => 'Creat',
         'actions' => 'Accions',
+        'status' => 'Estat',
+    ],
+
+    'status' => [
+        'archived' => 'Arxivat',
+        'resolved' => 'Resolts',
     ],
 
     'filters' => [
@@ -30,6 +36,16 @@ return [
         'severity_medium' => 'Mitjana',
         'severity_low' => 'Baixa',
         'severity_other' => 'Altra',
+
+        'archived' => 'Arxivat',
+        'archived_all' => 'Tots',
+        'archived_archived' => 'Arxivats',
+        'archived_not_archived' => 'No arxivats',
+
+        'resolved' => 'Resolts',
+        'resolved_all' => 'Tots',
+        'resolved_resolved' => 'Resolts',
+        'resolved_unresolved' => 'No resolts',
     ],
 
     'buttons' => [
