@@ -14,7 +14,21 @@ class ErrorCodeRepository implements ErrorCodeRepositoryInterface
             ->with('application')
             ->withCount(['logs', 'archivedLogs', 'comments'])
             ->orderBy('code')
-            ->paginate($perPage);
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
+    public function searchAndFilter(
+        ?string $severity,
+        int $perPage = 15
+    ): LengthAwarePaginator {
+        return ErrorCode::query()
+            ->with('application')
+            ->withCount(['logs', 'archivedLogs', 'comments'])
+            ->when($severity, fn ($q) => $q->where('severity', $severity))
+            ->orderBy('code')
+            ->paginate($perPage)
+            ->withQueryString();
     }
 
     public function findOrFail(int $id): ErrorCode

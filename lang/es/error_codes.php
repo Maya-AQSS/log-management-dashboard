@@ -15,6 +15,18 @@ return [
     ],
 
     'buttons' => [
+        'apply' => 'Aplicar',
+        'reset' => 'Limpiar',
         'back' => 'Volver',
+    ],
+
+    'filters' => [
+        'severity' => 'Severidad',
+        'severity_all' => 'Todas',
+        'severity_critical' => 'Crítica',
+        'severity_high' => 'Alta',
+        'severity_medium' => 'Media',
+        'severity_low' => 'Baja',
+        'severity_other' => 'Otra',
     ],
 ];
