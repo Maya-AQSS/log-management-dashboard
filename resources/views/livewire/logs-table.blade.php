@@ -100,8 +100,7 @@
                 >
                     <td class="px-3 py-2 text-slate-700">{{ $log->application?->name ?? '-' }}</td>
                     <td class="px-3 py-2 whitespace-nowrap">
-                        @php($badge = $this->severityBadge($log->severity ?? null))
-                        <span class="{{ $badge['classes'] }}">{{ $badge['label'] }}</span>
+                        <x-severity-badge :severity="$log->severity" />
                     </td>
                     <td class="px-3 py-2 text-slate-700">{{ $log->message ?? '-' }}</td>
                     <td class="px-3 py-2 text-slate-700 whitespace-nowrap">{{ $log->errorCode?->code ?? '-' }}</td>

@@ -81,41 +81,4 @@ class LogsTable extends Component
 
         return view('livewire.logs-table', ['logs' => $logs]);
     }
-
-    /**
-     * Badge metadata for severity.
-     *
-     * @return array{label:string, classes:string}
-     */
-    public function severityBadge(?string $severity): array
-    {
-        $severity = $severity ?? null;
-
-        return match ($severity) {
-            'critical' => [
-                'label' => strtoupper('critical'),
-                'classes' => 'inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-800',
-            ],
-            'high' => [
-                'label' => strtoupper('high'),
-                'classes' => 'inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-xs font-semibold text-orange-800',
-            ],
-            'medium' => [
-                'label' => strtoupper('medium'),
-                'classes' => 'inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-semibold text-yellow-800',
-            ],
-            'low' => [
-                'label' => strtoupper('low'),
-                'classes' => 'inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800',
-            ],
-            'other' => [
-                'label' => strtoupper('other'),
-                'classes' => 'inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700',
-            ],
-            default => [
-                'label' => $severity ? strtoupper($severity) : '-',
-                'classes' => 'text-slate-500',
-            ],
-        };
-    }
 }

@@ -48,7 +48,9 @@
             </div>
             <div>
                 <div class="font-semibold">{{ __('archived_logs.table.severity') }}</div>
-                <div class="text-slate-700">{{ $archivedLog->severity ?? '-' }}</div>
+                <div class="text-slate-700">
+                    <x-severity-badge :severity="$archivedLog->severity" />
+                </div>
             </div>
             <div class="md:col-span-2">
                 <div class="font-semibold">{{ __('archived_logs.table.message') }}</div>

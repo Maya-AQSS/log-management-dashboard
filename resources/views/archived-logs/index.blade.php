@@ -27,8 +27,8 @@
                             <td class="px-3 py-2 text-slate-700">
                                 {{ $item->application?->name ?? '-' }}
                             </td>
-                            <td class="px-3 py-2 text-slate-700 whitespace-nowrap">
-                                {{ $item->severity ?? '-' }}
+                            <td class="px-3 py-2 whitespace-nowrap">
+                                <x-severity-badge :severity="$item->severity" />
                             </td>
                             <td class="px-3 py-2 text-slate-700">
                                 {{ $item->message ?? '-' }}
