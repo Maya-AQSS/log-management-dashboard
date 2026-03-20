@@ -10,9 +10,25 @@ return [
     'confirm_delete' => 'Segur que vols eliminar este historic de logs?',
 
     'buttons' => [
+        'apply' => 'Aplicar',
+        'reset' => 'Netejar',
         'edit' => 'Editar',
         'view_tutorial' => 'Veure tutorial',
         'delete' => 'Eliminar',
+    ],
+
+    'filters' => [
+        'severity' => 'Severitat',
+        'severity_all' => 'Totes',
+        'severity_critical' => 'Crítica',
+        'severity_high' => 'Alta',
+        'severity_medium' => 'Mitjana',
+        'severity_low' => 'Baixa',
+        'severity_other' => 'Altra',
+        'tutorial' => 'Tutorial',
+        'tutorial_all' => 'Tots',
+        'tutorial_with' => 'Amb tutorial',
+        'tutorial_without' => 'Sense tutorial',
     ],
 
     'table' => [

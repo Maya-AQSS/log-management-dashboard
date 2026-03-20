@@ -18,6 +18,14 @@ class ArchivedLogService implements ArchivedLogServiceInterface
         return $this->archivedLogRepository->paginate($perPage);
     }
 
+    public function searchAndFilter(
+        ?string $severity,
+        ?string $tutorial,
+        int $perPage = 15
+    ): LengthAwarePaginator {
+        return $this->archivedLogRepository->searchAndFilter($severity, $tutorial, $perPage);
+    }
+
     public function findOrFail(int $id): ArchivedLog
     {
         return $this->archivedLogRepository->findOrFail($id);

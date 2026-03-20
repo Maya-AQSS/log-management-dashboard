@@ -16,7 +16,29 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
             ->with(['application', 'archivedBy', 'errorCode'])
             ->withCount('comments')
             ->latest('archived_at')
-            ->paginate($perPage);
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
+    public function searchAndFilter(
+        ?string $severity,
+        ?string $tutorial,
+        int $perPage = 15
+    ): LengthAwarePaginator {
+        return ArchivedLog::query()
+            ->with(['application', 'archivedBy', 'errorCode'])
+            ->withCount('comments')
+            ->when($severity, fn ($q) => $q->where('severity', $severity))
+            ->when($tutorial, function ($q) use ($tutorial): void {
+                if ($tutorial === 'with_tutorial') {
+                    $q->whereNotNull('url_tutorial');
+                } elseif ($tutorial === 'without_tutorial') {
+                    $q->whereNull('url_tutorial');
+                }
+            })
+            ->latest('archived_at')
+            ->paginate($perPage)
+            ->withQueryString();
     }
 
     public function findOrFail(int $id): ArchivedLog

@@ -10,9 +10,25 @@ return [
     'confirm_delete' => 'Are you sure you want to delete this archived log history?',
 
     'buttons' => [
+        'apply' => 'Apply',
+        'reset' => 'Reset',
         'edit' => 'Edit',
         'view_tutorial' => 'View tutorial',
         'delete' => 'Delete',
+    ],
+
+    'filters' => [
+        'severity' => 'Severity',
+        'severity_all' => 'All',
+        'severity_critical' => 'Critical',
+        'severity_high' => 'High',
+        'severity_medium' => 'Medium',
+        'severity_low' => 'Low',
+        'severity_other' => 'Other',
+        'tutorial' => 'Tutorial',
+        'tutorial_all' => 'All',
+        'tutorial_with' => 'With tutorial',
+        'tutorial_without' => 'Without tutorial',
     ],
 
     'table' => [
