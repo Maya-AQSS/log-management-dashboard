@@ -32,12 +32,9 @@ return [
     ],
 
     'table' => [
-        'id' => 'ID',
         'application' => 'Aplicacio',
         'severity' => 'Severitat',
         'message' => 'Missatge',
         'archived_at' => 'Arxivada',
-        'url_tutorial' => 'URL tutorial',
-        'actions' => 'Accions',
     ],
 ];

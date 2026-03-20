@@ -7,7 +7,6 @@ return [
 
     'empty' => 'No logs to display',
 
-    'archived' => 'Archived',
     'archived_success' => 'Log archived successfully',
     'archived_error' => 'The log could not be archived',
 
@@ -17,7 +16,6 @@ return [
         'message' => 'Message',
         'error_code' => 'Error code',
         'created_at' => 'Created at',
-        'actions' => 'Actions',
         'status' => 'Status',
     ],
 
@@ -52,7 +50,6 @@ return [
         'apply' => 'Apply',
         'reset' => 'Reset',
         'archive' => 'Archive',
-        'edit' => 'Edit',
         'view_archived' => 'View archived',
     ],
 ];
