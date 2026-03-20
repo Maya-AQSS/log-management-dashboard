@@ -53,5 +53,6 @@ return [
         'reset' => 'Netejar',
         'archive' => 'Arxivar',
         'edit' => 'Editar',
+        'view_archived' => 'Veure arxivat',
     ],
 ];

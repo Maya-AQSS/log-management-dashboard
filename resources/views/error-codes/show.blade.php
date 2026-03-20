@@ -13,7 +13,9 @@
 
             <div>
                 <div class="font-semibold">{{ __('error_codes.table.severity') }}</div>
-                <div class="text-slate-700">{{ $errorCode->severity ?? '-' }}</div>
+                <div class="text-slate-700">
+                    <x-severity-badge :severity="$errorCode->severity" />
+                </div>
             </div>
 
             <div>

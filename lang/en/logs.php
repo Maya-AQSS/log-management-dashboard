@@ -53,5 +53,6 @@ return [
         'reset' => 'Reset',
         'archive' => 'Archive',
         'edit' => 'Edit',
+        'view_archived' => 'View archived',
     ],
 ];
