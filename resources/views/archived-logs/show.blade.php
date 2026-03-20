@@ -1,8 +1,44 @@
 <x-layout>
-    <h1 class="text-xl font-semibold text-center">{{ __('archived_logs.title') }}</h1>
-    <p class="text-base text-gray-500 text-center mb-5">
-        {{ __('archived_logs.welcome') }}
-    </p>
+    <div class="flex items-start justify-between gap-3">
+        <a
+            href="{{ route('archived-logs.index') }}"
+            class="inline-flex items-center px-4 py-2 rounded-full bg-[#f7a736] hover:bg-[#e28f1f] text-[#1e1a24] text-sm font-semibold shadow-sm"
+        >
+            Back
+        </a>
+
+        <div class="text-center">
+            <h1 class="text-xl font-semibold">{{ __('archived_logs.title') }}</h1>
+            <p class="text-base text-gray-500">
+                {{ __('archived_logs.welcome') }}
+            </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <a
+                href="{{ route('archived-logs.show', $archivedLog->id) }}"
+                class="inline-flex items-center px-4 py-2 rounded-full bg-[#5b3853] hover:bg-[#4a2d44] text-white text-sm font-semibold"
+            >
+                {{ __('archived_logs.buttons.edit') }}
+            </a>
+            @can('delete', $archivedLog)
+                <form
+                    method="POST"
+                    action="{{ route('archived-logs.destroy', $archivedLog->id) }}"
+                    onsubmit="return confirm('{{ addslashes(__('archived_logs.confirm_delete')) }}')"
+                >
+                    @csrf
+                    @method('DELETE')
+                    <button
+                        type="submit"
+                        class="px-3 py-1.5 rounded-full bg-red-600 hover:bg-red-500 text-base font-semibold text-white shadow-sm"
+                    >
+                        {{ __('archived_logs.buttons.delete') }}
+                    </button>
+                </form>
+            @endcan
+        </div>
+    </div>
 
     <div class="mt-4 bg-white border rounded-2xl p-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
@@ -24,35 +60,21 @@
                     {{ optional($archivedLog->archived_at)->toDateTimeString() ?? '-' }}
                 </div>
             </div>
-        </div>
 
-        <div class="mt-4 flex items-center justify-end gap-3">
-            @can('delete', $archivedLog)
-                <form
-                    method="POST"
-                    action="{{ route('archived-logs.destroy', $archivedLog->id) }}"
-                    onsubmit="return confirm('{{ addslashes(__('archived_logs.confirm_delete')) }}')"
-                >
-                    @csrf
-                    @method('DELETE')
-                    <button
-                        type="submit"
-                        class="px-3 py-1.5 rounded-full bg-red-600 hover:bg-red-500 text-base font-semibold text-white shadow-sm"
+            @if(!blank($archivedLog->url_tutorial))
+                <div class="md:col-span-2">
+                    <a
+                        href="{{ $archivedLog->url_tutorial }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center px-4 py-2 rounded-full bg-[#5b3853] hover:bg-[#4a2d44] text-white text-sm font-semibold shadow-sm"
                     >
-                        {{ __('archived_logs.buttons.delete') }}
-                    </button>
-                </form>
-            @endcan
+                        {{ __('archived_logs.buttons.view_tutorial') }}
+                    </a>
+                </div>
+            @endif
         </div>
-    </div>
 
-    <div class="mt-4 text-center">
-        <a
-            href="{{ route('archived-logs.index') }}"
-            class="inline-flex items-center px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm font-semibold"
-        >
-            Back
-        </a>
     </div>
 
     <div class="mt-6">

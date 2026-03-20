@@ -10,6 +10,8 @@ return [
     'confirm_delete' => 'Are you sure you want to delete this archived log history?',
 
     'buttons' => [
+        'edit' => 'Edit',
+        'view_tutorial' => 'View tutorial',
         'delete' => 'Delete',
     ],
 
@@ -19,6 +21,7 @@ return [
         'severity' => 'Severity',
         'message' => 'Message',
         'archived_at' => 'Archived At',
+        'url_tutorial' => 'URL tutorial',
         'actions' => 'Actions',
     ],
 ];

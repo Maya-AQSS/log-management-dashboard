@@ -10,6 +10,8 @@ return [
     'confirm_delete' => 'Segur que vols eliminar este historic de logs?',
 
     'buttons' => [
+        'edit' => 'Editar',
+        'view_tutorial' => 'Veure tutorial',
         'delete' => 'Eliminar',
     ],
 
@@ -19,6 +21,7 @@ return [
         'severity' => 'Severitat',
         'message' => 'Missatge',
         'archived_at' => 'Arxivada',
+        'url_tutorial' => 'URL tutorial',
         'actions' => 'Accions',
     ],
 ];
