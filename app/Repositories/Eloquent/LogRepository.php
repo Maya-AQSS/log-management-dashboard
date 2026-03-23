@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Enums\Severity;
 use App\Models\Log;
 use App\Repositories\Contracts\LogRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -66,7 +67,7 @@ class LogRepository implements LogRepositoryInterface
 
     public function severityResolvedCounts(): array
     {
-        $severities = ['critical', 'high', 'medium', 'low', 'other'];
+        $severities = Severity::values();
 
         $rows = Log::query()
             ->selectRaw('severity, resolved, count(*) as count')

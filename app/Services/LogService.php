@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\Severity;
 use App\Models\Log;
 use App\Repositories\Contracts\LogRepositoryInterface;
 use App\Services\Contracts\LogServiceInterface;
@@ -46,7 +47,7 @@ class LogService implements LogServiceInterface
 
     public function dashboardSeverityCards(): array
     {
-        $severityKeys = ['critical', 'high', 'medium', 'low', 'other'];
+        $severityKeys = Severity::values();
         $bySeverity = $this->logRepository->severityResolvedCounts();
 
         $cards = collect($severityKeys)

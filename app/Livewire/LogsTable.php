@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\Severity;
 use App\Services\Contracts\LogServiceInterface;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
@@ -21,6 +22,22 @@ class LogsTable extends Component
     public ?string $severity = null;
     public ?string $archived = null;
     public ?string $resolved = null;
+
+    public function mount(): void
+    {
+        $querySeverity = request()->query('severity');
+
+        if (!is_string($querySeverity) || $querySeverity === '') {
+            return;
+        }
+
+        if (!in_array($querySeverity, Severity::values(), true)) {
+            return;
+        }
+
+        $this->severityInput = $querySeverity;
+        $this->severity = $querySeverity;
+    }
 
     public function resetFilters(): void
     {
@@ -53,7 +70,7 @@ class LogsTable extends Component
 
         $validated = $this->validate([
             'searchInput' => ['nullable', 'string', 'max:255'],
-            'severityInput' => ['nullable', 'in:critical,high,medium,low,other'],
+            'severityInput' => ['nullable', Severity::validationRule()],
             'archivedInput' => ['nullable', 'in:archived,not_archived'],
             'resolvedInput' => ['nullable', 'in:resolved,unresolved'],
         ]);
