@@ -26,23 +26,39 @@ class LogsTable extends Component
     public function mount(): void
     {
         $querySeverity = request()->query('severity');
+        $queryArchived = request()->query('archived');
 
         if (is_string($querySeverity) && $querySeverity !== '' && in_array($querySeverity, Severity::values(), true)) {
             $this->severityInput = $querySeverity;
             $this->severity = $querySeverity;
         }
+
+        if ($queryArchived === 'true') {
+            $this->archivedInput = null;
+            $this->archived = null;
+            return;
+        }
+
+        if (is_string($queryArchived) && in_array($queryArchived, ['archived', 'not_archived'], true)) {
+            $this->archivedInput = $queryArchived;
+            $this->archived = $queryArchived;
+            return;
+        }
+
+        $this->archivedInput = 'not_archived';
+        $this->archived = 'not_archived';
     }
 
     public function resetFilters(): void
     {
         $this->searchInput = '';
         $this->severityInput = null;
-        $this->archivedInput = null;
+        $this->archivedInput = 'not_archived';
         $this->resolvedInput = null;
 
         $this->search = null;
         $this->severity = null;
-        $this->archived = null;
+        $this->archived = 'not_archived';
         $this->resolved = null;
 
         $this->resetPage();
