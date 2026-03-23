@@ -44,9 +44,38 @@ class LogService implements LogServiceInterface
         return $this->logRepository->searchAndFilter($search, $severity, $archived, $resolved, $perPage);
     }
 
-    public function severityCounts(): array
+    public function dashboardSeverityCards(): array
     {
-        return $this->logRepository->severityCounts();
+        $severityKeys = ['critical', 'high', 'medium', 'low', 'other'];
+        $bySeverity = $this->logRepository->severityResolvedCounts();
+
+        $cards = collect($severityKeys)
+            ->map(function (string $key) use ($bySeverity): array {
+                $resolvedCount = (int) ($bySeverity[$key]['resolved'] ?? 0);
+                $unresolvedCount = (int) ($bySeverity[$key]['unresolved'] ?? 0);
+
+                return [
+                    'key' => $key,
+                    'count' => $resolvedCount + $unresolvedCount,
+                    'resolvedCount' => $resolvedCount,
+                    'unresolvedCount' => $unresolvedCount,
+                    'routeParams' => ['severity' => $key],
+                ];
+            })
+            ->values();
+
+        $allResolved = (int) $cards->sum('resolvedCount');
+        $allUnresolved = (int) $cards->sum('unresolvedCount');
+
+        $cards->prepend([
+            'key' => 'all',
+            'count' => $allResolved + $allUnresolved,
+            'resolvedCount' => $allResolved,
+            'unresolvedCount' => $allUnresolved,
+            'routeParams' => [],
+        ]);
+
+        return $cards->all();
     }
 
     public function archivedLogIdFor(int $logId): ?int

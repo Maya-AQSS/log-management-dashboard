@@ -11,8 +11,18 @@ class DashboardController extends Controller
 
     public function index(): View
     {
+        $cards = collect($this->logService->dashboardSeverityCards())
+            ->map(fn (array $card): array => [
+                ...$card,
+                'title' => __('dashboard.cards.' . $card['key']),
+                'href' => route('logs.index', $card['routeParams']),
+            ])
+            ->all();
+
         return view('dashboard', [
-            'severityCounts' => $this->logService->severityCounts(),
+            'cards' => $cards,
+            'unresolvedLabel' => __('logs.filters.resolved_unresolved'),
+            'resolvedLabel' => __('logs.filters.resolved_resolved'),
         ]);
     }
 }

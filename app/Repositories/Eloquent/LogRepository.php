@@ -64,20 +64,36 @@ class LogRepository implements LogRepositoryInterface
             ->paginate($perPage);
     }
 
-    public function severityCounts(): array
+    public function severityResolvedCounts(): array
     {
         $severities = ['critical', 'high', 'medium', 'low', 'other'];
 
-        $counts = Log::query()
-            ->whereNull('matched_archived_log_id')
-            ->selectRaw('severity, count(*) as count')
+        $rows = Log::query()
+            ->selectRaw('severity, resolved, count(*) as count')
             ->whereIn('severity', $severities)
-            ->groupBy('severity')
-            ->pluck('count', 'severity');
+            ->groupBy('severity', 'resolved')
+            ->get();
 
         $result = [];
         foreach ($severities as $severity) {
-            $result[$severity] = (int) ($counts[$severity] ?? 0);
+            $result[$severity] = [
+                'resolved' => 0,
+                'unresolved' => 0,
+                'total' => 0,
+            ];
+        }
+
+        foreach ($rows as $row) {
+            $severity = (string) $row->severity;
+            $count = (int) $row->count;
+            $bucket = (bool) $row->resolved ? 'resolved' : 'unresolved';
+
+            if (!isset($result[$severity])) {
+                continue;
+            }
+
+            $result[$severity][$bucket] += $count;
+            $result[$severity]['total'] += $count;
         }
 
         return $result;
