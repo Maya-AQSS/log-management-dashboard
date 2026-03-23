@@ -65,11 +65,12 @@ class LogRepository implements LogRepositoryInterface
             ->paginate($perPage);
     }
 
-    public function severityResolvedCounts(): array
+    public function severityResolvedCounts(bool $includeArchived = false): array
     {
         $severities = Severity::values();
 
         $rows = Log::query()
+            ->when(!$includeArchived, fn ($q) => $q->whereNull('matched_archived_log_id'))
             ->selectRaw('severity, resolved, count(*) as count')
             ->whereIn('severity', $severities)
             ->groupBy('severity', 'resolved')

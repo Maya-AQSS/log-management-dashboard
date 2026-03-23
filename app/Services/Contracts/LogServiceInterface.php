@@ -32,7 +32,7 @@ interface LogServiceInterface
      *
      * @return array<int,array{key:string,count:int,resolvedCount:int,unresolvedCount:int,routeParams:array<string,string>}>
      */
-    public function dashboardSeverityCards(): array;
+    public function dashboardSeverityCards(bool $includeArchived = false): array;
 
     /**
      * Devuelve el id de ArchivedLog asociado al log o null si no está archivado.
