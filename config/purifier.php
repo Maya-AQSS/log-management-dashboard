@@ -30,5 +30,19 @@ return [
             'URI.AllowedSchemes' => ['http' => true, 'https' => true, 'data' => true],
             'Attr.AllowedFrameTargets' => ['_blank'],
         ],
+        'rich_comment' => [
+            'HTML.Doctype'    => 'HTML 4.01 Transitional',
+            'HTML.Allowed'    =>
+                'p,br,b,strong,i,em,s,ul,ol,li,' .
+                'h1,h2,h3,h4,h5,h6,' .
+                'blockquote,code,pre,hr,' .
+                'a[href|rel|target],' .
+                'img[src|alt|width|height]',
+            'CSS.AllowedProperties'  => '',
+            'AutoFormat.AutoParagraph' => false,
+            'AutoFormat.RemoveEmpty'   => false,
+            'URI.AllowedSchemes' => ['http' => true, 'https' => true, 'data' => true],
+            'Attr.AllowedFrameTargets' => ['_blank'],
+        ],
     ],
 ];

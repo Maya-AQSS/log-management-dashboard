@@ -8,12 +8,18 @@ use App\Models\ErrorCode;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Validation\ValidationException;
+use Mews\Purifier\Facades\Purifier;
 use Throwable;
 use Livewire\Component;
 
 class CommentThread extends Component
 {
     use AuthorizesRequests;
+
+    private const MAX_COMMENT_BYTES = 10 * 1024 * 1024;
+
+    private const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 
     public string $commentableType;
 
@@ -34,21 +40,28 @@ class CommentThread extends Component
         $this->resolveCommentableModel();
     }
 
-    public function addComment(): void
+    public function addComment(string $rawContent = ''): void
     {
+        if ($rawContent !== '') {
+            $this->content = $rawContent;
+        }
+
         $validated = $this->validate([
-            'content' => ['required', 'string', 'min:3', 'max:1000'],
+            'content' => ['required', 'string', 'min:3'],
         ]);
+
+        $sanitizedContent = $this->sanitizeAndValidateContent($validated['content'], 'content');
 
         try {
             $this->resolveCommentableModel()
                 ->comments()
                 ->create([
                     'user_id' => auth()->id(),
-                    'content' => $validated['content'],
+                    'content' => $sanitizedContent,
                 ]);
 
             $this->reset('content');
+            $this->dispatch('comment-editor-reset');
             session()->flash('status', __('comments.flash.created'));
         } catch (Throwable $e) {
             report($e);
@@ -71,12 +84,18 @@ class CommentThread extends Component
         $this->editingContent = $comment->content;
     }
 
-    public function updateComment(): void
+    public function updateComment(string $rawContent = ''): void
     {
+        if ($rawContent !== '') {
+            $this->editingContent = $rawContent;
+        }
+
         $validated = $this->validate([
             'editingCommentId' => ['required', 'integer', 'exists:comments,id'],
-            'editingContent' => ['required', 'string', 'min:3', 'max:1000'],
+            'editingContent' => ['required', 'string', 'min:3'],
         ]);
+
+        $sanitizedContent = $this->sanitizeAndValidateContent($validated['editingContent'], 'editingContent');
 
         $comment = $this->findCommentOrFail($validated['editingCommentId']);
 
@@ -84,7 +103,7 @@ class CommentThread extends Component
 
         try {
             $comment->update([
-                'content' => $validated['editingContent'],
+                'content' => $sanitizedContent,
             ]);
 
             $this->cancelEditing();
@@ -172,6 +191,91 @@ class CommentThread extends Component
         }
 
         return $class;
+    }
+
+    private function sanitizeAndValidateContent(string $rawContent, string $field): string
+    {
+        $sanitized = Purifier::clean($rawContent, 'rich_comment');
+
+        $this->validateNotBlank($sanitized, $field);
+        $this->validateContentSize($sanitized, $field);
+        $this->validateEmbeddedImages($sanitized, $field);
+
+        return $sanitized;
+    }
+
+    private function validateNotBlank(string $html, string $field): void
+    {
+        $textOnly = trim(strip_tags(str_ireplace(['<br>', '<br/>', '<br />'], ' ', $html)));
+
+        if ($textOnly !== '' || str_contains($html, '<img')) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            $field => __('validation.required', ['attribute' => $field]),
+        ]);
+    }
+
+    private function validateContentSize(string $html, string $field): void
+    {
+        if (strlen($html) <= self::MAX_COMMENT_BYTES) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            $field => __('comments.editor.comment_too_large'),
+        ]);
+    }
+
+    private function validateEmbeddedImages(string $html, string $field): void
+    {
+        preg_match_all('/<img[^>]+src=["\']([^"\']+)["\']/i', $html, $matches);
+        $sources = $matches[1] ?? [];
+
+        foreach ($sources as $src) {
+            if (preg_match('/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/s', $src, $parts) !== 1) {
+                continue;
+            }
+
+            $decoded = base64_decode($parts[2], true);
+            if ($decoded === false) {
+                throw ValidationException::withMessages([
+                    $field => __('comments.editor.image_invalid_type'),
+                ]);
+            }
+
+            if (strlen($decoded) > self::MAX_IMAGE_BYTES) {
+                throw ValidationException::withMessages([
+                    $field => __('comments.editor.image_too_large'),
+                ]);
+            }
+
+            if (!$this->isAllowedImageByMagicBytes($decoded)) {
+                throw ValidationException::withMessages([
+                    $field => __('comments.editor.image_invalid_type'),
+                ]);
+            }
+        }
+    }
+
+    private function isAllowedImageByMagicBytes(string $binary): bool
+    {
+        $header = substr($binary, 0, 12);
+
+        if (str_starts_with($header, "\x89PNG")) {
+            return true;
+        }
+
+        if (str_starts_with($header, "\xFF\xD8\xFF")) {
+            return true;
+        }
+
+        if (str_starts_with($header, 'GIF8')) {
+            return true;
+        }
+
+        return str_starts_with($header, 'RIFF') && substr($header, 8, 4) === 'WEBP';
     }
 
     /**
