@@ -2,19 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ErrorCodeIndexRequest;
 use App\Services\Contracts\ErrorCodeServiceInterface;
 use Illuminate\Contracts\View\View;
-use Illuminate\Http\Request;
 
 class ErrorCodeController extends Controller
 {
     public function __construct(private ErrorCodeServiceInterface $errorCodeService) {}
 
-    public function index(Request $request): View
+    public function index(ErrorCodeIndexRequest $request): View
     {
-        $validated = $request->validate([
-            'severity' => ['nullable', 'in:critical,high,medium,low,other'],
-        ]);
+        $validated = $request->validated();
 
         $severity = $validated['severity'] ?? null;
 
