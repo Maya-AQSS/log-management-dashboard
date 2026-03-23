@@ -66,7 +66,7 @@ class LogService implements LogServiceInterface
                         'resolvedCount' => $resolvedCount,
                         'unresolvedCount' => $unresolvedCount,
                         'routeParams' => $includeArchived
-                            ? ['severity' => $key, 'archived' => 'true']
+                            ? ['severity' => $key, 'archived' => 'all']
                             : ['severity' => $key],
                     ];
                 })
@@ -80,7 +80,7 @@ class LogService implements LogServiceInterface
                 'count' => $totalLogsCount,
                 'resolvedCount' => $allResolved,
                 'unresolvedCount' => $allUnresolved,
-                'routeParams' => $includeArchived ? ['archived' => 'true'] : [],
+                'routeParams' => $includeArchived ? ['archived' => 'all'] : [],
             ]);
 
             return $cards->all();
