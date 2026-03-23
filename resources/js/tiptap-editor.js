@@ -88,6 +88,7 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 		isEmpty: true,
 		wireModel,
 		maxCommentBytes,
+		resetHandler: null,
 
 		init() {
 			const self = this;
@@ -121,18 +122,17 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 				},
 			});
 
-			this.$el.addEventListener('comment-editor-reset', () => {
+			this.resetHandler = () => {
 				if (!this.editor) {
 					return;
 				}
 
 				this.editor.commands.clearContent(true);
 				this.editor.commands.focus();
-			});
+			};
 
-			this.$el.addEventListener('click', () => {
-				this.editor?.chain().focus().run();
-			});
+			this.$el.addEventListener('comment-editor-reset', this.resetHandler);
+			window.addEventListener('comment-editor-reset', this.resetHandler);
 		},
 
 		syncToLivewire() {
@@ -288,6 +288,11 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 		},
 
 		destroy() {
+			if (this.resetHandler) {
+				this.$el.removeEventListener('comment-editor-reset', this.resetHandler);
+				window.removeEventListener('comment-editor-reset', this.resetHandler);
+			}
+
 			this.editor?.destroy();
 			this.editor = null;
 		},
