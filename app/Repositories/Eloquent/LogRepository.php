@@ -101,6 +101,13 @@ class LogRepository implements LogRepositoryInterface
         return $result;
     }
 
+    public function logsCount(bool $includeArchived = false): int
+    {
+        return Log::query()
+            ->when(!$includeArchived, fn ($q) => $q->whereNull('matched_archived_log_id'))
+            ->count();
+    }
+
     public function archivedLogIdFor(int $logId): ?int
     {
         $matchedId = Log::query()

@@ -27,16 +27,10 @@ class LogsTable extends Component
     {
         $querySeverity = request()->query('severity');
 
-        if (!is_string($querySeverity) || $querySeverity === '') {
-            return;
+        if (is_string($querySeverity) && $querySeverity !== '' && in_array($querySeverity, Severity::values(), true)) {
+            $this->severityInput = $querySeverity;
+            $this->severity = $querySeverity;
         }
-
-        if (!in_array($querySeverity, Severity::values(), true)) {
-            return;
-        }
-
-        $this->severityInput = $querySeverity;
-        $this->severity = $querySeverity;
     }
 
     public function resetFilters(): void
