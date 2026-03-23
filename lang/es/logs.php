@@ -28,12 +28,6 @@ return [
         'search' => 'Buscar',
         'search_placeholder' => 'p.ej. mensaje del error',
         'severity' => 'Severidad',
-        'severity_all' => 'Todas',
-        'severity_critical' => 'Crítica',
-        'severity_high' => 'Alta',
-        'severity_medium' => 'Media',
-        'severity_low' => 'Baja',
-        'severity_other' => 'Otra',
 
         'archived' => 'Archivado',
         'archived_all' => 'Todos',

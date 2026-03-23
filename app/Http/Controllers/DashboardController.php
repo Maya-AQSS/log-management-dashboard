@@ -14,7 +14,7 @@ class DashboardController extends Controller
         $cards = collect($this->logService->dashboardSeverityCards())
             ->map(fn (array $card): array => [
                 ...$card,
-                'title' => __('dashboard.cards.' . $card['key']),
+                'title' => __('severity.' . $card['key']),
                 'href' => route('logs.index', $card['routeParams']),
             ])
             ->all();
