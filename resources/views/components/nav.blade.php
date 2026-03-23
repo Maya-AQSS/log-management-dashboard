@@ -2,10 +2,10 @@
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
         {{-- Logo / título izquierda --}}
         <div class="flex items-center gap-2">
-            <div class="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-semibold">
+            <div class="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-base font-semibold">
                 LM
             </div>
-            <span class="text-sm font-semibold tracking-wide uppercase">
+            <span class="text-base font-semibold tracking-wide uppercase">
                 {{ __('app.app_name') }}
             </span>
         </div>
@@ -20,7 +20,7 @@
 
         {{-- Zona derecha: usuario + logout + hamburguesa --}}
         <div class="flex items-center gap-3">
-            <span class="hidden sm:inline text-sm text-white/80">
+            <span class="hidden sm:inline text-base text-white/80">
                 {{ auth()->user()->name ?? __('app.nav_user') }}
             </span>
 
@@ -28,7 +28,7 @@
             <div class="relative hidden sm:block">
                 <button
                     type="button"
-                    class="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-xs font-semibold"
+                    class="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-base font-semibold"
                     @click="langOpen = ! langOpen"
                 >
                     <span class="sr-only">{{ __('app.nav_language') }}</span>
@@ -46,7 +46,7 @@
                             @csrf
                             <button
                                 type="submit"
-                                class="w-full text-left px-3 py-2 text-sm hover:bg-slate-50 {{ app()->getLocale() === $locale ? 'font-semibold' : '' }}"
+                                class="w-full text-left px-3 py-2 text-base hover:bg-slate-50 {{ app()->getLocale() === $locale ? 'font-semibold' : '' }}"
                             >
                                 {{ __('app.locale_'.$locale) }}
                             </button>
@@ -59,7 +59,7 @@
                 @csrf
                 <button
                     type="submit"
-                    class="px-3 py-1.5 rounded-full bg-[#f7a736] hover:bg-[#e28f1f] text-xs font-semibold text-[#1e1a24] shadow-sm"
+                    class="px-3 py-1.5 rounded-full bg-[#f7a736] hover:bg-[#e28f1f] text-base font-semibold text-[#1e1a24] shadow-sm"
                 >
                     {{ __('app.nav_logout') }}
                 </button>
@@ -91,7 +91,7 @@
 
             {{-- Selector de idioma (mobile) --}}
             <div class="pt-2 border-t border-white/10">
-                <div class="text-xs uppercase tracking-wide text-white/70 mb-2">
+                <div class="text-base uppercase tracking-wide text-white/70 mb-2">
                     {{ __('app.nav_language') }}
                 </div>
                 <div class="flex flex-wrap gap-2">
@@ -100,7 +100,7 @@
                             @csrf
                             <button
                                 type="submit"
-                                class="px-3 py-1.5 rounded-full text-xs font-semibold {{ app()->getLocale() === $locale ? 'bg-white/20' : 'bg-white/10 hover:bg-white/15' }}"
+                                class="px-3 py-1.5 rounded-full text-base font-semibold {{ app()->getLocale() === $locale ? 'bg-white/20' : 'bg-white/10 hover:bg-white/15' }}"
                             >
                                 {{ __('app.locale_'.$locale) }}
                             </button>

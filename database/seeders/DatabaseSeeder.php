@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             ApplicationSeeder::class,
             ErrorCodeSeeder::class,
+            LogSeeder::class,
+            ArchivedLogSeeder::class,
             CommentSeeder::class,
         ]);
     }

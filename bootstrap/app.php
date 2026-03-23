@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Middleware\AuthGateway;
-use App\Http\Middleware\AuthMock;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,23 +16,17 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
 
-        $middleware->alias([
-            'auth.gateway' => AuthGateway::class,
-            'auth.mock' => AuthMock::class,
+        // AuthGateway debe correr en web para resolver sesión local/mock antes de auth.
+        $middleware->web(prepend: [
+            AuthGateway::class,
         ]);
 
-        // Middleware global para establecer el idioma (requiere sesión -> append)
         $middleware->web(append: [
             SetLocale::class,
         ]);
 
-        $middleware->prependToPriorityList(
-            \Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests::class,
-            \App\Http\Middleware\AuthGateway::class
-        );
-
         $middleware->redirectGuestsTo(function (Request $request): string {
-            if ($request->expectsJson()) {
+            if ($request->expectsJson() || $request->is('sse/*')) {
                 abort(401, 'Unauthenticated.');
             }
 
