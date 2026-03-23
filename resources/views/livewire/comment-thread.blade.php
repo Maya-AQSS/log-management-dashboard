@@ -1,20 +1,91 @@
+<style>
+    .rte-prosemirror {
+        min-height: 9rem;
+        outline: none;
+        color: #0f172a;
+    }
+
+    .rte-prosemirror p.is-editor-empty:first-child::before {
+        content: attr(data-placeholder);
+        color: #94a3b8;
+        float: left;
+        height: 0;
+        pointer-events: none;
+    }
+
+    .rte-prosemirror img {
+        max-width: 100%;
+        border-radius: 0.75rem;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    .rte-prosemirror ul,
+    .rte-prosemirror ol {
+        padding-left: 1.25rem;
+    }
+    .rte-prosemirror h2 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-top: 0.25rem;
+        margin-bottom: 0.25rem;
+    }
+</style>
+
 <div class="mt-4 space-y-4">
-    <form wire:submit="addComment" class="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-        <label for="content" class="block text-sm font-medium text-slate-700">{{ __('comments.form.new_comment') }}</label>
-        <textarea
-            id="content"
-            wire:model="content"
-            rows="4"
-            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
-        ></textarea>
+    <div
+        class="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4"
+        x-data="tiptapEditor({
+            wireModel: 'content',
+            initialValue: @js($content),
+            messages: {
+                imageTooLarge: @js(__('comments.editor.image_too_large')),
+                imageInvalidType: @js(__('comments.editor.image_invalid_type')),
+                commentTooLarge: @js(__('comments.editor.comment_too_large')),
+                invalidLink: @js(__('comments.editor.invalid_link')),
+            },
+        })"
+        x-init="init()"
+        x-on:paste="handlePaste($event)"
+        x-on:drop="handleDrop($event)"
+        x-on:dragover.prevent
+    >
+        <label class="block text-sm font-medium text-slate-700">{{ __('comments.form.new_comment') }}</label>
+
+        <div wire:ignore class="space-y-2">
+            <x-rte-toolbar />
+
+            <div class="rounded-xl border border-slate-300 bg-white p-3 shadow-sm">
+                <div class="cursor-text" x-on:click="editor?.chain().focus().run()">
+                    <div
+                        x-ref="editorEl"
+                        data-placeholder="{{ __('comments.editor.placeholder') }}"
+                    ></div>
+                </div>
+            </div>
+
+            <input
+                x-ref="imageInput"
+                type="file"
+                class="hidden"
+                accept="image/png,image/jpeg,image/gif,image/webp"
+                x-on:change="onImageInputChange($event)"
+            >
+        </div>
+
+        <p class="text-xs text-slate-500">{{ __('comments.editor.hint') }}</p>
+
         @error('content')
             <p class="text-sm text-rose-600">{{ $message }}</p>
         @enderror
 
-        <button type="submit" class="rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]">
+        <button
+            type="button"
+            x-on:click="$wire.addComment(html)"
+            class="rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]"
+        >
             {{ __('comments.buttons.save') }}
         </button>
-    </form>
+    </div>
 
     <div class="space-y-3">
         @forelse ($comments as $comment)
@@ -38,27 +109,63 @@
                 </div>
 
                 @if ($editingCommentId === $comment->id)
-                    <form wire:submit="updateComment" class="mt-3 space-y-3">
-                        <textarea
-                            wire:model="editingContent"
-                            rows="4"
-                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
-                        ></textarea>
+                    <div
+                        class="mt-3 space-y-3"
+                        x-data="tiptapEditor({
+                            wireModel: 'editingContent',
+                            initialValue: @js($editingContent),
+                            messages: {
+                                imageTooLarge: @js(__('comments.editor.image_too_large')),
+                                imageInvalidType: @js(__('comments.editor.image_invalid_type')),
+                                commentTooLarge: @js(__('comments.editor.comment_too_large')),
+                                invalidLink: @js(__('comments.editor.invalid_link')),
+                            },
+                        })"
+                        x-init="init()"
+                        x-on:paste="handlePaste($event)"
+                        x-on:drop="handleDrop($event)"
+                        x-on:dragover.prevent
+                    >
+                        <div wire:ignore class="space-y-2">
+                            <x-rte-toolbar />
+
+                            <div class="rounded-xl border border-slate-300 bg-white p-3 shadow-sm">
+                                <div class="cursor-text" x-on:click="editor?.chain().focus().run()">
+                                    <div
+                                        x-ref="editorEl"
+                                        data-placeholder="{{ __('comments.editor.placeholder') }}"
+                                    ></div>
+                                </div>
+                            </div>
+
+                            <input
+                                x-ref="imageInput"
+                                type="file"
+                                class="hidden"
+                                accept="image/png,image/jpeg,image/gif,image/webp"
+                                x-on:change="onImageInputChange($event)"
+                            >
+                        </div>
+
                         @error('editingContent')
                             <p class="text-sm text-rose-600">{{ $message }}</p>
                         @enderror
 
                         <div class="flex gap-2">
-                            <button type="submit" class="rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]">
+                            <button
+                                type="button"
+                                x-on:click="$wire.updateComment(html)"
+                                class="rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]"
+                            >
                                 {{ __('comments.buttons.update') }}
                             </button>
                             <button type="button" wire:click="cancelEditing" class="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
                                 {{ __('comments.buttons.cancel') }}
                             </button>
                         </div>
-                    </form>
+                    </div>
                 @else
-                    <p class="mt-3 whitespace-pre-line text-sm leading-6 text-slate-700">{{ $comment->content }}</p>
+                    <div class="prose prose-sm mt-3 max-w-none text-slate-700 [&_img]:rounded-lg [&_img]:max-w-full [&_img]:my-2">{!! $comment->content !!}</div>
                 @endif
             </article>
         @empty
