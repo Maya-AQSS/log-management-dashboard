@@ -15,16 +15,25 @@ class LogService implements LogServiceInterface
         private LogRepositoryInterface $logRepository
     ) {}
 
+    /**
+     * Devuelve una página de logs.
+     */
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
         return $this->logRepository->paginate($perPage);
     }
 
+    /**
+     * Encuentra un log por su id.
+     */
     public function findOrFail(int $id): Log
     {
         return $this->logRepository->findOrFail($id);
     }
 
+    /**
+     * Devuelve los datos de los últimos logs para streaming.
+     */
     public function streamPayload(int $limit = 10): array
     {
         $logs = $this->logRepository->latestForStream($limit);
@@ -41,54 +50,84 @@ class LogService implements LogServiceInterface
         })->all();
     }
 
+    /**
+     * Busca y filtra logs por diferentes criterios: 
+     * - texto libre en el mensaje
+     * - tipo de severidad de error
+     * - si está archivado o no
+     * - si está resuelto o no
+     */
     public function searchAndFilter(?string $search, ?string $severity, ?string $archived, ?string $resolved, int $perPage = 15): LengthAwarePaginator
     {
         return $this->logRepository->searchAndFilter($search, $severity, $archived, $resolved, $perPage);
     }
 
-    public function dashboardSeverityCards(bool $includeArchived = false): array
+    /**
+     * Devuelve los datos de las cards del dashboard con estado resolved/unresolved.
+     * Incluye todas las severidades y la card "all" usando el total de logs.
+     *
+     * @return array<int,array{key:string,totalCount:int,resolvedCount:int,unresolvedCount:int}>
+     */
+    public function dashboardSeverityCards(): array
     {
-        $cacheKey = sprintf('dashboard:severity-cards:%s', $includeArchived ? 'all' : 'active');
+        $cacheKey = 'dashboard:severity-cards:all';
 
-        return Cache::remember($cacheKey, now()->addSeconds(10), function () use ($includeArchived): array {
+        return Cache::remember($cacheKey, now()->addSeconds(10), function (): array {
             $severityKeys = Severity::values();
-            $bySeverity = $this->logRepository->severityResolvedCounts($includeArchived);
-            $totalLogsCount = $this->logRepository->logsCount($includeArchived);
+            $bySeverity = $this->logRepository->severityResolvedCounts(true);
+            $totalLogsCount = $this->logRepository->logsCount(true);
 
             $cards = collect($severityKeys)
-                ->map(function (string $key) use ($bySeverity, $includeArchived): array {
+                ->map(function (string $key) use ($bySeverity): array {
                     $resolvedCount = (int) ($bySeverity[$key]['resolved'] ?? 0);
                     $unresolvedCount = (int) ($bySeverity[$key]['unresolved'] ?? 0);
 
-                    return [
-                        'key' => $key,
-                        'count' => $resolvedCount + $unresolvedCount,
-                        'resolvedCount' => $resolvedCount,
-                        'unresolvedCount' => $unresolvedCount,
-                        'routeParams' => $includeArchived
-                            ? ['severity' => $key, 'archived' => 'all']
-                            : ['severity' => $key],
-                    ];
+                    return $this->buildDashboardCard(
+                        key: $key,
+                        resolvedCount: $resolvedCount,
+                        unresolvedCount: $unresolvedCount,
+                    );
                 })
                 ->values();
 
             $allResolved = (int) $cards->sum('resolvedCount');
             $allUnresolved = (int) $cards->sum('unresolvedCount');
 
-            $cards->prepend([
-                'key' => 'all',
-                'count' => $totalLogsCount,
-                'resolvedCount' => $allResolved,
-                'unresolvedCount' => $allUnresolved,
-                'routeParams' => $includeArchived ? ['archived' => 'all'] : [],
-            ]);
+            $cards->prepend($this->buildDashboardCard(
+                key: 'all',
+                resolvedCount: $allResolved,
+                unresolvedCount: $allUnresolved,
+                totalCount: $totalLogsCount,
+            ));
 
             return $cards->all();
         });
     }
 
+    /**
+     * Devuelve el id de ArchivedLog equivalente al log o null si no está archivado.
+     */
     public function archivedLogIdFor(int $logId): ?int
     {
         return $this->logRepository->archivedLogIdFor($logId);
+    }
+
+    /**
+     * Construye una card del dashboard con estado resolved/unresolved.
+     * 
+     * @return array{key:string,totalCount:int,resolvedCount:int,unresolvedCount:int}
+     */
+    private function buildDashboardCard(
+        string $key,
+        int $resolvedCount,
+        int $unresolvedCount,
+        ?int $totalCount = null,
+    ): array {
+        return [
+            'key' => $key,
+            'totalCount' => $totalCount ?? ($resolvedCount + $unresolvedCount),
+            'resolvedCount' => $resolvedCount,
+            'unresolvedCount' => $unresolvedCount,
+        ];
     }
 }

@@ -13,7 +13,7 @@ interface LogRepositoryInterface
     public function findOrFail(int $id): Log;
 
     /**
-     * SSE: solo logs activos.
+     * SSE: últimos logs para streaming en tiempo real.
      */
     public function latestForStream(int $limit = 10): Collection;
 
@@ -41,7 +41,7 @@ interface LogRepositoryInterface
     public function logsCount(bool $includeArchived = false): int;
 
     /**
-     * Devuelve el id de ArchivedLog asociado al log (matched_archived_log_id) o null si no está archivado.
+     * Devuelve el id de ArchivedLog equivalente al log o null si no está archivado.
      */
     public function archivedLogIdFor(int $logId): ?int;
 }
