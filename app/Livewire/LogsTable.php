@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Enums\Severity;
 use App\Services\Contracts\LogServiceInterface;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -14,41 +15,57 @@ class LogsTable extends Component
 
     public string $searchInput = '';
     public ?string $severityInput = null;
-    public ?string $archivedInput = null;
+    public ?string $archivedInput = 'not_archived';
     public ?string $resolvedInput = null;
 
     // filtros aplicados (ya validados)
-    public ?string $search = null;
+    #[Url(as: 'search', except: '')]
+    public string $search = '';
+
+    #[Url(as: 'severity', except: null)]
     public ?string $severity = null;
-    public ?string $archived = null;
+
+    #[Url(as: 'archived', except: 'not_archived')]
+    public string $archived = 'not_archived';
+
+    #[Url(as: 'resolved', except: null)]
     public ?string $resolved = null;
 
     public function mount(): void
     {
-        $querySeverity = request()->query('severity');
-
-        if (!is_string($querySeverity) || $querySeverity === '') {
-            return;
+        // Backward compatibility for old URLs generated with archived=true
+        if ($this->archived === 'true') {
+            $this->archived = 'all';
         }
 
-        if (!in_array($querySeverity, Severity::values(), true)) {
-            return;
+        if ($this->severity !== null && !in_array($this->severity, Severity::values(), true)) {
+            $this->severity = null;
         }
 
-        $this->severityInput = $querySeverity;
-        $this->severity = $querySeverity;
+        if (!in_array($this->archived, ['archived', 'not_archived', 'all'], true)) {
+            $this->archived = 'not_archived';
+        }
+
+        if ($this->resolved !== null && !in_array($this->resolved, ['resolved', 'unresolved'], true)) {
+            $this->resolved = null;
+        }
+
+        $this->searchInput = $this->search;
+        $this->severityInput = $this->severity;
+        $this->archivedInput = $this->archived === 'all' ? null : $this->archived;
+        $this->resolvedInput = $this->resolved;
     }
 
     public function resetFilters(): void
     {
         $this->searchInput = '';
         $this->severityInput = null;
-        $this->archivedInput = null;
+        $this->archivedInput = 'not_archived';
         $this->resolvedInput = null;
 
-        $this->search = null;
+        $this->search = '';
         $this->severity = null;
-        $this->archived = null;
+        $this->archived = 'not_archived';
         $this->resolved = null;
 
         $this->resetPage();
@@ -77,10 +94,10 @@ class LogsTable extends Component
 
         $this->search = $validated['searchInput'] !== null && $validated['searchInput'] !== ''
             ? trim($validated['searchInput'])
-            : null;
+            : '';
 
         $this->severity = $validated['severityInput'] ?: null;
-        $this->archived = $validated['archivedInput'] ?: null;
+        $this->archived = $validated['archivedInput'] ?: 'all';
         $this->resolved = $validated['resolvedInput'] ?: null;
 
         $this->resetPage();
@@ -88,10 +105,12 @@ class LogsTable extends Component
 
     public function render(): View
     {
+        $archivedFilter = $this->archived === 'all' ? null : $this->archived;
+
         $logs = app(LogServiceInterface::class)->searchAndFilter(
-            $this->search,
+            $this->search !== '' ? $this->search : null,
             $this->severity,
-            $this->archived,
+            $archivedFilter,
             $this->resolved,
             15
         );

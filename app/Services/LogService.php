@@ -7,6 +7,7 @@ use App\Models\Log;
 use App\Repositories\Contracts\LogRepositoryInterface;
 use App\Services\Contracts\LogServiceInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 
 class LogService implements LogServiceInterface
 {
@@ -47,38 +48,43 @@ class LogService implements LogServiceInterface
 
     public function dashboardSeverityCards(bool $includeArchived = false): array
     {
-        $severityKeys = Severity::values();
-        $bySeverity = $this->logRepository->severityResolvedCounts($includeArchived);
+        $cacheKey = sprintf('dashboard:severity-cards:%s', $includeArchived ? 'all' : 'active');
 
-        $cards = collect($severityKeys)
-            ->map(function (string $key) use ($bySeverity, $includeArchived): array {
-                $resolvedCount = (int) ($bySeverity[$key]['resolved'] ?? 0);
-                $unresolvedCount = (int) ($bySeverity[$key]['unresolved'] ?? 0);
+        return Cache::remember($cacheKey, now()->addSeconds(10), function () use ($includeArchived): array {
+            $severityKeys = Severity::values();
+            $bySeverity = $this->logRepository->severityResolvedCounts($includeArchived);
+            $totalLogsCount = $this->logRepository->logsCount($includeArchived);
 
-                return [
-                    'key' => $key,
-                    'count' => $resolvedCount + $unresolvedCount,
-                    'resolvedCount' => $resolvedCount,
-                    'unresolvedCount' => $unresolvedCount,
-                    'routeParams' => $includeArchived
-                        ? ['severity' => $key]
-                        : ['severity' => $key, 'archived' => 'not_archived'],
-                ];
-            })
-            ->values();
+            $cards = collect($severityKeys)
+                ->map(function (string $key) use ($bySeverity, $includeArchived): array {
+                    $resolvedCount = (int) ($bySeverity[$key]['resolved'] ?? 0);
+                    $unresolvedCount = (int) ($bySeverity[$key]['unresolved'] ?? 0);
 
-        $allResolved = (int) $cards->sum('resolvedCount');
-        $allUnresolved = (int) $cards->sum('unresolvedCount');
+                    return [
+                        'key' => $key,
+                        'count' => $resolvedCount + $unresolvedCount,
+                        'resolvedCount' => $resolvedCount,
+                        'unresolvedCount' => $unresolvedCount,
+                        'routeParams' => $includeArchived
+                            ? ['severity' => $key, 'archived' => 'all']
+                            : ['severity' => $key],
+                    ];
+                })
+                ->values();
 
-        $cards->prepend([
-            'key' => 'all',
-            'count' => $allResolved + $allUnresolved,
-            'resolvedCount' => $allResolved,
-            'unresolvedCount' => $allUnresolved,
-            'routeParams' => [],
-        ]);
+            $allResolved = (int) $cards->sum('resolvedCount');
+            $allUnresolved = (int) $cards->sum('unresolvedCount');
 
-        return $cards->all();
+            $cards->prepend([
+                'key' => 'all',
+                'count' => $totalLogsCount,
+                'resolvedCount' => $allResolved,
+                'unresolvedCount' => $allUnresolved,
+                'routeParams' => $includeArchived ? ['archived' => 'all'] : [],
+            ]);
+
+            return $cards->all();
+        });
     }
 
     public function archivedLogIdFor(int $logId): ?int

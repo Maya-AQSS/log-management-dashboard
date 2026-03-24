@@ -36,6 +36,11 @@ interface LogRepositoryInterface
     public function severityResolvedCounts(bool $includeArchived = false): array;
 
     /**
+     * Total logs count (COUNT(*)) for selected scope.
+     */
+    public function logsCount(bool $includeArchived = false): int;
+
+    /**
      * Devuelve el id de ArchivedLog asociado al log (matched_archived_log_id) o null si no está archivado.
      */
     public function archivedLogIdFor(int $logId): ?int;
