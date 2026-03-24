@@ -55,7 +55,6 @@ class PanelRoutingAndSecurityTest extends TestCase
             'file' => 'app/Jobs/Test.php',
             'line' => 12,
             'metadata' => json_encode(['context' => 'test']),
-            'matched_archived_log_id' => $archivedLog->id,
             'resolved' => false,
             'created_at' => now(),
         ]);
@@ -65,8 +64,8 @@ class PanelRoutingAndSecurityTest extends TestCase
             '/dashboard',
             '/logs',
             '/logs/' . $logId,
-            '/historico',
-            '/historico/' . $archivedLog->id,
+            '/archived-logs',
+            '/archived-logs/' . $archivedLog->id,
             '/error-codes',
             '/error-codes/' . $errorCode->id,
         ] as $uri) {
@@ -75,7 +74,7 @@ class PanelRoutingAndSecurityTest extends TestCase
 
         $this->get('/sse/logs')->assertUnauthorized();
 
-        $this->delete('/historico/' . $archivedLog->id)
+        $this->delete('/archived-logs/' . $archivedLog->id)
             ->assertRedirect('http://auth.example.com/login');
     }
 
@@ -89,8 +88,8 @@ class PanelRoutingAndSecurityTest extends TestCase
         $this->get('/dashboard')->assertOk()->assertViewIs('dashboard');
         $this->get('/logs')->assertOk()->assertViewIs('logs.index');
         $this->get('/logs/' . $logId)->assertOk()->assertViewIs('logs.show');
-        $this->get('/historico')->assertOk()->assertViewIs('archived-logs.index');
-        $this->get('/historico/' . $archivedLog->id)->assertOk()->assertViewIs('archived-logs.show');
+        $this->get('/archived-logs')->assertOk()->assertViewIs('archived-logs.index');
+        $this->get('/archived-logs/' . $archivedLog->id)->assertOk()->assertViewIs('archived-logs.show');
         $this->get('/error-codes')->assertOk()->assertViewIs('error-codes.index');
         $this->get('/error-codes/' . $errorCode->id)->assertOk()->assertViewIs('error-codes.show');
 
@@ -106,11 +105,11 @@ class PanelRoutingAndSecurityTest extends TestCase
         $intruder = User::factory()->create();
 
         $this->actingAs($intruder)
-            ->delete('/historico/' . $archivedLog->id)
+            ->delete('/archived-logs/' . $archivedLog->id)
             ->assertForbidden();
 
         $this->actingAs($owner)
-            ->delete('/historico/' . $archivedLog->id)
+            ->delete('/archived-logs/' . $archivedLog->id)
             ->assertRedirect(route('archived-logs.index'));
 
         $this->assertDatabaseMissing('archived_logs', [
@@ -165,12 +164,12 @@ class PanelRoutingAndSecurityTest extends TestCase
 
         $this->actingAs($user);
 
-        $this->expectException(\Illuminate\Auth\Access\AuthorizationException::class);
-
         Livewire::test(CommentThread::class, [
             'commentableType' => 'archived-log',
             'commentableId' => $archivedLog->id,
-        ])->call('deleteComment', $comment->id);
+        ])
+            ->call('deleteComment', $comment->id)
+            ->assertForbidden();
     }
 
     private function seedPanelRecords(): array
@@ -211,7 +210,6 @@ class PanelRoutingAndSecurityTest extends TestCase
             'file' => 'app/Jobs/Test.php',
             'line' => 12,
             'metadata' => json_encode(['context' => 'test']),
-            'matched_archived_log_id' => $archivedLog->id,
             'resolved' => false,
             'created_at' => now(),
         ]);
