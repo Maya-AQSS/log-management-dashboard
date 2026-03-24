@@ -324,7 +324,7 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 			this.$refs.imageInput?.click();
 		},
 
-		submitToWire(methodName) {
+		async submitToWire(methodName) {
 			console.log('[TipTap] submitToWire:start', {
 				instanceId: this.instanceId,
 				methodName,
@@ -357,15 +357,50 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 				return;
 			}
 
-			if (typeof this.$wire.call === 'function') {
-				console.log('[TipTap] submitToWire:calling-wire-call', { instanceId: this.instanceId, methodName });
-				this.$wire.call(methodName, latestHtml);
+			if (typeof this.$wire.$set === 'function') {
+				console.log('[TipTap] submitToWire:setting-wire-model', {
+					instanceId: this.instanceId,
+					wireModel: this.wireModel,
+				});
+
+				try {
+					await this.$wire.$set(this.wireModel, latestHtml);
+				} catch (error) {
+					console.error('[TipTap] submitToWire:wire-$set-rejected', {
+						instanceId: this.instanceId,
+						wireModel: this.wireModel,
+						error,
+					});
+					this.notifyError('No se pudo sincronizar el contenido del editor.');
+					return;
+				}
+			}
+
+			if (typeof this.$wire.$call === 'function') {
+				console.log('[TipTap] submitToWire:calling-wire-$call', { instanceId: this.instanceId, methodName });
+
+				try {
+					const result = await this.$wire.$call(methodName);
+					console.log('[TipTap] submitToWire:wire-$call-resolved', {
+						instanceId: this.instanceId,
+						methodName,
+						result,
+					});
+				} catch (error) {
+					console.error('[TipTap] submitToWire:wire-$call-rejected', {
+						instanceId: this.instanceId,
+						methodName,
+						error,
+					});
+					this.notifyError('La solicitud de guardado fallo. Revisa la consola y el log de Laravel.');
+				}
+
 				return;
 			}
 
 			if (typeof this.$wire[methodName] === 'function') {
 				console.log('[TipTap] submitToWire:calling-wire-method', { instanceId: this.instanceId, methodName });
-				this.$wire[methodName](latestHtml);
+				this.$wire[methodName]();
 				return;
 			}
 

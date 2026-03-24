@@ -8,6 +8,7 @@ use App\Models\ErrorCode;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Mews\Purifier\Facades\Purifier;
 use Throwable;
@@ -40,12 +41,8 @@ class CommentThread extends Component
         $this->resolveCommentableModel();
     }
 
-    public function addComment(string $rawContent = ''): void
+    public function addComment(): void
     {
-        if ($rawContent !== '') {
-            $this->content = $rawContent;
-        }
-
         $validated = $this->validate([
             'content' => ['required', 'string', 'min:3'],
         ]);
@@ -65,7 +62,15 @@ class CommentThread extends Component
             session()->flash('status', __('comments.flash.created'));
         } catch (Throwable $e) {
             report($e);
-            session()->flash('status', __('comments.flash.error'));
+            Log::error('comment.add.failed', [
+                'commentable_type' => $this->commentableType,
+                'commentable_id' => $this->commentableId,
+                'user_id' => auth()->id(),
+                'content_length' => strlen($this->content),
+                'message' => $e->getMessage(),
+            ]);
+
+            session()->flash('status', $this->errorStatus($e));
         }
     }
 
@@ -84,12 +89,8 @@ class CommentThread extends Component
         $this->editingContent = $comment->content;
     }
 
-    public function updateComment(string $rawContent = ''): void
+    public function updateComment(): void
     {
-        if ($rawContent !== '') {
-            $this->editingContent = $rawContent;
-        }
-
         $validated = $this->validate([
             'editingCommentId' => ['required', 'integer', 'exists:comments,id'],
             'editingContent' => ['required', 'string', 'min:3'],
@@ -110,7 +111,14 @@ class CommentThread extends Component
             session()->flash('status', __('comments.flash.updated'));
         } catch (Throwable $e) {
             report($e);
-            session()->flash('status', __('comments.flash.error'));
+            Log::error('comment.update.failed', [
+                'comment_id' => $validated['editingCommentId'] ?? null,
+                'user_id' => auth()->id(),
+                'content_length' => strlen($this->editingContent),
+                'message' => $e->getMessage(),
+            ]);
+
+            session()->flash('status', $this->errorStatus($e));
         }
     }
 
@@ -137,7 +145,13 @@ class CommentThread extends Component
             session()->flash('status', __('comments.flash.deleted'));
         } catch (Throwable $e) {
             report($e);
-            session()->flash('status', __('comments.flash.error'));
+            Log::error('comment.delete.failed', [
+                'comment_id' => $commentId,
+                'user_id' => auth()->id(),
+                'message' => $e->getMessage(),
+            ]);
+
+            session()->flash('status', $this->errorStatus($e));
         }
     }
 
@@ -289,5 +303,14 @@ class CommentThread extends Component
             'archived-log' => ArchivedLog::class,
             'error-code' => ErrorCode::class,
         ];
+    }
+
+    private function errorStatus(Throwable $e): string
+    {
+        if (!config('app.debug')) {
+            return __('comments.flash.error');
+        }
+
+        return __('comments.flash.error').': '.$e->getMessage();
     }
 }
