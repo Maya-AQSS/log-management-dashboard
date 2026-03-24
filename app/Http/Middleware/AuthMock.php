@@ -21,7 +21,7 @@ class AuthMock
         }
 
         if (!Auth::check()) {
-            Auth::loginUsingId((int) env('AUTH_MOCK_USER_ID', 1));
+            Auth::loginUsingId((int) config('services.auth_gateway.mock_user_id', 1));
         }
 
         return $next($request);

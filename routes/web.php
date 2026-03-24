@@ -41,7 +41,7 @@ Route::middleware(['auth'])->group(function () {
         $request->session()->regenerateToken();
 
         return redirect()->away(
-            rtrim((string) env('AUTH_EXTERNAL_URL', 'http://auth.example.com'), '/') . '/login'
+            rtrim((string) config('services.auth_gateway.external_url', 'http://auth.example.com'), '/') . '/login'
         );
     })->name('logout');
 
