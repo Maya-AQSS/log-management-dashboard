@@ -15,7 +15,7 @@ class LogsTable extends Component
 
     public string $searchInput = '';
     public ?string $severityInput = null;
-    public ?string $archivedInput = 'not_archived';
+    public ?string $archivedInput = null;
     public ?string $resolvedInput = null;
 
     // filtros aplicados (ya validados)
@@ -25,8 +25,8 @@ class LogsTable extends Component
     #[Url(as: 'severity', except: null)]
     public ?string $severity = null;
 
-    #[Url(as: 'archived', except: 'not_archived')]
-    public string $archived = 'not_archived';
+    #[Url(as: 'archived', except: 'all')]
+    public string $archived = 'all';
 
     #[Url(as: 'resolved', except: null)]
     public ?string $resolved = null;
@@ -43,7 +43,7 @@ class LogsTable extends Component
         }
 
         if (!in_array($this->archived, ['archived', 'not_archived', 'all'], true)) {
-            $this->archived = 'not_archived';
+            $this->archived = 'all';
         }
 
         if ($this->resolved !== null && !in_array($this->resolved, ['resolved', 'unresolved'], true)) {
@@ -60,12 +60,12 @@ class LogsTable extends Component
     {
         $this->searchInput = '';
         $this->severityInput = null;
-        $this->archivedInput = 'not_archived';
+        $this->archivedInput = null;
         $this->resolvedInput = null;
 
         $this->search = '';
         $this->severity = null;
-        $this->archived = 'not_archived';
+        $this->archived = 'all';
         $this->resolved = null;
 
         $this->resetPage();
