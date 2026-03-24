@@ -69,7 +69,6 @@ function formatBytes(bytes) {
 
 window.tiptapEditor = function tiptapEditor(options = {}) {
 	const {
-		wireModel = 'commentContent',
 		initialValue = '',
 		maxCommentBytes = 10 * 1024 * 1024,
 		messages = {},
@@ -87,36 +86,30 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 		editor: null,
 		html: initialValue || '',
 		isEmpty: true,
-		wireModel,
 		maxCommentBytes,
 		resetHandler: null,
 		initialized: false,
 
+		getActiveEditor() {
+			const editor = this.editor;
+
+			if (!editor || editor.isDestroyed) {
+				return null;
+			}
+
+			return editor;
+		},
+
 		init() {
 			if (this.initialized) {
-				console.log('[TipTap] init:skip-already-initialized', {
-					instanceId: this.instanceId,
-					wireModel: this.wireModel,
-				});
 				return;
 			}
 
 			if (this.$el.__tiptapController && this.$el.__tiptapController !== this) {
-				console.log('[TipTap] init:destroy-stale-controller', {
-					instanceId: this.instanceId,
-					staleInstanceId: this.$el.__tiptapController.instanceId,
-					wireModel: this.wireModel,
-				});
-
 				this.$el.__tiptapController.destroy();
 			}
 
 			if (this.$refs.editorEl.__tiptapEditor) {
-				console.log('[TipTap] init:destroy-stale-editor', {
-					instanceId: this.instanceId,
-					wireModel: this.wireModel,
-				});
-
 				this.$refs.editorEl.__tiptapEditor.destroy();
 				this.$refs.editorEl.__tiptapEditor = null;
 			}
@@ -125,12 +118,6 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 			this.$el.__tiptapController = this;
 
 			const self = this;
-
-			console.log('[TipTap] init', {
-				instanceId: this.instanceId,
-				wireModel: this.wireModel,
-				initialValueLength: this.html.length,
-			});
 
 			this.editor = new Editor({
 				element: this.$refs.editorEl,
@@ -154,22 +141,10 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 					self.html = editor.getHTML();
 					self.isEmpty = editor.isEmpty;
 					self.$refs.editorEl.__tiptapEditor = editor;
-					console.log('[TipTap] onCreate', {
-						instanceId: self.instanceId,
-						wireModel: self.wireModel,
-						htmlLength: self.html.length,
-						preview: self.html.slice(0, 120),
-					});
 				},
 				onUpdate({ editor }) {
 					self.html = editor.getHTML();
 					self.isEmpty = editor.isEmpty;
-					console.log('[TipTap] onUpdate', {
-						instanceId: self.instanceId,
-						wireModel: self.wireModel,
-						htmlLength: self.html.length,
-						preview: self.html.slice(0, 120),
-					});
 				},
 			});
 
@@ -270,7 +245,12 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 		},
 
 		promptForLink() {
-			const currentHref = this.editor?.getAttributes('link')?.href || '';
+			const editor = this.getActiveEditor();
+			if (!editor) {
+				return;
+			}
+
+			const currentHref = editor.getAttributes('link')?.href || '';
 			const value = window.prompt('URL', currentHref);
 
 			if (value === null) {
@@ -280,7 +260,7 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 			const normalized = value.trim();
 
 			if (normalized === '') {
-				this.editor?.chain().focus().unsetLink().run();
+				editor.chain().unsetLink().run();
 				return;
 			}
 
@@ -289,34 +269,43 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 				return;
 			}
 
-			this.editor?.chain().focus().extendMarkRange('link').setLink({ href: normalized }).run();
+			editor.chain().extendMarkRange('link').setLink({ href: normalized }).run();
 		},
 
 		execCommand(command) {
+			const editor = this.getActiveEditor();
+			if (!editor) {
+				return;
+			}
+
+			try {
 			switch (command) {
 				case 'bold':
-					this.editor?.chain().focus().toggleBold().run();
+					editor.commands.toggleBold();
 					break;
 				case 'italic':
-					this.editor?.chain().focus().toggleItalic().run();
+					editor.commands.toggleItalic();
 					break;
 				case 'strike':
-					this.editor?.chain().focus().toggleStrike().run();
+					editor.commands.toggleStrike();
 					break;
 				case 'h2':
-					this.editor?.chain().focus().toggleHeading({ level: 2 }).run();
+					editor.commands.toggleHeading({ level: 2 });
 					break;
 				case 'bulletList':
-					this.editor?.chain().focus().toggleBulletList().run();
+					editor.commands.toggleBulletList();
 					break;
 				case 'orderedList':
-					this.editor?.chain().focus().toggleOrderedList().run();
+					editor.commands.toggleOrderedList();
 					break;
 				case 'link':
 					this.promptForLink();
 					break;
 				default:
 					break;
+			}
+			} catch (_error) {
+				// Avoid crashing the UI if a command races with teardown.
 			}
 		},
 
@@ -325,16 +314,7 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 		},
 
 		async submitToWire(methodName) {
-			console.log('[TipTap] submitToWire:start', {
-				instanceId: this.instanceId,
-				methodName,
-				wireModel: this.wireModel,
-				hasWire: Boolean(this.$wire),
-				hasEditor: Boolean(this.editor),
-			});
-
 			if (!this.$wire) {
-				console.log('[TipTap] submitToWire:missing-wire', { methodName });
 				this.notifyError('No se pudo enviar el comentario. Recarga la pagina e intenta de nuevo.');
 				return;
 			}
@@ -342,72 +322,20 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 			const latestHtml = this.editor?.getHTML() || this.html || '';
 			this.html = latestHtml;
 
-			console.log('[TipTap] submitToWire:html-ready', {
-				instanceId: this.instanceId,
-				methodName,
-				htmlLength: latestHtml.length,
-				preview: latestHtml.slice(0, 120),
-			});
-
 			if (!this.validateCommentSize()) {
-				console.log('[TipTap] submitToWire:comment-too-large', {
-					methodName,
-					htmlLength: latestHtml.length,
-				});
 				return;
 			}
 
-			if (typeof this.$wire.$set === 'function') {
-				console.log('[TipTap] submitToWire:setting-wire-model', {
-					instanceId: this.instanceId,
-					wireModel: this.wireModel,
-				});
-
-				try {
-					await this.$wire.$set(this.wireModel, latestHtml);
-				} catch (error) {
-					console.error('[TipTap] submitToWire:wire-$set-rejected', {
-						instanceId: this.instanceId,
-						wireModel: this.wireModel,
-						error,
-					});
-					this.notifyError('No se pudo sincronizar el contenido del editor.');
-					return;
-				}
-			}
-
 			if (typeof this.$wire.$call === 'function') {
-				console.log('[TipTap] submitToWire:calling-wire-$call', { instanceId: this.instanceId, methodName });
-
 				try {
-					const result = await this.$wire.$call(methodName);
-					console.log('[TipTap] submitToWire:wire-$call-resolved', {
-						instanceId: this.instanceId,
-						methodName,
-						result,
-					});
-				} catch (error) {
-					console.error('[TipTap] submitToWire:wire-$call-rejected', {
-						instanceId: this.instanceId,
-						methodName,
-						error,
-					});
+					await this.$wire.$call(methodName, latestHtml);
+				} catch (_error) {
 					this.notifyError('La solicitud de guardado fallo. Revisa la consola y el log de Laravel.');
 				}
 
 				return;
 			}
 
-			if (typeof this.$wire[methodName] === 'function') {
-				console.log('[TipTap] submitToWire:calling-wire-method', { instanceId: this.instanceId, methodName });
-				this.$wire[methodName]();
-				return;
-			}
-
-			console.log('[TipTap] submitToWire:no-callable-method', {
-				methodName,
-				availableKeys: Object.keys(this.$wire || {}),
-			});
 			this.notifyError('No se pudo ejecutar la accion de guardado.');
 		},
 

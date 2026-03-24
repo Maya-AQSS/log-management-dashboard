@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\ArchivedLog;
 use App\Models\Comment;
 use App\Models\ErrorCode;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -41,15 +42,17 @@ class CommentThread extends Component
         $this->resolveCommentableModel();
     }
 
-    public function addComment(): void
+    public function addComment(string $htmlContent): void
     {
-        $validated = $this->validate([
-            'content' => ['required', 'string', 'min:3'],
-        ]);
+        dd("Estoy en addComment.");
+    /*
+       try {
+            $validated = $this->validate([
+                'htmlContent' => ['required', 'string', 'min:3'],
+            ], [], ['htmlContent' => 'content']);
 
-        $sanitizedContent = $this->sanitizeAndValidateContent($validated['content'], 'content');
+            $sanitizedContent = $this->sanitizeAndValidateContent($validated['htmlContent'], 'content');
 
-        try {
             $this->resolveCommentableModel()
                 ->comments()
                 ->create([
@@ -60,6 +63,10 @@ class CommentThread extends Component
             $this->reset('content');
             $this->dispatch('comment-editor-reset');
             session()->flash('status', __('comments.flash.created'));
+        } 
+         
+        catch (ValidationException $e) {
+            throw $e;
         } catch (Throwable $e) {
             report($e);
             Log::error('comment.add.failed', [
@@ -72,6 +79,8 @@ class CommentThread extends Component
 
             session()->flash('status', $this->errorStatus($e));
         }
+     */
+       
     }
 
     public function startEditing(int $commentId): void
@@ -89,26 +98,30 @@ class CommentThread extends Component
         $this->editingContent = $comment->content;
     }
 
-    public function updateComment(): void
+    public function updateComment(int $commentId, string $htmlContent): void
     {
-        $validated = $this->validate([
-            'editingCommentId' => ['required', 'integer', 'exists:comments,id'],
-            'editingContent' => ['required', 'string', 'min:3'],
-        ]);
-
-        $sanitizedContent = $this->sanitizeAndValidateContent($validated['editingContent'], 'editingContent');
-
-        $comment = $this->findCommentOrFail($validated['editingCommentId']);
-
-        $this->authorize('update', $comment);
-
         try {
+            $validated = $this->validate([
+                'commentId' => ['required', 'integer', 'exists:comments,id'],
+                'htmlContent' => ['required', 'string', 'min:3'],
+            ], [], ['commentId' => 'comment', 'htmlContent' => 'content']);
+
+            $sanitizedContent = $this->sanitizeAndValidateContent($validated['htmlContent'], 'content');
+
+            $comment = $this->findCommentOrFail($validated['commentId']);
+
+            $this->authorize('update', $comment);
+
             $comment->update([
                 'content' => $sanitizedContent,
             ]);
 
             $this->cancelEditing();
             session()->flash('status', __('comments.flash.updated'));
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (AuthorizationException $e) {
+            throw $e;
         } catch (Throwable $e) {
             report($e);
             Log::error('comment.update.failed', [
@@ -124,17 +137,17 @@ class CommentThread extends Component
 
     public function deleteComment(int $commentId): void
     {
-        $this->commentIdToDelete = $commentId;
-
-        $validated = $this->validate([
-            'commentIdToDelete' => ['required', 'integer', 'exists:comments,id'],
-        ]);
-
-        $comment = $this->findCommentOrFail($validated['commentIdToDelete']);
-
-        $this->authorize('delete', $comment);
-
         try {
+            $this->commentIdToDelete = $commentId;
+
+            $validated = $this->validate([
+                'commentIdToDelete' => ['required', 'integer', 'exists:comments,id'],
+            ]);
+
+            $comment = $this->findCommentOrFail($validated['commentIdToDelete']);
+
+            $this->authorize('delete', $comment);
+
             $comment->delete();
 
             if ($this->editingCommentId === $commentId) {
@@ -143,6 +156,10 @@ class CommentThread extends Component
 
             $this->reset('commentIdToDelete');
             session()->flash('status', __('comments.flash.deleted'));
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (AuthorizationException $e) {
+            throw $e;
         } catch (Throwable $e) {
             report($e);
             Log::error('comment.delete.failed', [

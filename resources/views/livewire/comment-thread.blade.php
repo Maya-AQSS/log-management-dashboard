@@ -30,63 +30,63 @@
         margin-bottom: 0.25rem;
     }
 </style>
-
-<div class="mt-4 space-y-4">
-    <div
-        wire:key="comment-editor-create"
-        class="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4"
-        x-data="tiptapEditor({
-            wireModel: 'content',
-            initialValue: @js($content),
-            messages: {
-                imageTooLarge: @js(__('comments.editor.image_too_large')),
-                imageInvalidType: @js(__('comments.editor.image_invalid_type')),
-                commentTooLarge: @js(__('comments.editor.comment_too_large')),
-                invalidLink: @js(__('comments.editor.invalid_link')),
-            },
-        })"
-        x-init="init()"
-        x-on:paste="handlePaste($event)"
-        x-on:drop="handleDrop($event)"
-        x-on:dragover.prevent
-    >
-        <label class="block text-sm font-medium text-slate-700">{{ __('comments.form.new_comment') }}</label>
-
-        <div wire:ignore class="space-y-2">
-            <x-rte-toolbar />
-
-            <div class="rounded-xl border border-slate-300 bg-white p-3 shadow-sm">
-                <div class="cursor-text">
-                    <div
-                        x-ref="editorEl"
-                        data-placeholder="{{ __('comments.editor.placeholder') }}"
-                    ></div>
-                </div>
-            </div>
-
-            <input
-                x-ref="imageInput"
-                type="file"
-                class="hidden"
-                accept="image/png,image/jpeg,image/gif,image/webp"
-                x-on:change="onImageInputChange($event)"
-            >
-        </div>
-
-        <p class="text-xs text-slate-500">{{ __('comments.editor.hint') }}</p>
-
-        @error('content')
-            <p class="text-sm text-rose-600">{{ $message }}</p>
-        @enderror
-
-        <button
-            type="button"
-            x-on:click.prevent.stop="console.log('[TipTap] save-button:clicked'); submitToWire('addComment')"
-            class="rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]"
+<div>
+    <div class="mt-4 space-y-4">
+        <div
+                wire:key="comment-editor-create"
+                class="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                x-data="tiptapEditor({
+                    initialValue: @entangle('content'), // <-- Conectamos Livewire aquí
+                    messages: {
+                        imageTooLarge: @js(__('comments.editor.image_too_large')),
+                        imageInvalidType: @js(__('comments.editor.image_invalid_type')),
+                        commentTooLarge: @js(__('comments.editor.comment_too_large')),
+                        invalidLink: @js(__('comments.editor.invalid_link')),
+                    },
+                })"
+                x-init="init()"
+                x-on:paste="handlePaste($event)"
+                x-on:drop="handleDrop($event)"
+                x-on:dragover.prevent
         >
-            {{ __('comments.buttons.save') }}
+        <label class="block text-sm font-medium text-slate-700">{{ __('comments.form.new_comment') }}</label>
+        
+                <div wire:ignore class="space-y-2">
+        <x-rte-toolbar />
+        
+                    <div class="rounded-xl border border-slate-300 bg-white p-3 shadow-sm">
+        <div class="cursor-text">
+        <div
+                                x-ref="editorEl"
+                                data-placeholder="{{ __('comments.editor.placeholder') }}"
+        ></div>
+        </div>
+        </div>
+        
+                    <input
+                        x-ref="imageInput"
+                        type="file"
+                        class="hidden"
+                        accept="image/png,image/jpeg,image/gif,image/webp"
+                        x-on:change="onImageInputChange($event)"
+        >
+        </div>
+        
+                <p class="text-xs text-slate-500">{{ __('comments.editor.hint') }}</p>
+        
+                @error('content')
+        <p class="text-sm text-rose-600">{{ $message }}</p>
+                @enderror
+        
+                <button
+                    type="button"
+                    x-on:click.prevent="$wire.addComment()"
+                    class="rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]"
+        >
+                    {{ __('comments.buttons.save') }}
         </button>
-    </div>
+        </div>
+        </div>
 
     <div class="space-y-3">
         @forelse ($comments as $comment)
@@ -114,7 +114,6 @@
                         wire:key="comment-editor-edit-{{ $comment->id }}"
                         class="mt-3 space-y-3"
                         x-data="tiptapEditor({
-                            wireModel: 'editingContent',
                             initialValue: @js($editingContent),
                             messages: {
                                 imageTooLarge: @js(__('comments.editor.image_too_large')),
@@ -155,15 +154,13 @@
 
                         <div class="flex gap-2">
                             <button
-                                type="button"
-                                x-on:click.prevent.stop="console.log('[TipTap] update-button:clicked'); submitToWire('updateComment')"
-                                class="rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]"
+
+                                type="button" x-on:click.prevent="$wire.addComment()" class="rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]"
                             >
-                                {{ __('comments.buttons.update') }}
+
+                                {{ __('comments.buttons.save') }}
                             </button>
-                            <button type="button" wire:click="cancelEditing" class="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-                                {{ __('comments.buttons.cancel') }}
-                            </button>
+ 
                         </div>
                     </div>
                 @else
@@ -176,4 +173,5 @@
             </p>
         @endforelse
     </div>
+</div>
 </div>
