@@ -51,10 +51,7 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
 
     public function delete(ArchivedLog $archivedLog): void
     {
-        DB::transaction(function () use ($archivedLog): void {
-            $archivedLog->logs()->update(['matched_archived_log_id' => null]);
-            $archivedLog->delete();
-        });
+        $archivedLog->delete();
     }
 
     public function archiveFromLogId(int $logId, int $archivedById): ArchivedLog
@@ -86,7 +83,7 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
 
             if ($updated !== 1) {
                 // Evita inconsistencias si algo cambió entre lecturas
-                $archivedLog->delete();
+                $archivedLog->forceDelete();
                 abort(409, 'Log already archived.');
             }
 
