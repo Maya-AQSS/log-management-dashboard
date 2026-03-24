@@ -33,6 +33,7 @@
 
 <div class="mt-4 space-y-4">
     <div
+        wire:key="comment-editor-create"
         class="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4"
         x-data="tiptapEditor({
             wireModel: 'content',
@@ -55,7 +56,7 @@
             <x-rte-toolbar />
 
             <div class="rounded-xl border border-slate-300 bg-white p-3 shadow-sm">
-                <div class="cursor-text" x-on:click="editor?.chain().focus().run()">
+                <div class="cursor-text">
                     <div
                         x-ref="editorEl"
                         data-placeholder="{{ __('comments.editor.placeholder') }}"
@@ -80,7 +81,7 @@
 
         <button
             type="button"
-            x-on:click="$wire.addComment(html)"
+            x-on:click.prevent.stop="console.log('[TipTap] save-button:clicked'); submitToWire('addComment')"
             class="rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]"
         >
             {{ __('comments.buttons.save') }}
@@ -110,6 +111,7 @@
 
                 @if ($editingCommentId === $comment->id)
                     <div
+                        wire:key="comment-editor-edit-{{ $comment->id }}"
                         class="mt-3 space-y-3"
                         x-data="tiptapEditor({
                             wireModel: 'editingContent',
@@ -130,7 +132,7 @@
                             <x-rte-toolbar />
 
                             <div class="rounded-xl border border-slate-300 bg-white p-3 shadow-sm">
-                                <div class="cursor-text" x-on:click="editor?.chain().focus().run()">
+                                <div class="cursor-text">
                                     <div
                                         x-ref="editorEl"
                                         data-placeholder="{{ __('comments.editor.placeholder') }}"
@@ -154,7 +156,7 @@
                         <div class="flex gap-2">
                             <button
                                 type="button"
-                                x-on:click="$wire.updateComment(html)"
+                                x-on:click.prevent.stop="console.log('[TipTap] update-button:clicked'); submitToWire('updateComment')"
                                 class="rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]"
                             >
                                 {{ __('comments.buttons.update') }}

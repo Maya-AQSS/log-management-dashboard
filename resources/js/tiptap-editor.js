@@ -1,9 +1,9 @@
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
-import Link from '@tiptap/extension-link';
 
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+let tiptapInstanceSequence = 0;
 
 const FILE_SIGNATURES = [
 	{ mime: 'image/png', bytes: [0x89, 0x50, 0x4e, 0x47] },
@@ -83,24 +83,64 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 	};
 
 	return {
+		instanceId: ++tiptapInstanceSequence,
 		editor: null,
 		html: initialValue || '',
 		isEmpty: true,
 		wireModel,
 		maxCommentBytes,
 		resetHandler: null,
+		initialized: false,
 
 		init() {
+			if (this.initialized) {
+				console.log('[TipTap] init:skip-already-initialized', {
+					instanceId: this.instanceId,
+					wireModel: this.wireModel,
+				});
+				return;
+			}
+
+			if (this.$el.__tiptapController && this.$el.__tiptapController !== this) {
+				console.log('[TipTap] init:destroy-stale-controller', {
+					instanceId: this.instanceId,
+					staleInstanceId: this.$el.__tiptapController.instanceId,
+					wireModel: this.wireModel,
+				});
+
+				this.$el.__tiptapController.destroy();
+			}
+
+			if (this.$refs.editorEl.__tiptapEditor) {
+				console.log('[TipTap] init:destroy-stale-editor', {
+					instanceId: this.instanceId,
+					wireModel: this.wireModel,
+				});
+
+				this.$refs.editorEl.__tiptapEditor.destroy();
+				this.$refs.editorEl.__tiptapEditor = null;
+			}
+
+			this.initialized = true;
+			this.$el.__tiptapController = this;
+
 			const self = this;
+
+			console.log('[TipTap] init', {
+				instanceId: this.instanceId,
+				wireModel: this.wireModel,
+				initialValueLength: this.html.length,
+			});
 
 			this.editor = new Editor({
 				element: this.$refs.editorEl,
 				extensions: [
-					StarterKit,
-					Link.configure({
-						openOnClick: false,
-						autolink: true,
-						protocols: ['http', 'https'],
+					StarterKit.configure({
+						link: {
+							openOnClick: false,
+							autolink: true,
+							protocols: ['http', 'https'],
+						},
 					}),
 					Image,
 				],
@@ -113,12 +153,23 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 				onCreate({ editor }) {
 					self.html = editor.getHTML();
 					self.isEmpty = editor.isEmpty;
-					self.syncToLivewire();
+					self.$refs.editorEl.__tiptapEditor = editor;
+					console.log('[TipTap] onCreate', {
+						instanceId: self.instanceId,
+						wireModel: self.wireModel,
+						htmlLength: self.html.length,
+						preview: self.html.slice(0, 120),
+					});
 				},
 				onUpdate({ editor }) {
 					self.html = editor.getHTML();
 					self.isEmpty = editor.isEmpty;
-					self.syncToLivewire();
+					console.log('[TipTap] onUpdate', {
+						instanceId: self.instanceId,
+						wireModel: self.wireModel,
+						htmlLength: self.html.length,
+						preview: self.html.slice(0, 120),
+					});
 				},
 			});
 
@@ -127,24 +178,17 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 					return;
 				}
 
-				this.editor.commands.clearContent(true);
-				this.editor.commands.focus();
+				try {
+					this.editor.commands.clearContent(true);
+					this.html = this.editor.getHTML();
+					this.isEmpty = this.editor.isEmpty;
+				} catch (_error) {
+					// Editor may be in teardown while Livewire morphs the DOM.
+				}
 			};
 
 			this.$el.addEventListener('comment-editor-reset', this.resetHandler);
 			window.addEventListener('comment-editor-reset', this.resetHandler);
-		},
-
-		syncToLivewire() {
-			if (!this.$wire) {
-				return;
-			}
-
-			if (!this.validateCommentSize()) {
-				return;
-			}
-
-			this.$wire.set(this.wireModel, this.html);
 		},
 
 		validateCommentSize() {
@@ -189,6 +233,9 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 					title: escapeHtml(file.name || 'image'),
 				})
 				.run();
+
+			this.html = this.editor?.getHTML() || this.html;
+			this.validateCommentSize();
 		},
 
 		async handleFiles(fileList) {
@@ -277,6 +324,58 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 			this.$refs.imageInput?.click();
 		},
 
+		submitToWire(methodName) {
+			console.log('[TipTap] submitToWire:start', {
+				instanceId: this.instanceId,
+				methodName,
+				wireModel: this.wireModel,
+				hasWire: Boolean(this.$wire),
+				hasEditor: Boolean(this.editor),
+			});
+
+			if (!this.$wire) {
+				console.log('[TipTap] submitToWire:missing-wire', { methodName });
+				this.notifyError('No se pudo enviar el comentario. Recarga la pagina e intenta de nuevo.');
+				return;
+			}
+
+			const latestHtml = this.editor?.getHTML() || this.html || '';
+			this.html = latestHtml;
+
+			console.log('[TipTap] submitToWire:html-ready', {
+				instanceId: this.instanceId,
+				methodName,
+				htmlLength: latestHtml.length,
+				preview: latestHtml.slice(0, 120),
+			});
+
+			if (!this.validateCommentSize()) {
+				console.log('[TipTap] submitToWire:comment-too-large', {
+					methodName,
+					htmlLength: latestHtml.length,
+				});
+				return;
+			}
+
+			if (typeof this.$wire.call === 'function') {
+				console.log('[TipTap] submitToWire:calling-wire-call', { instanceId: this.instanceId, methodName });
+				this.$wire.call(methodName, latestHtml);
+				return;
+			}
+
+			if (typeof this.$wire[methodName] === 'function') {
+				console.log('[TipTap] submitToWire:calling-wire-method', { instanceId: this.instanceId, methodName });
+				this.$wire[methodName](latestHtml);
+				return;
+			}
+
+			console.log('[TipTap] submitToWire:no-callable-method', {
+				methodName,
+				availableKeys: Object.keys(this.$wire || {}),
+			});
+			this.notifyError('No se pudo ejecutar la accion de guardado.');
+		},
+
 		async onImageInputChange(event) {
 			await this.handleFiles(event.target?.files || []);
 			event.target.value = '';
@@ -293,8 +392,17 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 				window.removeEventListener('comment-editor-reset', this.resetHandler);
 			}
 
+			if (this.$refs?.editorEl && this.$refs.editorEl.__tiptapEditor === this.editor) {
+				this.$refs.editorEl.__tiptapEditor = null;
+			}
+
+			if (this.$el.__tiptapController === this) {
+				this.$el.__tiptapController = null;
+			}
+
 			this.editor?.destroy();
 			this.editor = null;
+			this.initialized = false;
 		},
 	};
 };
