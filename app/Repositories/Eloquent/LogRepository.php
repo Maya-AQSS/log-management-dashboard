@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Enums\Severity;
 use App\Models\Log;
 use App\Repositories\Contracts\LogRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -64,20 +65,37 @@ class LogRepository implements LogRepositoryInterface
             ->paginate($perPage);
     }
 
-    public function severityCounts(): array
+    public function severityResolvedCounts(bool $includeArchived = false): array
     {
-        $severities = ['critical', 'high', 'medium', 'low', 'other'];
+        $severities = Severity::values();
 
-        $counts = Log::query()
-            ->whereNull('matched_archived_log_id')
-            ->selectRaw('severity, count(*) as count')
+        $rows = Log::query()
+            ->when(!$includeArchived, fn ($q) => $q->whereNull('matched_archived_log_id'))
+            ->selectRaw('severity, resolved, count(*) as count')
             ->whereIn('severity', $severities)
-            ->groupBy('severity')
-            ->pluck('count', 'severity');
+            ->groupBy('severity', 'resolved')
+            ->get();
 
         $result = [];
         foreach ($severities as $severity) {
-            $result[$severity] = (int) ($counts[$severity] ?? 0);
+            $result[$severity] = [
+                'resolved' => 0,
+                'unresolved' => 0,
+                'total' => 0,
+            ];
+        }
+
+        foreach ($rows as $row) {
+            $severity = (string) $row->severity;
+            $count = (int) $row->count;
+            $bucket = (bool) $row->resolved ? 'resolved' : 'unresolved';
+
+            if (!isset($result[$severity])) {
+                continue;
+            }
+
+            $result[$severity][$bucket] += $count;
+            $result[$severity]['total'] += $count;
         }
 
         return $result;

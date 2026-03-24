@@ -21,12 +21,12 @@
                     wire:model.defer="severityInput"
                     class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
                 >
-                    <option value="">{{ __('logs.filters.severity_all') }}</option>
-                    <option value="critical">{{ __('logs.filters.severity_critical') }}</option>
-                    <option value="high">{{ __('logs.filters.severity_high') }}</option>
-                    <option value="medium">{{ __('logs.filters.severity_medium') }}</option>
-                    <option value="low">{{ __('logs.filters.severity_low') }}</option>
-                    <option value="other">{{ __('logs.filters.severity_other') }}</option>
+                    <option value="">{{ __('severity.all') }}</option>
+                    <option value="critical">{{ __('severity.critical') }}</option>
+                    <option value="high">{{ __('severity.high') }}</option>
+                    <option value="medium">{{ __('severity.medium') }}</option>
+                    <option value="low">{{ __('severity.low') }}</option>
+                    <option value="other">{{ __('severity.other') }}</option>
                 </select>
             </div>
 

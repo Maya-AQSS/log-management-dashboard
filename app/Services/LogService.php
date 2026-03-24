@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\Severity;
 use App\Models\Log;
 use App\Repositories\Contracts\LogRepositoryInterface;
 use App\Services\Contracts\LogServiceInterface;
@@ -44,9 +45,40 @@ class LogService implements LogServiceInterface
         return $this->logRepository->searchAndFilter($search, $severity, $archived, $resolved, $perPage);
     }
 
-    public function severityCounts(): array
+    public function dashboardSeverityCards(bool $includeArchived = false): array
     {
-        return $this->logRepository->severityCounts();
+        $severityKeys = Severity::values();
+        $bySeverity = $this->logRepository->severityResolvedCounts($includeArchived);
+
+        $cards = collect($severityKeys)
+            ->map(function (string $key) use ($bySeverity, $includeArchived): array {
+                $resolvedCount = (int) ($bySeverity[$key]['resolved'] ?? 0);
+                $unresolvedCount = (int) ($bySeverity[$key]['unresolved'] ?? 0);
+
+                return [
+                    'key' => $key,
+                    'count' => $resolvedCount + $unresolvedCount,
+                    'resolvedCount' => $resolvedCount,
+                    'unresolvedCount' => $unresolvedCount,
+                    'routeParams' => $includeArchived
+                        ? ['severity' => $key]
+                        : ['severity' => $key, 'archived' => 'not_archived'],
+                ];
+            })
+            ->values();
+
+        $allResolved = (int) $cards->sum('resolvedCount');
+        $allUnresolved = (int) $cards->sum('unresolvedCount');
+
+        $cards->prepend([
+            'key' => 'all',
+            'count' => $allResolved + $allUnresolved,
+            'resolvedCount' => $allResolved,
+            'unresolvedCount' => $allUnresolved,
+            'routeParams' => [],
+        ]);
+
+        return $cards->all();
     }
 
     public function archivedLogIdFor(int $logId): ?int

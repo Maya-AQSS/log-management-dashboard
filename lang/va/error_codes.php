@@ -22,11 +22,5 @@ return [
 
     'filters' => [
         'severity' => 'Severitat',
-        'severity_all' => 'Totes',
-        'severity_critical' => 'Crítica',
-        'severity_high' => 'Alta',
-        'severity_medium' => 'Mitjana',
-        'severity_low' => 'Baixa',
-        'severity_other' => 'Altra',
     ],
 ];

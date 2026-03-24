@@ -1,23 +1,33 @@
 <x-layout>
-    <h1 class="text-xl font-semibold text-center">{{ __('dashboard.title') }}</h1>
-    <p class="text-base text-gray-500 text-center mb-6">{{ __('dashboard.welcome') }}</p>
+    <div class="w-full flex flex-col gap-4 md:flex-row md:items-center mt-6">
+        <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100">{{ __('dashboard.title') }}</h1>
 
-    <div class="mt-6 overflow-x-auto">
-        <table class="min-w-full text-base">
-            <thead class="bg-slate-50 text-base uppercase tracking-wide text-slate-500">
-                <tr>
-                    <th class="px-3 py-2 text-left">{{ __('logs.table.severity') }}</th>
-                    <th class="px-3 py-2 text-left">{{ __('dashboard.count') }}</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 bg-white">
-                @foreach($severityCounts as $severity => $count)
-                    <tr>
-                        <td class="px-3 py-2 text-slate-700 whitespace-nowrap">{{ $severity }}</td>
-                        <td class="px-3 py-2 text-slate-700 whitespace-nowrap">{{ $count }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+        <form method="GET" action="{{ route('dashboard') }}" class="md:ml-auto">
+            <label class="inline-flex items-center gap-2 rounded-full border border-[#5b3853] dark:border-[#9c6b91] bg-white dark:bg-slate-900 px-4 py-2 text-sm font-medium text-[#5b3853] dark:text-[#f0deea] shadow-sm">
+                <input
+                    type="checkbox"
+                    name="include_archived"
+                    value="1"
+                    @checked($includeArchived)
+                    onchange="this.form.submit()"
+                    class="h-4 w-4 rounded border-slate-300 text-[#5b3853] focus:ring-[#5b3853]/30"
+                >
+                <span>{{ __('dashboard.filters.include_archived') }}</span>
+            </label>
+        </form>
+    </div>
+
+    <div class="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" style="column-gap: 2rem; row-gap: 2rem;">
+        @foreach($cards as $card)
+            <x-dashboard-card
+                :title="$card['title']"
+                :href="$card['href']"
+                :severity-key="$card['key']"
+                :unresolved-count="$card['unresolvedCount']"
+                :resolved-count="$card['resolvedCount']"
+                :unresolved-label="$unresolvedLabel"
+                :resolved-label="$resolvedLabel"
+            />
+        @endforeach
     </div>
 </x-layout>

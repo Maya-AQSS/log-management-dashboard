@@ -11,12 +11,12 @@
                     name="severity"
                     class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
                 >
-                    <option value="">{{ __('error_codes.filters.severity_all') }}</option>
-                    <option value="critical" @selected(($severity ?? null) === 'critical')>{{ __('error_codes.filters.severity_critical') }}</option>
-                    <option value="high" @selected(($severity ?? null) === 'high')>{{ __('error_codes.filters.severity_high') }}</option>
-                    <option value="medium" @selected(($severity ?? null) === 'medium')>{{ __('error_codes.filters.severity_medium') }}</option>
-                    <option value="low" @selected(($severity ?? null) === 'low')>{{ __('error_codes.filters.severity_low') }}</option>
-                    <option value="other" @selected(($severity ?? null) === 'other')>{{ __('error_codes.filters.severity_other') }}</option>
+                    <option value="">{{ __('severity.all') }}</option>
+                    <option value="critical" @selected(($severity ?? null) === 'critical')>{{ __('severity.critical') }}</option>
+                    <option value="high" @selected(($severity ?? null) === 'high')>{{ __('severity.high') }}</option>
+                    <option value="medium" @selected(($severity ?? null) === 'medium')>{{ __('severity.medium') }}</option>
+                    <option value="low" @selected(($severity ?? null) === 'low')>{{ __('severity.low') }}</option>
+                    <option value="other" @selected(($severity ?? null) === 'other')>{{ __('severity.other') }}</option>
                 </select>
             </div>
 

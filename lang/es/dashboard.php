@@ -5,4 +5,7 @@ return [
     'title' => 'Panel de logs',
     'welcome' => 'Bienvenido al panel de logs',
     'count' => 'Cantidad',
+    'filters' => [
+        'include_archived' => 'Incluir archivados',
+    ],
 ];
