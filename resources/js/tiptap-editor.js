@@ -87,7 +87,6 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 		html: initialValue || '',
 		isEmpty: true,
 		maxCommentBytes,
-		resetHandler: null,
 		initialized: false,
 
 		getActiveEditor() {
@@ -147,24 +146,8 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 					self.isEmpty = editor.isEmpty;
 				},
 			});
-
-			this.resetHandler = () => {
-				if (!this.editor) {
-					return;
-				}
-
-				try {
-					this.editor.commands.clearContent(true);
-					this.html = this.editor.getHTML();
-					this.isEmpty = this.editor.isEmpty;
-				} catch (_error) {
-					// Editor may be in teardown while Livewire morphs the DOM.
-				}
-			};
-
-			this.$el.addEventListener('comment-editor-reset', this.resetHandler);
-			window.addEventListener('comment-editor-reset', this.resetHandler);
 		},
+
 
 		validateCommentSize() {
 			const bytes = new TextEncoder().encode(this.html).length;
@@ -313,7 +296,7 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 			this.$refs.imageInput?.click();
 		},
 
-		async submitToWire(methodName) {
+		async submitToWire(methodName, ...args) {
 			if (!this.$wire) {
 				this.notifyError('No se pudo enviar el comentario. Recarga la pagina e intenta de nuevo.');
 				return;
@@ -328,11 +311,10 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 
 			if (typeof this.$wire.$call === 'function') {
 				try {
-					await this.$wire.$call(methodName, latestHtml);
+					await this.$wire.$call(methodName, ...args, latestHtml);
 				} catch (_error) {
 					this.notifyError('La solicitud de guardado fallo. Revisa la consola y el log de Laravel.');
 				}
-
 				return;
 			}
 
@@ -350,11 +332,6 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 		},
 
 		destroy() {
-			if (this.resetHandler) {
-				this.$el.removeEventListener('comment-editor-reset', this.resetHandler);
-				window.removeEventListener('comment-editor-reset', this.resetHandler);
-			}
-
 			if (this.$refs?.editorEl && this.$refs.editorEl.__tiptapEditor === this.editor) {
 				this.$refs.editorEl.__tiptapEditor = null;
 			}

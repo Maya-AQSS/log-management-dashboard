@@ -1,42 +1,45 @@
-<style>
-    .rte-prosemirror {
-        min-height: 9rem;
-        outline: none;
-        color: #0f172a;
-    }
-
-    .rte-prosemirror p.is-editor-empty:first-child::before {
-        content: attr(data-placeholder);
-        color: #94a3b8;
-        float: left;
-        height: 0;
-        pointer-events: none;
-    }
-
-    .rte-prosemirror img {
-        max-width: 100%;
-        border-radius: 0.75rem;
-        margin-top: 0.5rem;
-        margin-bottom: 0.5rem;
-    }
-    .rte-prosemirror ul,
-    .rte-prosemirror ol {
-        padding-left: 1.25rem;
-    }
-    .rte-prosemirror h2 {
-        font-size: 1.125rem;
-        font-weight: 600;
-        margin-top: 0.25rem;
-        margin-bottom: 0.25rem;
-    }
-</style>
 <div>
+    <style>
+        .rte-prosemirror {
+            min-height: 9rem;
+            outline: none;
+            color: #0f172a;
+        }
+
+        .rte-prosemirror p.is-editor-empty:first-child::before {
+            content: attr(data-placeholder);
+            color: #94a3b8;
+            float: left;
+            height: 0;
+            pointer-events: none;
+        }
+
+        .rte-prosemirror img {
+            max-width: 100%;
+            border-radius: 0.75rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .rte-prosemirror ul,
+        .rte-prosemirror ol {
+            padding-left: 1.25rem;
+        }
+
+        .rte-prosemirror h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-top: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+    </style>
+
     <div class="mt-4 space-y-4">
         <div
-                wire:key="comment-editor-create"
+                wire:key="comment-editor-create-{{ $newCommentKey }}"
                 class="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4"
                 x-data="tiptapEditor({
-                    initialValue: @entangle('content'), // <-- Conectamos Livewire aquí
+                    initialValue: '',
                     messages: {
                         imageTooLarge: @js(__('comments.editor.image_too_large')),
                         imageInvalidType: @js(__('comments.editor.image_invalid_type')),
@@ -80,7 +83,7 @@
         
                 <button
                     type="button"
-                    x-on:click.prevent="$wire.addComment()"
+                    x-on:click.prevent="submitToWire('addComment')"
                     class="rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]"
         >
                     {{ __('comments.buttons.save') }}
@@ -154,11 +157,18 @@
 
                         <div class="flex gap-2">
                             <button
-
-                                type="button" x-on:click.prevent="$wire.addComment()" class="rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]"
+                                type="button"
+                                x-on:click.prevent="submitToWire('updateComment', {{ $comment->id }})"
+                                class="rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]"
                             >
-
-                                {{ __('comments.buttons.save') }}
+                                {{ __('comments.buttons.update') }}
+                            </button>
+                            <button
+                                type="button"
+                                wire:click="cancelEditing"
+                                class="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                            >
+                                {{ __('comments.buttons.cancel') }}
                             </button>
  
                         </div>
@@ -173,5 +183,4 @@
             </p>
         @endforelse
     </div>
-</div>
 </div>

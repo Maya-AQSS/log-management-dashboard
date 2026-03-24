@@ -10,6 +10,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Mews\Purifier\Facades\Purifier;
 use Throwable;
@@ -29,6 +30,8 @@ class CommentThread extends Component
 
     public string $content = '';
 
+    public int $newCommentKey = 0;
+
     public ?int $editingCommentId = null;
 
     public string $editingContent = '';
@@ -44,12 +47,14 @@ class CommentThread extends Component
 
     public function addComment(string $htmlContent): void
     {
-        dd("Estoy en addComment.");
-    /*
-       try {
-            $validated = $this->validate([
+        try {
+            $validated = Validator::make([
+                'htmlContent' => $htmlContent,
+            ], [
                 'htmlContent' => ['required', 'string', 'min:3'],
-            ], [], ['htmlContent' => 'content']);
+            ], [], [
+                'htmlContent' => 'content',
+            ])->validate();
 
             $sanitizedContent = $this->sanitizeAndValidateContent($validated['htmlContent'], 'content');
 
@@ -60,11 +65,9 @@ class CommentThread extends Component
                     'content' => $sanitizedContent,
                 ]);
 
-            $this->reset('content');
-            $this->dispatch('comment-editor-reset');
             session()->flash('status', __('comments.flash.created'));
-        } 
-         
+            $this->newCommentKey++;
+        }
         catch (ValidationException $e) {
             throw $e;
         } catch (Throwable $e) {
@@ -73,14 +76,12 @@ class CommentThread extends Component
                 'commentable_type' => $this->commentableType,
                 'commentable_id' => $this->commentableId,
                 'user_id' => auth()->id(),
-                'content_length' => strlen($this->content),
+                'content_length' => strlen($htmlContent),
                 'message' => $e->getMessage(),
             ]);
 
             session()->flash('status', $this->errorStatus($e));
         }
-     */
-       
     }
 
     public function startEditing(int $commentId): void
@@ -101,10 +102,16 @@ class CommentThread extends Component
     public function updateComment(int $commentId, string $htmlContent): void
     {
         try {
-            $validated = $this->validate([
+            $validated = Validator::make([
+                'commentId' => $commentId,
+                'htmlContent' => $htmlContent,
+            ], [
                 'commentId' => ['required', 'integer', 'exists:comments,id'],
                 'htmlContent' => ['required', 'string', 'min:3'],
-            ], [], ['commentId' => 'comment', 'htmlContent' => 'content']);
+            ], [], [
+                'commentId' => 'comment',
+                'htmlContent' => 'content',
+            ])->validate();
 
             $sanitizedContent = $this->sanitizeAndValidateContent($validated['htmlContent'], 'content');
 
@@ -125,9 +132,9 @@ class CommentThread extends Component
         } catch (Throwable $e) {
             report($e);
             Log::error('comment.update.failed', [
-                'comment_id' => $validated['editingCommentId'] ?? null,
+                'comment_id' => $commentId,
                 'user_id' => auth()->id(),
-                'content_length' => strlen($this->editingContent),
+                'content_length' => strlen($htmlContent),
                 'message' => $e->getMessage(),
             ]);
 
@@ -140,9 +147,11 @@ class CommentThread extends Component
         try {
             $this->commentIdToDelete = $commentId;
 
-            $validated = $this->validate([
+            $validated = Validator::make([
+                'commentIdToDelete' => $this->commentIdToDelete,
+            ], [
                 'commentIdToDelete' => ['required', 'integer', 'exists:comments,id'],
-            ]);
+            ])->validate();
 
             $comment = $this->findCommentOrFail($validated['commentIdToDelete']);
 
