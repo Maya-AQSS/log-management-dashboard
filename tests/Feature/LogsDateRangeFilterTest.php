@@ -67,6 +67,17 @@ class LogsDateRangeFilterTest extends TestCase
             ->assertHasErrors(['dateToInput' => 'after_or_equal']);
     }
 
+    public function test_accepts_native_datepicker_values_and_normalizes_them(): void
+    {
+        Livewire::test(LogsTable::class)
+            ->set('dateFromInput', '2026-03-10')
+            ->set('dateToInput', '2026-03-15')
+            ->call('applyFilters')
+            ->assertHasNoErrors()
+            ->assertSet('dateFrom', '2026-03-10T00:00:00+00:00')
+            ->assertSet('dateTo', '2026-03-15T23:59:59+00:00');
+    }
+
     public function test_frontend_contains_utc_normalization_to_iso8601(): void
     {
         $user = User::factory()->create();
@@ -75,6 +86,15 @@ class LogsDateRangeFilterTest extends TestCase
         $this->get('/logs')
             ->assertOk()
             ->assertSee('toISOString()', false);
+    }
+
+    public function test_reset_filters_dispatches_date_range_reset_event(): void
+    {
+        Livewire::test(LogsTable::class)
+            ->set('dateFromInput', '2026-03-10')
+            ->set('dateToInput', '2026-03-15')
+            ->call('resetFilters')
+            ->assertDispatched('date-range-reset');
     }
 
     /**

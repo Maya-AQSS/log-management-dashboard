@@ -71,6 +71,7 @@ class LogsTable extends Component
         $this->dateTo = null;
 
         $this->resetPage();
+        $this->dispatch('date-range-reset');
     }
 
     public function applyFilters(): void

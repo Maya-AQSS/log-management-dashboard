@@ -8,15 +8,20 @@
     x-data="{
         localFrom: '',
         localTo: '',
+        toAtomUtc(v) {
+            if (!v) return '';
+            return v.toISOString().replace(/\.\d{3}Z$/, '+00:00');
+        },
         toIsoStart(v) {
             if (!v) return '';
-            return new Date(`${v}T00:00:00`).toISOString();
+            return this.toAtomUtc(new Date(`${v}T00:00:00`));
         },
         toIsoEnd(v) {
             if (!v) return '';
-            return new Date(`${v}T23:59:59.999`).toISOString();
+            return this.toAtomUtc(new Date(`${v}T23:59:59`));
         }
     }"
+    x-on:date-range-reset.window="localFrom = ''; localTo = ''"
 >
     <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
         {{ $label }}

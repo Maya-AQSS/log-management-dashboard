@@ -16,8 +16,8 @@ class DateRangeFilter
      */
     public static function normalize(?string $from, ?string $to, string $fromField = 'dateFromInput', string $toField = 'dateToInput'): array
     {
-        $from = self::normalizeSingle($from, $fromField);
-        $to = self::normalizeSingle($to, $toField);
+        $from = self::normalizeSingle($from, $fromField, false);
+        $to = self::normalizeSingle($to, $toField, true);
 
         if ($from !== null && $to !== null) {
             $fromDate = CarbonImmutable::parse($from);
@@ -36,14 +36,20 @@ class DateRangeFilter
     /**
      * @throws ValidationException
      */
-    private static function normalizeSingle(?string $value, string $field): ?string
+    private static function normalizeSingle(?string $value, string $field, bool $endOfDayIfDateOnly): ?string
     {
         if ($value === null || trim($value) === '') {
             return null;
         }
 
         try {
-            return CarbonImmutable::parse($value)->utc()->toIso8601String();
+            $date = CarbonImmutable::parse($value);
+
+            if ($endOfDayIfDateOnly && preg_match('/^\d{4}-\d{2}-\d{2}$/', trim($value)) === 1) {
+                $date = $date->endOfDay();
+            }
+
+            return $date->utc()->toIso8601String();
         } catch (\Throwable) {
             throw ValidationException::withMessages([
                 $field => __('validation.date', ['attribute' => $field]),
