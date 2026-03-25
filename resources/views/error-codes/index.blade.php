@@ -9,7 +9,7 @@
             class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-base font-semibold text-white hover:bg-[#4a2d44]"
             disabled
         >
-            + Nuevo Error Code
+            {{ __('error_codes.buttons.create') }}
         </button>
     </div>
 
