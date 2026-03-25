@@ -16,9 +16,18 @@ class ErrorCode extends Model
         'code',
         'application_id',
         'name',
+        'file',
+        'line',
         'description',
         'severity',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'line' => 'integer',
+        ];
+    }
 
     public function application(): BelongsTo
     {
