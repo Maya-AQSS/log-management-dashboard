@@ -15,6 +15,26 @@ class LogsSeverityFilterTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_filter_by_single_severity_via_ui_other(): void
+    {
+        [$application, $errorCode] = $this->seedApplicationAndErrorCode();
+
+        $this->seedLogs($application->id, $errorCode->id, [
+            'critical' => ['critical log A'],
+            'high' => ['high log A'],
+            'other' => ['other log A'],
+            'medium' => ['medium log A'],
+        ]);
+
+        Livewire::test(LogsTable::class)
+            ->set('severityInput', ['other'])
+            ->call('applyFilters')
+            ->assertSee('other log A')
+            ->assertDontSee('critical log A')
+            ->assertDontSee('high log A')
+            ->assertDontSee('medium log A');
+    }
+
     public function test_filter_by_single_severity_via_ui_critical(): void
     {
         [$application, $errorCode] = $this->seedApplicationAndErrorCode();
@@ -49,6 +69,28 @@ class LogsSeverityFilterTest extends TestCase
         $this->get('/logs?severity=critical')
             ->assertOk()
             ->assertSee('critical log A')
+            ->assertDontSee('high log A')
+            ->assertDontSee('medium log A');
+    }
+
+    public function test_filter_by_single_severity_via_url_other(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        [$application, $errorCode] = $this->seedApplicationAndErrorCode();
+
+        $this->seedLogs($application->id, $errorCode->id, [
+            'critical' => ['critical log A'],
+            'high' => ['high log A'],
+            'other' => ['other log A'],
+            'medium' => ['medium log A'],
+        ]);
+
+        $this->get('/logs?severity=other')
+            ->assertOk()
+            ->assertSee('other log A')
+            ->assertDontSee('critical log A')
             ->assertDontSee('high log A')
             ->assertDontSee('medium log A');
     }
