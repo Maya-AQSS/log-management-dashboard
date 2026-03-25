@@ -13,7 +13,7 @@ interface LogRepositoryInterface
     public function findOrFail(int $id): Log;
 
     /**
-     * SSE: solo logs activos.
+     * SSE: últimos logs para streaming en tiempo real.
      */
     public function latestForStream(int $limit = 10): Collection;
 
@@ -29,14 +29,19 @@ interface LogRepositoryInterface
     ): LengthAwarePaginator;
 
     /**
-     * Counts grouped by severity, incluyendo zeros (solo logs activos).
+     * Counts grouped by severity y resolved.
      *
-     * @return array<string,int>
+     * @return array<string,array{resolved:int,unresolved:int,total:int}>
      */
-    public function severityCounts(): array;
+    public function severityResolvedCounts(bool $includeArchived = false): array;
 
     /**
-     * Devuelve el id de ArchivedLog asociado al log (matched_archived_log_id) o null si no está archivado.
+     * Total logs count (COUNT(*)) for selected scope.
+     */
+    public function logsCount(bool $includeArchived = false): int;
+
+    /**
+     * Devuelve el id de ArchivedLog equivalente al log o null si no está archivado.
      */
     public function archivedLogIdFor(int $logId): ?int;
 }

@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ArchivedLog extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     const CREATED_AT = null;
     const UPDATED_AT = 'updated_at';
@@ -34,6 +35,7 @@ class ArchivedLog extends Model
             'metadata' => 'array',
             'original_created_at' => 'datetime',
             'archived_at' => 'datetime',
+            'deleted_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
     }
@@ -56,10 +58,5 @@ class ArchivedLog extends Model
     public function comments(): MorphMany
     {
         return $this->morphMany(Comment::class, 'commentable');
-    }
-
-    public function logs(): HasMany
-    {
-        return $this->hasMany(Log::class, 'matched_archived_log_id');
     }
 }

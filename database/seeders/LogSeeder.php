@@ -2,91 +2,19 @@
 
 namespace Database\Seeders;
 
-use App\Models\Log;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class LogSeeder extends Seeder
 {
     public function run(): void
     {
-        Log::updateOrCreate(
-            ['id' => 1],
-            [
-                'application_id' => 1,
-                'error_code_id' => 1,
-                'severity' => 'low',
-                'message' => 'Seed: log de prueba',
-                'file' => 'seed.log',
-                'line' => 10,
-                'metadata' => ['seed' => true, 'source' => 'LogSeeder'],
-                'matched_archived_log_id' => 1,
-                'resolved' => true,
-                'created_at' => now(),
-            ]
-        );
+        $mockLogs = require database_path('data/mock-logs.php');
 
-        Log::updateOrCreate(
-            ['id' => 2],
-            [
-                'application_id' => 1,
-                'error_code_id' => 1,
-                'severity' => 'medium',
-                'message' => 'Seed: log de prueba',
-                'file' => 'seed.log',
-                'line' => 10,
-                'metadata' => ['seed' => true, 'source' => 'LogSeeder'],
-                'matched_archived_log_id' => null,
-                'resolved' => false,
-                'created_at' => now(),
-            ]
-        );
+        DB::table('logs')->insert($mockLogs);
 
-        Log::updateOrCreate(
-            ['id' => 3],
-            [
-                'application_id' => 1,
-                'error_code_id' => 1,
-                'severity' => 'high',
-                'message' => 'Seed: log de prueba',
-                'file' => 'seed.log',
-                'line' => 10,
-                'metadata' => ['seed' => true, 'source' => 'LogSeeder'],
-                'matched_archived_log_id' => null,
-                'resolved' => true,
-                'created_at' => now(),
-            ]
-        );
-
-        Log::updateOrCreate(
-            ['id' => 4],
-            [
-                'application_id' => 1,
-                'error_code_id' => 1,
-                'severity' => 'critical',
-                'message' => 'Seed: log de prueba',
-                'file' => 'seed.log',
-                'line' => 10,
-                'metadata' => ['seed' => true, 'source' => 'LogSeeder'],
-                'matched_archived_log_id' => 2,
-                'resolved' => false,
-                'created_at' => now(),
-            ]
-        );
-
-        Log::updateOrCreate(
-            ['id' => 5],
-            [
-                'application_id' => 1,
-                'error_code_id' => 1,
-                'severity' => 'other',
-                'message' => 'Seed: log de prueba',
-                'file' => 'seed.log',
-                'line' => 10,
-                'metadata' => ['seed' => true, 'source' => 'LogSeeder'],
-                'matched_archived_log_id' => null,
-                'resolved' => false,
-                'created_at' => now(),
-            ]
+        DB::statement(
+            "SELECT setval(pg_get_serial_sequence('logs', 'id'), (SELECT COALESCE(MAX(id), 1) FROM logs))"
         );
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\Severity;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ErrorCodeIndexRequest extends FormRequest
@@ -17,7 +18,7 @@ class ErrorCodeIndexRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'severity' => ['nullable', 'in:critical,high,medium,low,other'],
+            'severity' => ['nullable', Severity::validationRule()],
         ];
     }
 }

@@ -19,12 +19,6 @@ return [
 
     'filters' => [
         'severity' => 'Severidad',
-        'severity_all' => 'Todas',
-        'severity_critical' => 'Crítica',
-        'severity_high' => 'Alta',
-        'severity_medium' => 'Media',
-        'severity_low' => 'Baja',
-        'severity_other' => 'Otra',
         'tutorial' => 'Tutorial',
         'tutorial_all' => 'Todos',
         'tutorial_with' => 'Con tutorial',

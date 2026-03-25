@@ -55,7 +55,6 @@ class PanelRoutingAndSecurityTest extends TestCase
             'file' => 'app/Jobs/Test.php',
             'line' => 12,
             'metadata' => json_encode(['context' => 'test']),
-            'matched_archived_log_id' => $archivedLog->id,
             'resolved' => false,
             'created_at' => now(),
         ]);
@@ -65,8 +64,8 @@ class PanelRoutingAndSecurityTest extends TestCase
             '/dashboard',
             '/logs',
             '/logs/' . $logId,
-            '/historico',
-            '/historico/' . $archivedLog->id,
+            '/archived-logs',
+            '/archived-logs/' . $archivedLog->id,
             '/error-codes',
             '/error-codes/' . $errorCode->id,
         ] as $uri) {
@@ -75,7 +74,7 @@ class PanelRoutingAndSecurityTest extends TestCase
 
         $this->get('/sse/logs')->assertUnauthorized();
 
-        $this->delete('/historico/' . $archivedLog->id)
+        $this->delete('/archived-logs/' . $archivedLog->id)
             ->assertRedirect('http://auth.example.com/login');
     }
 
@@ -89,8 +88,8 @@ class PanelRoutingAndSecurityTest extends TestCase
         $this->get('/dashboard')->assertOk()->assertViewIs('dashboard');
         $this->get('/logs')->assertOk()->assertViewIs('logs.index');
         $this->get('/logs/' . $logId)->assertOk()->assertViewIs('logs.show');
-        $this->get('/historico')->assertOk()->assertViewIs('archived-logs.index');
-        $this->get('/historico/' . $archivedLog->id)->assertOk()->assertViewIs('archived-logs.show');
+        $this->get('/archived-logs')->assertOk()->assertViewIs('archived-logs.index');
+        $this->get('/archived-logs/' . $archivedLog->id)->assertOk()->assertViewIs('archived-logs.show');
         $this->get('/error-codes')->assertOk()->assertViewIs('error-codes.index');
         $this->get('/error-codes/' . $errorCode->id)->assertOk()->assertViewIs('error-codes.show');
 
@@ -99,23 +98,62 @@ class PanelRoutingAndSecurityTest extends TestCase
             ->assertHeader('Content-Type', 'text/event-stream; charset=UTF-8');
     }
 
-    public function test_archived_log_delete_route_uses_policy_authorization(): void
+    public function test_archived_log_delete_route_soft_deletes_and_hides_from_default_views(): void
     {
         [$owner, , $archivedLog] = $this->seedPanelRecords();
 
         $intruder = User::factory()->create();
 
         $this->actingAs($intruder)
-            ->delete('/historico/' . $archivedLog->id)
+            ->delete('/archived-logs/' . $archivedLog->id)
             ->assertForbidden();
 
         $this->actingAs($owner)
-            ->delete('/historico/' . $archivedLog->id)
+            ->delete('/archived-logs/' . $archivedLog->id)
             ->assertRedirect(route('archived-logs.index'));
 
-        $this->assertDatabaseMissing('archived_logs', [
+        $this->assertSoftDeleted('archived_logs', [
             'id' => $archivedLog->id,
         ]);
+
+        $this->get('/archived-logs/' . $archivedLog->id)
+            ->assertNotFound();
+    }
+
+    public function test_two_year_old_archived_log_and_comments_remain_accessible_when_not_deleted(): void
+    {
+        [$user, , $archivedLog] = $this->seedPanelRecords();
+
+        $archivedLog->update([
+            'archived_at' => now()->subYears(2),
+            'original_created_at' => now()->subYears(2)->subDay(),
+        ]);
+
+        Comment::query()->create([
+            'commentable_type' => ArchivedLog::class,
+            'commentable_id' => $archivedLog->id,
+            'user_id' => $user->id,
+            'content' => 'Comentario A historico',
+        ]);
+
+        Comment::query()->create([
+            'commentable_type' => ArchivedLog::class,
+            'commentable_id' => $archivedLog->id,
+            'user_id' => $user->id,
+            'content' => 'Comentario B historico',
+        ]);
+
+        $this->actingAs($user)
+            ->get('/archived-logs/' . $archivedLog->id)
+            ->assertOk()
+            ->assertSee('Archived test log');
+
+        Livewire::test(CommentThread::class, [
+            'commentableType' => 'archived-log',
+            'commentableId' => $archivedLog->id,
+        ])
+            ->assertSee('Comentario A historico')
+            ->assertSee('Comentario B historico');
     }
 
     public function test_livewire_comment_actions_validate_user_input_before_persisting(): void
@@ -165,12 +203,12 @@ class PanelRoutingAndSecurityTest extends TestCase
 
         $this->actingAs($user);
 
-        $this->expectException(\Illuminate\Auth\Access\AuthorizationException::class);
-
         Livewire::test(CommentThread::class, [
             'commentableType' => 'archived-log',
             'commentableId' => $archivedLog->id,
-        ])->call('deleteComment', $comment->id);
+        ])
+            ->call('deleteComment', $comment->id)
+            ->assertForbidden();
     }
 
     private function seedPanelRecords(): array
@@ -211,7 +249,6 @@ class PanelRoutingAndSecurityTest extends TestCase
             'file' => 'app/Jobs/Test.php',
             'line' => 12,
             'metadata' => json_encode(['context' => 'test']),
-            'matched_archived_log_id' => $archivedLog->id,
             'resolved' => false,
             'created_at' => now(),
         ]);

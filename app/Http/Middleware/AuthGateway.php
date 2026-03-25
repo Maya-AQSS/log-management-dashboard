@@ -32,7 +32,7 @@ class AuthGateway
             return $next($request);
         }
 
-        $externalBaseUrl = rtrim((string) env('AUTH_EXTERNAL_URL', ''), '/');
+        $externalBaseUrl = rtrim((string) config('services.auth_gateway.external_url', ''), '/');
 
         if ($externalBaseUrl === '') {
             return $next($request);

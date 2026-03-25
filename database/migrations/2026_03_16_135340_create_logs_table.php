@@ -19,7 +19,6 @@ return new class extends Migration
      *   file             varchar nullable
      *   line             integer nullable
      *   metadata         jsonb nullable
-     *   matched_archived_log_id  bigint nullable
      *   resolved         boolean default false
      *   created_at       timestamptz
      */
@@ -38,14 +37,12 @@ return new class extends Migration
             $table->string('file')->nullable();
             $table->integer('line')->nullable();
             $table->jsonb('metadata')->nullable();
-            $table->unsignedBigInteger('matched_archived_log_id')->nullable();
             $table->boolean('resolved')->default(false);
             $table->timestamptz('created_at')->nullable();
 
             $table->index('error_code_id');
             $table->index(['application_id', 'created_at']);
             $table->index(['severity', 'resolved']);
-            $table->index('matched_archived_log_id');
         });
     }
 
