@@ -57,7 +57,7 @@ class LogService implements LogServiceInterface
      * - si está archivado o no
      * - si está resuelto o no
      */
-    public function searchAndFilter(?string $search, ?string $severity, ?string $archived, ?string $resolved, int $perPage = 25): LengthAwarePaginator
+    public function searchAndFilter(?string $search, ?array $severity, ?string $archived, ?string $resolved, int $perPage = 25): LengthAwarePaginator
     {
         return $this->logRepository->searchAndFilter($search, $severity, $archived, $resolved, $perPage);
     }
