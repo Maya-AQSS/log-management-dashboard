@@ -20,5 +20,21 @@ class ApplicationSeeder extends Seeder
                 'description' => 'Description 1',
             ]
         );
+
+        Application::updateOrCreate(
+            ['id' => 2],
+            [
+                'name'        => 'Application 2',
+                'description' => 'Description 2',
+            ]
+        );
+
+        Application::updateOrCreate(
+            ['id' => 3],
+            [
+                'name'        => 'Application 3',
+                'description' => 'Description 3',
+            ]
+        );
     }
 }
