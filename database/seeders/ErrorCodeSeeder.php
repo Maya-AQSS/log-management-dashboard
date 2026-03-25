@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\ErrorCode;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +22,8 @@ class ErrorCodeSeeder extends Seeder
                     'code' => $errorCode['code'],
                     'application_id' => $errorCode['application_id'],
                     'name' => $errorCode['name'],
+                    'file' => $errorCode['file'] ?? null,
+                    'line' => $errorCode['line'] ?? null,
                     'description' => $errorCode['description'],
                     'severity' => $errorCode['severity'],
                 ]
