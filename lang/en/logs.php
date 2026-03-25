@@ -17,6 +17,7 @@ return [
         'line' => 'Line',
         'metadata' => 'Metadata (JSON)',
         'no_metadata' => 'No metadata',
+        'archived_match' => 'This log matches an entry in archived history (same application, error code, severity and message).',
     ],
 
     'table' => [

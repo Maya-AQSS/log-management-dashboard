@@ -24,7 +24,7 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
     }
 
     /**
-     * Busca y filtra logs archivados por diferentes criterios: 
+     * Busca y filtra logs archivados por diferentes criterios:
      * - tipo de severidad de error
      * - si tiene tutorial o no
      */
@@ -84,7 +84,8 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
                 ->whereRaw('error_code_id IS NOT DISTINCT FROM ?', [$log->error_code_id])
                 ->where('severity', $log->severity)
                 ->where('message', $log->message)
-                ->where('original_created_at', $log->created_at)
+                ->orderByDesc('archived_at')
+                ->orderByDesc('id')
                 ->first();
 
             if ($existingArchived !== null) {

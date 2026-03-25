@@ -3,17 +3,10 @@
         <button
             type="button"
             wire:click="archive"
-            class="inline-flex items-center px-4 py-2 rounded-full bg-[#5b3853] hover:bg-[#4a2d44] text-white text-sm font-semibold"
+            class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]"
         >
             {{ __('logs.buttons.archive') }}
         </button>
-    @else
-        <a
-            href="{{ route('archived-logs.show', $archivedLogId) }}"
-            class="inline-flex items-center px-4 py-2 rounded-full bg-[#5b3853] hover:bg-[#4a2d44] text-white text-sm font-semibold"
-        >
-            {{ __('logs.buttons.view_archived') }}
-        </a>
     @endif
 </div>
 

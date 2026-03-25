@@ -5,7 +5,7 @@ return [
     'title' => 'Llistat de logs',
     'welcome' => 'Benvingut als logs',
 
-    'empty' => "No hi ha logs que coincideixin amb els filtres aplicats",
+    'empty' => 'No hi ha logs que coincideixin amb els filtres aplicats',
 
     'archived_success' => 'Log arxivat correctament',
     'archived_error' => "No s'ha pogut arxivar el log",
@@ -17,6 +17,7 @@ return [
         'line' => 'Línia',
         'metadata' => 'Metadades (JSON)',
         'no_metadata' => 'Sense metadades',
+        'archived_match' => "Aquest log coincideix amb una entrada de l'històric arxivat (mateixa aplicació, codi d'error, severitat i missatge).",
     ],
 
     'table' => [

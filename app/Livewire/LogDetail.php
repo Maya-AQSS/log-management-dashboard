@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Log;
+use App\Services\Contracts\LogServiceInterface;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
@@ -26,9 +27,12 @@ class LogDetail extends Component
             $metadataJson = json_encode($log->metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         }
 
+        $archivedLogId = app(LogServiceInterface::class)->archivedLogIdFor($log->id);
+
         return view('livewire.log-detail', [
             'log' => $log,
             'metadataJson' => $metadataJson,
+            'archivedLogId' => $archivedLogId,
         ]);
     }
 }

@@ -1,4 +1,24 @@
 <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+    @if($archivedLogId !== null)
+        <div
+            class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/40 dark:bg-amber-950/25"
+        >
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                <p class="flex-1 text-sm text-slate-800 dark:text-slate-200">
+                    {{ __('logs.detail.archived_match') }}
+                </p>
+                <div class="shrink-0">
+                    <a
+                        href="{{ route('archived-logs.show', $archivedLogId) }}"
+                        class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#4a2d44]"
+                    >
+                        {{ __('logs.buttons.view_archived') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
         <div>
             <div class="font-semibold text-slate-800 dark:text-slate-200">{{ __('logs.detail.id') }}</div>
