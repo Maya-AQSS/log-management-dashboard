@@ -11,17 +11,14 @@ class LogSeeder extends Seeder
     {
         $mockLogs = require database_path('data/mock-logs.php');
 
-        foreach ($mockLogs as &$row) {
+        $rows = array_map(function (array $row) {
             if (isset($row['metadata']) && is_array($row['metadata'])) {
-                $row['metadata'] = json_encode(
-                    $row['metadata'],
-                    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-                );
+                $row['metadata'] = json_encode($row['metadata'], JSON_UNESCAPED_UNICODE);
             }
-        }
-        unset($row);
+            return $row;
+        }, $mockLogs);
         
-        DB::table('logs')->insert($mockLogs);
+        DB::table('logs')->insert($rows);
 
         if (DB::getDriverName() === 'pgsql') {
             DB::statement(

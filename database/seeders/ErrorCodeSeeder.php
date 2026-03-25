@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\ErrorCode;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class ErrorCodeSeeder extends Seeder
@@ -17,16 +16,30 @@ class ErrorCodeSeeder extends Seeder
         $errorCodes = require database_path('data/mock-error-codes.php');
 
         foreach ($errorCodes as $errorCode) {
-            ErrorCode::updateOrCreate(
-                ['id' => $errorCode['id']],
-                [
-                    'code' => $errorCode['code'],
-                    'application_id' => $errorCode['application_id'],
-                    'name' => $errorCode['name'],
-                    'description' => $errorCode['description'],
-                    'severity' => $errorCode['severity'],
-                ]
-            );
+            $attributes = [
+                'code' => $errorCode['code'],
+                'application_id' => $errorCode['application_id'],
+                'name' => $errorCode['name'],
+                'description' => $errorCode['description'] ?? null,
+                'severity' => $errorCode['severity'],
+                'file' => $errorCode['file'] ?? null,
+                'line' => $errorCode['line'] ?? null,
+            ];
+
+            if (isset($errorCode['id'])) {
+                ErrorCode::updateOrCreate(
+                    ['id' => $errorCode['id']],
+                    $attributes
+                );
+            } else {
+                ErrorCode::updateOrCreate(
+                    [
+                        'code' => $errorCode['code'],
+                        'application_id' => $errorCode['application_id'],
+                    ],
+                    $attributes
+                );
+            }
         }
 
         if (DB::getDriverName() === 'pgsql') {
