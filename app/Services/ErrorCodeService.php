@@ -19,10 +19,12 @@ class ErrorCodeService implements ErrorCodeServiceInterface
     }
 
     public function searchAndFilter(
+        ?string $search,
+        ?int $filterApp,
         ?string $severity,
         int $perPage = 15
     ): LengthAwarePaginator {
-        return $this->errorCodeRepository->searchAndFilter($severity, $perPage);
+        return $this->errorCodeRepository->searchAndFilter($search, $filterApp, $severity, $perPage);
     }
 
     public function findOrFail(int $id): ErrorCode
