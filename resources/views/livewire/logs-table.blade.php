@@ -1,25 +1,25 @@
 <div>
-    <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+    <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
             <div>
-                <label class="block text-sm font-medium text-slate-700">
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
                     {{ __('logs.filters.search') }}
                 </label>
                 <input
                     type="text"
                     wire:model.defer="searchInput"
-                    class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
+                    class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
                     placeholder="{{ __('logs.filters.search_placeholder') }}"
                 />
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-slate-700">
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
                     {{ __('logs.filters.severity') }}
                 </label>
                 <select
                     wire:model.defer="severityInput"
-                    class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
+                    class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
                 >
                     <option value="">{{ __('severity.all') }}</option>
                     <option value="critical">{{ __('severity.critical') }}</option>
@@ -31,12 +31,12 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-slate-700">
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
                     {{ __('logs.filters.resolved') }}
                 </label>
                 <select
                     wire:model.defer="resolvedInput"
-                    class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
+                    class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
                 >
                     <option value="">{{ __('logs.filters.resolved_all') }}</option>
                     <option value="resolved">{{ __('logs.filters.resolved_resolved') }}</option>
@@ -66,7 +66,7 @@
 
     <div class="mt-4 overflow-x-auto">
         <table class="min-w-full text-base">
-            <thead class="bg-slate-50 text-base uppercase tracking-wide text-slate-500">
+            <thead class="bg-slate-50 text-base uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-300">
                 <tr>
                     <th class="px-3 py-2 text-left">{{ __('logs.table.application') }}</th>
                     <th class="px-3 py-2 text-left">{{ __('logs.table.severity') }}</th>
@@ -77,25 +77,25 @@
                 </tr>
             </thead>
 
-            <tbody class="divide-y divide-slate-100 bg-white">
+            <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-900">
             @forelse($logs as $log)
                 <tr
-                    class="align-top cursor-pointer hover:bg-slate-50"
+                    class="align-top cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
                     data-href="{{ route('logs.show', $log->id) }}"
                     onclick="window.location.href=this.dataset.href"
                 >
-                    <td class="px-3 py-2 text-slate-700">{{ $log->application?->name ?? '-' }}</td>
+                    <td class="px-3 py-2 text-slate-700 dark:text-slate-200">{{ $log->application?->name ?? '-' }}</td>
                     <td class="px-3 py-2 whitespace-nowrap">
                         <x-severity-badge :severity="$log->severity" />
                     </td>
-                    <td class="px-3 py-2 text-slate-700">
+                    <td class="px-3 py-2 text-slate-700 dark:text-slate-200">
                         {{ \Illuminate\Support\Str::limit($log->message ?? '-', 120) }}
                     </td>
-                    <td class="px-3 py-2 text-slate-700 whitespace-nowrap">{{ $log->errorCode?->code ?? '-' }}</td>
-                    <td class="px-3 py-2 text-slate-700 whitespace-nowrap">
+                    <td class="px-3 py-2 text-slate-700 whitespace-nowrap dark:text-slate-200">{{ $log->errorCode?->code ?? '-' }}</td>
+                    <td class="px-3 py-2 text-slate-700 whitespace-nowrap dark:text-slate-200">
                         {{ optional($log->created_at)->locale(app()->getLocale())->translatedFormat('d F Y H:i:s') ?? '-' }}
                     </td>
-                    <td class="px-3 py-2 text-slate-700 whitespace-nowrap">
+                    <td class="px-3 py-2 text-slate-700 whitespace-nowrap dark:text-slate-200">
                         <div class="flex flex-wrap gap-2">
                             @if($log->resolved)
                                 <span class="inline-flex items-center rounded-full bg-cyan-100 px-2 py-0.5 text-xs font-semibold text-cyan-800">
@@ -107,7 +107,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="px-3 py-4 text-center text-base text-slate-500">
+                    <td colspan="6" class="px-3 py-4 text-center text-base text-slate-500 dark:text-slate-400">
                         {{ __('logs.empty') }}
                     </td>
                 </tr>

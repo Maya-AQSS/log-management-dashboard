@@ -92,4 +92,5 @@ class LogsTable extends Component
 
         return view('livewire.logs-table', ['logs' => $logs]);
     }
+
 }
