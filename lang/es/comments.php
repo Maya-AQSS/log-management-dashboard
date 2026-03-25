@@ -30,7 +30,7 @@ return [
         'ordered_list' => 'Lista numerada',
         'link' => 'Enlace',
         'insert_image' => 'Imagen',
-        'hint' => 'Puedes pegar o arrastrar imágenes. Máximo por imagen: 2 MB.',
+        'hint' => 'Escribe / para insertar bloques. Pega o arrastra imágenes (máx. 2 MB).',
         'placeholder' => 'Describe el contexto, causa raíz y resolución aplicada...',
         'image_too_large' => 'La imagen supera el límite de 2 MB.',
         'image_invalid_type' => 'Tipo de imagen no válido.',

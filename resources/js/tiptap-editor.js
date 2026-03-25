@@ -1,6 +1,33 @@
-import { Editor } from '@tiptap/core';
+import { Editor, Extension } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
+import Placeholder from '@tiptap/extension-placeholder';
+import TaskList from '@tiptap/extension-task-list';
+import TaskItem from '@tiptap/extension-task-item';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { Suggestion } from '@tiptap/suggestion';
+import { common, createLowlight } from 'lowlight';
+import TextAlign from '@tiptap/extension-text-align';
+import Underline from '@tiptap/extension-underline';
+import Highlight from '@tiptap/extension-highlight';
+import Color from '@tiptap/extension-color';
+import { TextStyle } from '@tiptap/extension-text-style';
+import Superscript from '@tiptap/extension-superscript';
+import Subscript from '@tiptap/extension-subscript';
+
+// Solo los lenguajes más habituales en comentarios técnicos
+const lowlight = createLowlight({
+	bash:       common.bash,
+	css:        common.css,
+	html:       common.xml,
+	javascript: common.javascript,
+	json:       common.json,
+	php:        common.php,
+	python:     common.python,
+	sql:        common.sql,
+	typescript: common.typescript,
+	yaml:       common.yaml,
+});
 
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 let tiptapInstanceSequence = 0;
@@ -81,6 +108,15 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 		invalidLink: messages.invalidLink || 'El enlace debe comenzar por http:// o https://',
 	};
 
+	// Variables de clausura fuera del estado reactivo de Alpine.
+	// Alpine 3 envuelve todo el objeto retornado en un Proxy reactivo.
+	// ProseMirror falla con "Applying a mismatched transaction" cuando se opera
+	// sobre el editor a través del Proxy, porque las comparaciones internas de
+	// identidad de objetos (tr.before !== state.doc) se rompen.
+	// rawEditor almacena la referencia REAL (sin Proxy) del Editor de Tiptap.
+	let rawEditor = null;
+	let slashCommandFn = null;
+
 	return {
 		instanceId: ++tiptapInstanceSequence,
 		editor: null,
@@ -89,14 +125,20 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 		maxCommentBytes,
 		initialized: false,
 
-		getActiveEditor() {
-			const editor = this.editor;
+		// Estado del slash menu
+		slash: {
+			show: false,
+			query: '',
+			items: [],
+			selectedIndex: 0,
+		},
 
-			if (!editor || editor.isDestroyed) {
+		getActiveEditor() {
+			if (!rawEditor || rawEditor.isDestroyed) {
 				return null;
 			}
 
-			return editor;
+			return rawEditor;
 		},
 
 		init() {
@@ -118,7 +160,38 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 
 			const self = this;
 
-			this.editor = new Editor({
+			// Listener nativo en la toolbar — evita Alpine eval (CSP).
+			// Un único listener en el contenedor gestiona todos los botones (delegación).
+			if (this.$refs.toolbarEl) {
+				this.$refs.toolbarEl.addEventListener('mousedown', (e) => {
+					e.preventDefault(); // evita que el editor pierda el foco/selección
+					const btn = e.target.closest('[data-toolbar-cmd]');
+					if (btn) self.execCommand(btn.dataset.toolbarCmd);
+				});
+			}
+
+			// Extensión de slash commands basada en Suggestion
+			const SlashCommands = Extension.create({
+				name: 'slashCommands',
+				addOptions() {
+					return { suggestion: {} };
+				},
+				addProseMirrorPlugins() {
+					return [
+						Suggestion({
+							editor: this.editor,
+							char: '/',
+							allowSpaces: false,
+							startOfLine: false,
+							...this.options.suggestion,
+						}),
+					];
+				},
+			});
+
+			rawEditor = new Editor({
+			// NOTA: rawEditor es la referencia real. this.editor es el Proxy de Alpine
+			// que se asigna después para que templates Alpine puedan acceder si lo necesitan.
 				element: this.$refs.editorEl,
 				extensions: [
 					StarterKit.configure({
@@ -127,16 +200,102 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 							autolink: true,
 							protocols: ['http', 'https'],
 						},
+						codeBlock: false,  // lo reemplaza CodeBlockLowlight
+						underline: false,  // lo registra Underline explícitamente
 					}),
 					Image,
+					TaskList,
+					TaskItem.configure({ nested: true }),
+					CodeBlockLowlight.configure({ lowlight }),
+					TextAlign.configure({ types: ['heading', 'paragraph'] }),
+					Underline,
+					Highlight,
+					TextStyle,
+					Color,
+					Superscript,
+					Subscript,
+					Placeholder.configure({
+						placeholder: self.$refs.editorEl.dataset.placeholder || '',
+					}),
+					SlashCommands.configure({
+						suggestion: {
+							items: ({ query }) => self.slashItems(query),
+							// command: callback que llama Tiptap cuando se ejecuta props.command(item).
+							// Recibe editor y range NATIVOS de ProseMirror (sin Proxy de Alpine).
+							command: ({ editor, range, props: item }) => {
+								if (item.command === 'image') {
+									editor.chain().focus().deleteRange(range).run();
+									setTimeout(() => self.triggerImagePicker(), 0);
+									return;
+								}
+								let chain = editor.chain().focus().deleteRange(range);
+								switch (item.command) {
+									case 'paragraph':   chain = chain.setParagraph(); break;
+									case 'h1':          chain = chain.setHeading({ level: 1 }); break;
+									case 'h2':          chain = chain.setHeading({ level: 2 }); break;
+									case 'h3':          chain = chain.setHeading({ level: 3 }); break;
+									case 'bulletList':  chain = chain.toggleBulletList(); break;
+									case 'orderedList': chain = chain.toggleOrderedList(); break;
+									case 'taskList':    chain = chain.toggleTaskList(); break;
+									case 'blockquote':  chain = chain.toggleBlockquote(); break;
+									case 'hr':          chain = chain.setHorizontalRule(); break;
+									case 'codeBlock':   chain = chain.toggleCodeBlock(); break;
+								}
+								chain.run();
+							},
+							render: () => ({
+								onStart(props) {
+									slashCommandFn = props.command;
+									self.slash.show = true;
+									self.slash.query = props.query;
+									self.slash.items = self.slashItems(props.query);
+									self.slash.selectedIndex = 0;
+									self.positionSlashMenu(props.clientRect);
+								},
+								onUpdate(props) {
+									slashCommandFn = props.command;
+									self.slash.query = props.query;
+									self.slash.items = self.slashItems(props.query);
+									self.slash.selectedIndex = 0;
+									self.positionSlashMenu(props.clientRect);
+								},
+								onKeyDown({ event }) {
+									if (!self.slash.show) return false;
+									if (event.key === 'ArrowDown') {
+										self.slash.selectedIndex = (self.slash.selectedIndex + 1) % self.slash.items.length;
+										return true;
+									}
+									if (event.key === 'ArrowUp') {
+										self.slash.selectedIndex = (self.slash.selectedIndex - 1 + self.slash.items.length) % self.slash.items.length;
+										return true;
+									}
+									if (event.key === 'Enter') {
+										const item = self.slash.items[self.slash.selectedIndex];
+										if (item && slashCommandFn) {
+											slashCommandFn(item);
+										}
+										return true;
+									}
+									if (event.key === 'Escape') {
+										self.slash.show = false;
+										return true;
+									}
+									return false;
+								},
+								onExit() {
+									slashCommandFn = null;
+									self.slash.show = false;
+								},
+							}),
+						},
+					}),
 				],
 				content: this.html,
 				editorProps: {
-					attributes: {
-						class: 'rte-prosemirror',
-					},
+					attributes: { class: 'rte-prosemirror rte-content' },
 				},
 				onCreate({ editor }) {
+					self.editor = rawEditor; // exponer al Proxy de Alpine
 					self.html = editor.getHTML();
 					self.isEmpty = editor.isEmpty;
 					self.$refs.editorEl.__tiptapEditor = editor;
@@ -145,9 +304,74 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 					self.html = editor.getHTML();
 					self.isEmpty = editor.isEmpty;
 				},
+				// onTransaction se dispara tras CADA transacción (incluye selección,
+				// formato, inserción, etc.) — actualiza is-active en la toolbar
+				// inmediatamente, no solo al cambiar la selección.
+				onTransaction({ editor }) {
+					self.updateToolbarState(editor);
+				},
 			});
 		},
 
+		// --- Toolbar state ---
+
+		updateToolbarState(editor) {
+			const toolbarEl = this.$refs.toolbarEl;
+			if (!toolbarEl) return;
+			const cmdActive = {
+				bold:        editor.isActive('bold'),
+				italic:      editor.isActive('italic'),
+				underline:   editor.isActive('underline'),
+				strike:      editor.isActive('strike'),
+				link:        editor.isActive('link'),
+				code:        editor.isActive('code'),
+				highlight:   editor.isActive('highlight'),
+				alignLeft:   editor.isActive({ textAlign: 'left' }),
+				alignCenter: editor.isActive({ textAlign: 'center' }),
+				alignRight:  editor.isActive({ textAlign: 'right' }),
+				superscript: editor.isActive('superscript'),
+				subscript:   editor.isActive('subscript'),
+			};
+			toolbarEl.querySelectorAll('[data-toolbar-cmd]').forEach(btn => {
+				btn.classList.toggle('is-active', !!cmdActive[btn.dataset.toolbarCmd]);
+			});
+		},
+
+		// --- Slash menu helpers ---
+
+		slashItems(query) {
+			const all = [
+				{ label: 'Texto',           icon: '¶',  command: 'paragraph' },
+				{ label: 'Título 1',        icon: 'H1', command: 'h1' },
+				{ label: 'Título 2',        icon: 'H2', command: 'h2' },
+				{ label: 'Título 3',        icon: 'H3', command: 'h3' },
+				{ label: 'Lista de puntos', icon: '•',  command: 'bulletList' },
+				{ label: 'Lista numerada',  icon: '1.', command: 'orderedList' },
+				{ label: 'Lista de tareas', icon: '☐',  command: 'taskList' },
+				{ label: 'Cita',            icon: '❝',  command: 'blockquote' },
+				{ label: 'Separador',       icon: '—',  command: 'hr' },
+				{ label: 'Código',          icon: '<>', command: 'codeBlock' },
+				{ label: 'Imagen',          icon: '🖼', command: 'image' },
+			];
+			const q = (query || '').toLowerCase();
+			return q ? all.filter(item => item.label.toLowerCase().includes(q)) : all;
+		},
+
+		executeSlashItem(item) {
+			if (!item || !slashCommandFn) return;
+			const fn = slashCommandFn;
+			this.slash.show = false;
+			fn(item); // Tiptap-Suggestion gestiona deleteRange + comando en una transacción atómica
+		},
+
+		positionSlashMenu(clientRect) {
+			if (!clientRect || !this.$refs.slashMenuEl) return;
+			const rect = typeof clientRect === 'function' ? clientRect() : clientRect;
+			const el = this.$refs.slashMenuEl;
+			const editorRect = this.$el.getBoundingClientRect();
+			el.style.top  = `${rect.bottom - editorRect.top + 4}px`;
+			el.style.left = `${rect.left - editorRect.left}px`;
+		},
 
 		validateCommentSize() {
 			const bytes = new TextEncoder().encode(this.html).length;
@@ -182,17 +406,24 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 				return;
 			}
 
-			this.editor
-				?.chain()
+			const editor = this.getActiveEditor();
+			if (!editor) {
+				return;
+			}
+
+			// Tiptap escapa alt/title internamente — no usar escapeHtml aquí
+			// (causaría doble codificación: &amp; en vez de &).
+			editor
+				.chain()
 				.focus()
 				.setImage({
 					src: dataUrl,
-					alt: escapeHtml(file.name || 'image'),
-					title: escapeHtml(file.name || 'image'),
+					alt: file.name || 'image',
+					title: file.name || 'image',
 				})
 				.run();
 
-			this.html = this.editor?.getHTML() || this.html;
+			this.html = editor.getHTML() || this.html;
 			this.validateCommentSize();
 		},
 
@@ -262,31 +493,38 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 			}
 
 			try {
-			switch (command) {
-				case 'bold':
-					editor.commands.toggleBold();
-					break;
-				case 'italic':
-					editor.commands.toggleItalic();
-					break;
-				case 'strike':
-					editor.commands.toggleStrike();
-					break;
-				case 'h2':
-					editor.commands.toggleHeading({ level: 2 });
-					break;
-				case 'bulletList':
-					editor.commands.toggleBulletList();
-					break;
-				case 'orderedList':
-					editor.commands.toggleOrderedList();
-					break;
-				case 'link':
+				// link abre un prompt — se gestiona aparte (necesita foco explícito)
+				if (command === 'link') {
 					this.promptForLink();
-					break;
-				default:
-					break;
-			}
+					return;
+				}
+
+				// Todos los demás comandos: sin .focus() — e.preventDefault() en mousedown
+				// ya mantiene el foco y la selección ProseMirror intactos.
+				// Llamar .focus() aquí resetea la selección antes de ejecutar el comando.
+				let chain = editor.chain();
+				switch (command) {
+					case 'bold':         chain = chain.toggleBold(); break;
+					case 'italic':       chain = chain.toggleItalic(); break;
+					case 'underline':    chain = chain.toggleUnderline(); break;
+					case 'strike':       chain = chain.toggleStrike(); break;
+					case 'code':         chain = chain.toggleCode(); break;
+					case 'highlight':    chain = chain.toggleHighlight(); break;
+					case 'alignLeft':    chain = chain.setTextAlign('left'); break;
+					case 'alignCenter':  chain = chain.setTextAlign('center'); break;
+					case 'alignRight':   chain = chain.setTextAlign('right'); break;
+					case 'superscript':  chain = chain.toggleSuperscript(); break;
+					case 'subscript':    chain = chain.toggleSubscript(); break;
+					case 'h2':           chain = chain.toggleHeading({ level: 2 }); break;
+					case 'h3':           chain = chain.toggleHeading({ level: 3 }); break;
+					case 'bulletList':   chain = chain.toggleBulletList(); break;
+					case 'orderedList':  chain = chain.toggleOrderedList(); break;
+					case 'taskList':     chain = chain.toggleTaskList(); break;
+					case 'codeBlock':    chain = chain.toggleCodeBlock(); break;
+					case 'image':        this.triggerImagePicker(); return;
+					default: return;
+				}
+				chain.run();
 			} catch (_error) {
 				// Avoid crashing the UI if a command races with teardown.
 			}
@@ -302,7 +540,7 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 				return;
 			}
 
-			const latestHtml = this.editor?.getHTML() || this.html || '';
+			const latestHtml = rawEditor?.getHTML() || this.html || '';
 			this.html = latestHtml;
 
 			if (!this.validateCommentSize()) {
@@ -332,7 +570,7 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 		},
 
 		destroy() {
-			if (this.$refs?.editorEl && this.$refs.editorEl.__tiptapEditor === this.editor) {
+			if (this.$refs?.editorEl && this.$refs.editorEl.__tiptapEditor === rawEditor) {
 				this.$refs.editorEl.__tiptapEditor = null;
 			}
 
@@ -340,7 +578,8 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 				this.$el.__tiptapController = null;
 			}
 
-			this.editor?.destroy();
+			rawEditor?.destroy();
+			rawEditor = null;
 			this.editor = null;
 			this.initialized = false;
 		},

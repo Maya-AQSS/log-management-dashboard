@@ -30,7 +30,7 @@ return [
         'ordered_list' => 'Llista numerada',
         'link' => 'Enllac',
         'insert_image' => 'Imatge',
-        'hint' => 'Pots apegar o arrossegar imatges. Maxim per imatge: 2 MB.',
+        'hint' => 'Escriu / per inserir blocs. Apega o arrossega imatges (max. 2 MB).',
         'placeholder' => 'Descriu context, causa arrel i resolucio aplicada...',
         'image_too_large' => 'La imatge supera el limit de 2 MB.',
         'image_invalid_type' => "Tipus d'imatge no valid.",
