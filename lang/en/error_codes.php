@@ -12,15 +12,23 @@ return [
         'severity' => 'Severity',
         'name' => 'Name',
         'description' => 'Description',
+        'file' => 'File',
+        'line' => 'Line',
+        'actions' => 'Actions',
     ],
 
     'buttons' => [
         'apply' => 'Apply',
         'reset' => 'Reset',
         'back' => 'Back',
+        'create' => '+ New Error Code',
     ],
 
     'filters' => [
         'severity' => 'Severity',
+        'search' => 'Search',
+        'search_placeholder' => 'Search by code or name',
+        'app' => 'App',
+        'app_all' => 'All applications',
     ],
 ];
