@@ -30,7 +30,8 @@ return [
 
     'status' => [
         'archived' => 'Arxivat',
-        'resolved' => 'Resolts',
+        'resolved' => 'Resolt',
+        'unresolved' => 'No resolt',
     ],
 
     'filters' => [
@@ -43,7 +44,7 @@ return [
         'archived_archived' => 'Arxivats',
         'archived_not_archived' => 'No arxivats',
 
-        'resolved' => 'Resolts',
+        'resolved' => 'Resolt',
         'resolved_all' => 'Tots',
         'resolved_resolved' => 'Resolts',
         'resolved_unresolved' => 'No resolts',

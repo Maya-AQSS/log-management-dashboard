@@ -31,6 +31,7 @@ return [
     'status' => [
         'archived' => 'Archivado',
         'resolved' => 'Resuelto',
+        'unresolved' => 'No resuelto',
     ],
 
     'filters' => [
