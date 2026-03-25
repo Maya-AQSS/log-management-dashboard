@@ -6,11 +6,11 @@
 
 <details
     @if($hasSelected) open @endif
-    class="rounded-xl border border-slate-300 bg-white px-3 py-2 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+    class="group rounded-xl border border-slate-300 bg-white px-3 py-2 shadow-sm dark:border-slate-700 dark:bg-slate-800"
 >
     <summary class="list-none cursor-pointer select-none flex items-center justify-between gap-3 text-sm font-medium text-slate-700 dark:text-slate-200">
         <span>{{ $title }}</span>
-        <span class="text-slate-500 dark:text-slate-300 font-semibold">v</span>
+        <x-chevron-down class="transition-transform group-open:rotate-180" />
     </summary>
 
     <div class="mt-2 grid grid-cols-2 gap-2">

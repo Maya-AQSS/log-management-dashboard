@@ -2,23 +2,25 @@
     <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
             <div>
-                <label class="block text-sm font-medium text-slate-700">
-                    {{ __('error_codes.filters.search') }}
-                </label>
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="searchInput"
-                    class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
+                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
                     placeholder="{{ __('error_codes.filters.search_placeholder') }}"
                 />
             </div>
 
-            <x-filters.application-select
-                wire:model.defer="filterAppInput"
-                :label="__('error_codes.filters.app')"
-                :placeholder="__('error_codes.filters.app_all')"
-                :applications="$applications"
-            />
+            <div>
+                <select
+                    wire:model.defer="filterAppInput"
+                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
+                >
+                    <option value="">{{ __('error_codes.filters.app') }}: {{ __('error_codes.filters.app_all') }}</option>
+                    @foreach($applications as $id => $name)
+                        <option value="{{ $id }}">{{ $name }}</option>
+                    @endforeach
+                </select>
+            </div>
 
             <div class="flex gap-2 md:justify-end">
                 <button

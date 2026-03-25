@@ -1,53 +1,88 @@
 <div>
     <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
-            <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
-                    {{ __('logs.filters.search') }}
-                </label>
-                <input
-                    type="text"
-                    wire:model.defer="searchInput"
-                    class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
-                    placeholder="{{ __('logs.filters.search_placeholder') }}"
-                />
+        <div class="space-y-5">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+                        {{ __('logs.filters.search') }}
+                    </label>
+                    <input
+                        type="text"
+                        wire:model.defer="searchInput"
+                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
+                        placeholder="{{ __('logs.filters.search_placeholder') }}"
+                    />
+                </div>
+
+                <div>
+                    <x-date-range-filter
+                        wire-model-from="dateFromInput"
+                        wire-model-to="dateToInput"
+                    />
+                    @error('dateFromInput')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                    @error('dateToInput')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
             </div>
 
-            <div>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <x-severity-filter-checkboxes
                     wire-model="severityInput"
                     :selected="$severityInput"
                 />
-            </div>
 
-            <div>
-                <x-date-range-filter
-                    wire-model-from="dateFromInput"
-                    wire-model-to="dateToInput"
-                />
-                @error('dateFromInput')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                @enderror
-                @error('dateToInput')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
-                    {{ __('logs.filters.resolved') }}
-                </label>
-                <select
-                    wire:model.defer="resolvedInput"
-                    class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
+                @php
+                    $hasResolvedSelected = in_array($resolvedInput, ['resolved', 'unresolved'], true);
+                @endphp
+                <details
+                    @if($hasResolvedSelected) open @endif
+                    class="group rounded-xl border border-slate-300 bg-white px-3 py-2 shadow-sm dark:border-slate-700 dark:bg-slate-800"
                 >
-                    <option value="">{{ __('logs.filters.resolved_all') }}</option>
-                    <option value="resolved">{{ __('logs.filters.resolved_resolved') }}</option>
-                    <option value="unresolved">{{ __('logs.filters.resolved_unresolved') }}</option>
-                </select>
-            </div>
+                    <summary class="list-none cursor-pointer select-none flex items-center justify-between gap-3 text-sm font-medium text-slate-700 dark:text-slate-200">
+                        <span>{{ __('logs.filters.resolved') }}</span>
+                        <x-chevron-down class="transition-transform group-open:rotate-180" />
+                    </summary>
 
-            <div class="flex gap-2 md:justify-end">
+                    <div class="mt-2 grid grid-cols-1 gap-2">
+                        <label class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                            <input
+                                type="radio"
+                                name="resolved-filter"
+                                value=""
+                                wire:model.defer="resolvedInput"
+                                class="h-4 w-4 border-slate-300 bg-white text-[#5b3853] shadow-sm focus:ring-[#5b3853]/30 dark:border-slate-700 dark:bg-slate-800"
+                            />
+                            {{ __('logs.filters.resolved_all') }}
+                        </label>
+                        <label class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                            <input
+                                type="radio"
+                                name="resolved-filter"
+                                value="resolved"
+                                wire:model.defer="resolvedInput"
+                                class="h-4 w-4 border-slate-300 bg-white text-[#5b3853] shadow-sm focus:ring-[#5b3853]/30 dark:border-slate-700 dark:bg-slate-800"
+                            />
+                            {{ __('logs.filters.resolved_resolved') }}
+                        </label>
+                        <label class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                            <input
+                                type="radio"
+                                name="resolved-filter"
+                                value="unresolved"
+                                wire:model.defer="resolvedInput"
+                                class="h-4 w-4 border-slate-300 bg-white text-[#5b3853] shadow-sm focus:ring-[#5b3853]/30 dark:border-slate-700 dark:bg-slate-800"
+                            />
+                            {{ __('logs.filters.resolved_unresolved') }}
+                        </label>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <div class="mt-4 flex w-full justify-center gap-2">
                 <button
                     type="button"
                     wire:click="applyFilters"
@@ -63,7 +98,6 @@
                 >
                     {{ __('logs.buttons.reset') }}
                 </button>
-            </div>
         </div>
     </div>
 
