@@ -55,7 +55,7 @@ class LogRepository implements LogRepositoryInterface
      */
     public function searchAndFilter(
         ?string $search,
-        ?string $severity,
+        ?array $severity,
         ?string $archived,
         ?string $resolved,
         int $perPage = 25
@@ -71,7 +71,7 @@ class LogRepository implements LogRepositoryInterface
             ])
             ->with(['application', 'errorCode'])
             ->when($search, fn ($q) => $q->where('message', 'ilike', '%' . $search . '%'))
-            ->when($severity, fn ($q) => $q->where('severity', $severity))
+            ->when($severity, fn ($q) => $q->whereIn('severity', $severity))
             ->when($archived, function ($q) use ($archived): void {
                 if ($archived === 'archived') {
                     $q->whereExists(fn ($subQuery) => $this->applyArchivedMatchForLogsQuery($subQuery));

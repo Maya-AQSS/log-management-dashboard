@@ -22,7 +22,7 @@ interface LogRepositoryInterface
      */
     public function searchAndFilter(
         ?string $search,
-        ?string $severity,
+        ?array $severity,
         ?string $archived,
         ?string $resolved,
         int $perPage = 25

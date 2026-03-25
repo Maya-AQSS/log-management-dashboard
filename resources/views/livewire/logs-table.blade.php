@@ -14,20 +14,10 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
-                    {{ __('logs.filters.severity') }}
-                </label>
-                <select
-                    wire:model.defer="severityInput"
-                    class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
-                >
-                    <option value="">{{ __('severity.all') }}</option>
-                    <option value="critical">{{ __('severity.critical') }}</option>
-                    <option value="high">{{ __('severity.high') }}</option>
-                    <option value="medium">{{ __('severity.medium') }}</option>
-                    <option value="low">{{ __('severity.low') }}</option>
-                    <option value="other">{{ __('severity.other') }}</option>
-                </select>
+                <x-severity-filter-checkboxes
+                    wire-model="severityInput"
+                    :selected="$severityInput"
+                />
             </div>
 
             <div>
