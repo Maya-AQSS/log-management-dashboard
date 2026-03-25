@@ -4,8 +4,14 @@ return [
     'menu' => 'Error Codes',
     'title' => 'Error Codes',
     'welcome' => 'Welcome to the error codes',
+    'create_title' => 'Create Error Code',
+    'create_subtitle' => 'Complete the fields to register a new error code',
+    'edit_title' => 'Edit Error Code',
+    'edit_subtitle' => 'Update the fields for the error code',
     'empty' => 'No error codes to display',
     'deleted' => 'Error Code deleted successfully',
+    'created' => 'Error Code created successfully',
+    'updated' => 'Error Code updated successfully',
 
     'table' => [
         'application' => 'Application',
@@ -25,6 +31,12 @@ return [
         'create' => '+ New Error Code',
         'edit' => 'Edit',
         'delete' => 'Delete',
+        'save' => 'Save',
+        'cancel' => 'Cancel',
+    ],
+
+    'form' => [
+        'application' => 'Application',
     ],
 
     'messages' => [

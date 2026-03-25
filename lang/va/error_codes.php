@@ -4,8 +4,14 @@ return [
     'menu' => 'Errors',
     'title' => 'Errors',
     'welcome' => 'Benvingut als errors',
+    'create_title' => 'Crear Error Code',
+    'create_subtitle' => 'Completa els camps per registrar un nou error code',
+    'edit_title' => 'Editar Error Code',
+    'edit_subtitle' => 'Actualitza els camps del error code',
     'empty' => 'No hi ha codis d\'error per mostrar',
     'deleted' => 'Error Code eliminat correctament',
+    'created' => 'Error Code creat correctament',
+    'updated' => 'Error Code actualitzat correctament',
 
     'table' => [
         'application' => 'Aplicació',
@@ -25,6 +31,12 @@ return [
         'create' => '+ Nou Error Code',
         'edit' => 'Editar',
         'delete' => 'Esborrar',
+        'save' => 'Guardar',
+        'cancel' => 'Cancelar',
+    ],
+
+    'form' => [
+        'application' => 'Aplicació',
     ],
 
     'messages' => [
