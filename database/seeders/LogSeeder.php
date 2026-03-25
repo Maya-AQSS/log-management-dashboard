@@ -11,6 +11,14 @@ class LogSeeder extends Seeder
     {
         $mockLogs = require database_path('data/mock-logs.php');
 
+        // Convert metadata arrays to JSON strings
+        $mockLogs = array_map(function ($log) {
+            if (is_array($log['metadata'])) {
+                $log['metadata'] = json_encode($log['metadata']);
+            }
+            return $log;
+        }, $mockLogs);
+
         DB::table('logs')->insert($mockLogs);
 
         DB::statement(
