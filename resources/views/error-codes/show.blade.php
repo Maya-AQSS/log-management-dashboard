@@ -8,39 +8,39 @@
         </a>
 
         <div class="text-center">
-            <h1 class="text-xl font-semibold">{{ __('error_codes.title') }}</h1>
+            <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">{{ __('error_codes.title') }}</h1>
         </div>
 
         <div class="w-20"></div>
     </div>
 
-    <div class="mt-4 bg-white border rounded-2xl p-4">
+    <div class="mt-4 bg-white border border-slate-200 rounded-2xl p-4 dark:bg-slate-900 dark:border-slate-700">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
             <div>
-                <div class="font-semibold">{{ __('error_codes.table.application') }}</div>
-                <div class="text-slate-700">{{ $errorCode->application?->name ?? '-' }}</div>
+                <div class="font-semibold text-slate-900 dark:text-slate-100">{{ __('error_codes.table.application') }}</div>
+                <div class="text-slate-700 dark:text-slate-200">{{ $errorCode->application?->name ?? '-' }}</div>
             </div>
 
             <div>
-                <div class="font-semibold">{{ __('error_codes.table.severity') }}</div>
-                <div class="text-slate-700">
+                <div class="font-semibold text-slate-900 dark:text-slate-100">{{ __('error_codes.table.severity') }}</div>
+                <div class="text-slate-700 dark:text-slate-200">
                     <x-severity-badge :severity="$errorCode->severity" />
                 </div>
             </div>
 
             <div>
-                <div class="font-semibold">{{ __('error_codes.table.code') }}</div>
-                <div class="text-slate-700 whitespace-nowrap">{{ $errorCode->code ?? '-' }}</div>
+                <div class="font-semibold text-slate-900 dark:text-slate-100">{{ __('error_codes.table.code') }}</div>
+                <div class="text-slate-700 dark:text-slate-200 whitespace-nowrap">{{ $errorCode->code ?? '-' }}</div>
             </div>
 
             <div>
-                <div class="font-semibold">{{ __('error_codes.table.name') }}</div>
-                <div class="text-slate-700">{{ $errorCode->name ?? '-' }}</div>
+                <div class="font-semibold text-slate-900 dark:text-slate-100">{{ __('error_codes.table.name') }}</div>
+                <div class="text-slate-700 dark:text-slate-200">{{ $errorCode->name ?? '-' }}</div>
             </div>
 
             <div class="md:col-span-2">
-                <div class="font-semibold">{{ __('error_codes.table.description') }}</div>
-                <div class="text-slate-700 break-words">{{ $errorCode->description ?? '-' }}</div>
+                <div class="font-semibold text-slate-900 dark:text-slate-100">{{ __('error_codes.table.description') }}</div>
+                <div class="text-slate-700 dark:text-slate-200 break-words">{{ $errorCode->description ?? '-' }}</div>
             </div>
         </div>
     </div>
