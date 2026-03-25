@@ -18,7 +18,7 @@ class LogService implements LogServiceInterface
     /**
      * Devuelve una página de logs.
      */
-    public function paginate(int $perPage = 15): LengthAwarePaginator
+    public function paginate(int $perPage = 25): LengthAwarePaginator
     {
         return $this->logRepository->paginate($perPage);
     }
@@ -57,7 +57,7 @@ class LogService implements LogServiceInterface
      * - si está archivado o no
      * - si está resuelto o no
      */
-    public function searchAndFilter(?string $search, ?string $severity, ?string $archived, ?string $resolved, int $perPage = 15): LengthAwarePaginator
+    public function searchAndFilter(?string $search, ?string $severity, ?string $archived, ?string $resolved, int $perPage = 25): LengthAwarePaginator
     {
         return $this->logRepository->searchAndFilter($search, $severity, $archived, $resolved, $perPage);
     }

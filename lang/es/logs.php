@@ -2,10 +2,10 @@
 
 return [
     'menu' => 'Logs',
-    'title' => 'Logs',
+    'title' => 'Listado de logs',
     'welcome' => 'Bienvenido a los logs',
 
-    'empty' => 'No hay logs para mostrar',
+    'empty' => 'No hay logs que coincidan con los filtros aplicados',
 
     'archived_success' => 'Log archivado correctamente',
     'archived_error' => 'No ha podido archivarse el log',
