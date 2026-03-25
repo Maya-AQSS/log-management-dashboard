@@ -28,6 +28,8 @@ return [
         'search' => 'Search',
         'search_placeholder' => 'e.g. error message',
         'severity' => 'Severity',
+        'application' => 'Application',
+        'application_all' => 'All applications',
 
         'archived' => 'Archived',
         'archived_all' => 'All',
@@ -35,6 +37,7 @@ return [
         'archived_not_archived' => 'Not archived',
 
         'resolved' => 'Resolved',
+        'resolved_group' => 'Resolved / Unresolved',
         'resolved_all' => 'All',
         'resolved_resolved' => 'Resolved',
         'resolved_unresolved' => 'Unresolved',

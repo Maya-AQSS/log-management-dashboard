@@ -28,6 +28,8 @@ return [
         'search' => 'Cercar',
         'search_placeholder' => "p. ex. missatge de l'error",
         'severity' => 'Severitat',
+        'application' => 'Aplicació',
+        'application_all' => 'Totes les aplicacions',
 
         'archived' => 'Arxivat',
         'archived_all' => 'Tots',
@@ -35,6 +37,7 @@ return [
         'archived_not_archived' => 'No arxivats',
 
         'resolved' => 'Resolts',
+        'resolved_group' => 'Resolts / No resolts',
         'resolved_all' => 'Tots',
         'resolved_resolved' => 'Resolts',
         'resolved_unresolved' => 'No resolts',
