@@ -50,4 +50,18 @@ return [
         'app' => 'App',
         'app_all' => 'Todas las aplicaciones',
     ],
+
+    'validation' => [
+        'application_id_required' => 'La aplicación es obligatoria.',
+        'application_id_invalid' => 'La aplicación seleccionada no es válida.',
+        'code_required' => 'El código de error es obligatorio.',
+        'code_max' => 'El código de error no puede superar los 255 caracteres.',
+        'code_unique' => 'Ya existe un código con este ID para esta aplicación.',
+        'name_required' => 'El nombre es obligatorio.',
+        'name_max' => 'El nombre no puede superar los 255 caracteres.',
+        'file_max' => 'El fichero no puede superar los 255 caracteres.',
+        'line_integer' => 'La línea debe ser un número entero.',
+        'line_min' => 'La línea debe ser mayor que 0.',
+        'severity_invalid' => 'La severidad seleccionada no es válida.',
+    ],
 ];

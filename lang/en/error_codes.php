@@ -50,4 +50,18 @@ return [
         'app' => 'App',
         'app_all' => 'All applications',
     ],
+
+    'validation' => [
+        'application_id_required' => 'Application is required.',
+        'application_id_invalid' => 'Selected application is invalid.',
+        'code_required' => 'Error code is required.',
+        'code_max' => 'Error code may not be greater than 255 characters.',
+        'code_unique' => 'An error code with this ID already exists for this application.',
+        'name_required' => 'Name is required.',
+        'name_max' => 'Name may not be greater than 255 characters.',
+        'file_max' => 'File may not be greater than 255 characters.',
+        'line_integer' => 'Line must be an integer.',
+        'line_min' => 'Line must be greater than 0.',
+        'severity_invalid' => 'Selected severity is invalid.',
+    ],
 ];

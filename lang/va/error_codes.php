@@ -50,4 +50,18 @@ return [
         'app' => 'App',
         'app_all' => 'Totes les aplicacions',
     ],
+
+    'validation' => [
+        'application_id_required' => 'L\'aplicació és obligatòria.',
+        'application_id_invalid' => 'L\'aplicació seleccionada no és vàlida.',
+        'code_required' => 'El codi d\'error és obligatori.',
+        'code_max' => 'El codi d\'error no pot superar els 255 caràcters.',
+        'code_unique' => 'Ja existix un codi en este ID per a esta aplicació.',
+        'name_required' => 'El nom és obligatori.',
+        'name_max' => 'El nom no pot superar els 255 caràcters.',
+        'file_max' => 'El fitxer no pot superar els 255 caràcters.',
+        'line_integer' => 'La línia ha de ser un número sancer.',
+        'line_min' => 'La línia ha de ser major que 0.',
+        'severity_invalid' => 'La severitat seleccionada no és vàlida.',
+    ],
 ];
