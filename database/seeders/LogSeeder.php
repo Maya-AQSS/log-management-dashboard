@@ -18,7 +18,7 @@ class LogSeeder extends Seeder
             return $row;
         }, $mockLogs);
         
-        DB::table('logs')->insert($mockLogs);
+        DB::table('logs')->insert($rows);
 
         DB::statement(
             "SELECT setval(pg_get_serial_sequence('logs', 'id'), (SELECT COALESCE(MAX(id), 1) FROM logs))"
