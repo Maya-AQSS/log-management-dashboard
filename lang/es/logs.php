@@ -10,6 +10,15 @@ return [
     'archived_success' => 'Log archivado correctamente',
     'archived_error' => 'No ha podido archivarse el log',
 
+    'detail' => [
+        'title' => 'Detalle del log',
+        'id' => 'ID',
+        'file' => 'Archivo',
+        'line' => 'Línea',
+        'metadata' => 'Metadatos (JSON)',
+        'no_metadata' => 'Sin metadatos',
+    ],
+
     'table' => [
         'application' => 'Aplicación',
         'severity' => 'Severidad',
@@ -41,6 +50,7 @@ return [
     ],
 
     'buttons' => [
+        'back' => 'Volver',
         'apply' => 'Aplicar',
         'reset' => 'Limpiar',
         'archive' => 'Archivar',

@@ -10,6 +10,15 @@ return [
     'archived_success' => 'Log arxivat correctament',
     'archived_error' => "No s'ha pogut arxivar el log",
 
+    'detail' => [
+        'title' => 'Detall del log',
+        'id' => 'ID',
+        'file' => 'Fitxer',
+        'line' => 'Línia',
+        'metadata' => 'Metadades (JSON)',
+        'no_metadata' => 'Sense metadades',
+    ],
+
     'table' => [
         'application' => 'Aplicació',
         'severity' => 'Severitat',
@@ -41,6 +50,7 @@ return [
     ],
 
     'buttons' => [
+        'back' => 'Tornar',
         'apply' => 'Aplicar',
         'reset' => 'Netejar',
         'archive' => 'Arxivar',

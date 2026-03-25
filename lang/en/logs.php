@@ -10,6 +10,15 @@ return [
     'archived_success' => 'Log archived successfully',
     'archived_error' => 'The log could not be archived',
 
+    'detail' => [
+        'title' => 'Log detail',
+        'id' => 'ID',
+        'file' => 'File',
+        'line' => 'Line',
+        'metadata' => 'Metadata (JSON)',
+        'no_metadata' => 'No metadata',
+    ],
+
     'table' => [
         'application' => 'Application',
         'severity' => 'Severity',
@@ -41,6 +50,7 @@ return [
     ],
 
     'buttons' => [
+        'back' => 'Back',
         'apply' => 'Apply',
         'reset' => 'Reset',
         'archive' => 'Archive',
