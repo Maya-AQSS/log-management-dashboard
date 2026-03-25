@@ -65,6 +65,14 @@ class ErrorCodesTable extends Component
         $this->resetPage();
     }
 
+    public function updatedSearchInput(string $value): void
+    {
+        $this->search = trim(substr($value, 0, 255));
+        $this->searchInput = $this->search;
+
+        $this->resetPage();
+    }
+
     public function render(): View
     {
         $applications = Application::query()

@@ -7,26 +7,18 @@
                 </label>
                 <input
                     type="text"
-                    wire:model.defer="searchInput"
+                    wire:model.live.debounce.300ms="searchInput"
                     class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
                     placeholder="{{ __('error_codes.filters.search_placeholder') }}"
                 />
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-slate-700">
-                    {{ __('error_codes.filters.app') }}
-                </label>
-                <select
-                    wire:model.defer="filterAppInput"
-                    class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
-                >
-                    <option value="">{{ __('error_codes.filters.app_all') }}</option>
-                    @foreach($applications as $id => $name)
-                        <option value="{{ $id }}">{{ $name }}</option>
-                    @endforeach
-                </select>
-            </div>
+            <x-filters.application-select
+                wire:model.defer="filterAppInput"
+                :label="__('error_codes.filters.app')"
+                :placeholder="__('error_codes.filters.app_all')"
+                :applications="$applications"
+            />
 
             <div class="flex gap-2 md:justify-end">
                 <button
@@ -76,21 +68,28 @@
                     <td class="px-3 py-2 text-slate-700 whitespace-nowrap">
                         <div class="flex gap-2">
                             <a
-                                href="{{ route('error-codes.show', $item->id) }}"
+                                href="{{ route('error-codes.edit', $item->id) }}"
                                 onclick="event.stopPropagation()"
                                 class="inline-flex items-center rounded-full border border-slate-300 bg-white px-3 py-1 text-sm font-semibold text-slate-800 hover:bg-slate-50"
                             >
-                                Editar
+                                {{ __('error_codes.buttons.edit') }}
                             </a>
 
-                            <button
-                                type="button"
+                            <form
+                                method="POST"
+                                action="{{ route('error-codes.destroy', $item->id) }}"
                                 onclick="event.stopPropagation()"
-                                class="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-400 cursor-not-allowed"
-                                disabled
+                                onsubmit="return confirm('{{ __('error_codes.messages.delete_confirm') }}')"
                             >
-                                Borrar
-                            </button>
+                                @csrf
+                                @method('DELETE')
+                                <button
+                                    type="submit"
+                                    class="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-3 py-1 text-sm font-semibold text-red-700 hover:bg-red-100"
+                                >
+                                    {{ __('error_codes.buttons.delete') }}
+                                </button>
+                            </form>
                         </div>
                     </td>
                 </tr>
