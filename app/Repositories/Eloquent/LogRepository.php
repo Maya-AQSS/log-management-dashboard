@@ -16,7 +16,7 @@ class LogRepository implements LogRepositoryInterface
     /**
      * Devuelve una página de logs.
      */
-    public function paginate(int $perPage = 15): LengthAwarePaginator
+    public function paginate(int $perPage = 25): LengthAwarePaginator
     {
         return Log::query()
             ->with(['application', 'errorCode'])
@@ -55,10 +55,10 @@ class LogRepository implements LogRepositoryInterface
      */
     public function searchAndFilter(
         ?string $search,
-        ?string $severity,
+        ?array $severity,
         ?string $archived,
         ?string $resolved,
-        int $perPage = 15
+        int $perPage = 25
     ): LengthAwarePaginator
     {
         $archivedFlagSubquery = ArchivedLog::query()->selectRaw('1');
@@ -71,7 +71,7 @@ class LogRepository implements LogRepositoryInterface
             ])
             ->with(['application', 'errorCode'])
             ->when($search, fn ($q) => $q->where('message', 'ilike', '%' . $search . '%'))
-            ->when($severity, fn ($q) => $q->where('severity', $severity))
+            ->when($severity, fn ($q) => $q->whereIn('severity', $severity))
             ->when($archived, function ($q) use ($archived): void {
                 if ($archived === 'archived') {
                     $q->whereExists(fn ($subQuery) => $this->applyArchivedMatchForLogsQuery($subQuery));

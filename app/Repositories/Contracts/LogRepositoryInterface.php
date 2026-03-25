@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 
 interface LogRepositoryInterface
 {
-    public function paginate(int $perPage = 15): LengthAwarePaginator;
+    public function paginate(int $perPage = 25): LengthAwarePaginator;
 
     public function findOrFail(int $id): Log;
 
@@ -22,10 +22,10 @@ interface LogRepositoryInterface
      */
     public function searchAndFilter(
         ?string $search,
-        ?string $severity,
+        ?array $severity,
         ?string $archived,
         ?string $resolved,
-        int $perPage = 15
+        int $perPage = 25
     ): LengthAwarePaginator;
 
     /**

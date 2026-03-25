@@ -44,3 +44,15 @@ Thumbs.db
 /coverage/
 /.php-cs-fixer.cache
 /phpstan.neon.tmp
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+__MACOSX/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

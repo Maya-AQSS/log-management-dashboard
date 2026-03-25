@@ -10,7 +10,7 @@ interface LogServiceInterface
     /**
      * Devuelve una página de logs.
      */
-    public function paginate(int $perPage = 15): LengthAwarePaginator;
+    public function paginate(int $perPage = 25): LengthAwarePaginator;
 
     /**
      * Encuentra un log por su id.
@@ -27,10 +27,10 @@ interface LogServiceInterface
      */
     public function searchAndFilter(
         ?string $search,
-        ?string $severity,
+        ?array $severity,
         ?string $archived,
         ?string $resolved,
-        int $perPage = 15
+        int $perPage = 25
     ): LengthAwarePaginator;
 
     /**

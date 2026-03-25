@@ -11,7 +11,14 @@ class LogSeeder extends Seeder
     {
         $mockLogs = require database_path('data/mock-logs.php');
 
-        DB::table('logs')->insert($mockLogs);
+        $rows = array_map(function (array $row) {
+            if (isset($row['metadata']) && is_array($row['metadata'])) {
+                $row['metadata'] = json_encode($row['metadata'], JSON_UNESCAPED_UNICODE);
+            }
+            return $row;
+        }, $mockLogs);
+        
+        DB::table('logs')->insert($rows);
 
         DB::statement(
             "SELECT setval(pg_get_serial_sequence('logs', 'id'), (SELECT COALESCE(MAX(id), 1) FROM logs))"

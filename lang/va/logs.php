@@ -2,10 +2,10 @@
 
 return [
     'menu' => 'Logs',
-    'title' => 'Logs',
+    'title' => 'Llistat de logs',
     'welcome' => 'Benvingut als logs',
 
-    'empty' => 'No hi ha logs per mostrar',
+    'empty' => "No hi ha logs que coincideixin amb els filtres aplicats",
 
     'archived_success' => 'Log arxivat correctament',
     'archived_error' => "No s'ha pogut arxivar el log",
