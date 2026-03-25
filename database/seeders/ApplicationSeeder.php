@@ -13,12 +13,16 @@ class ApplicationSeeder extends Seeder
      */
     public function run(): void
     {
-        Application::updateOrCreate(
-            ['id' => 1],
-            [
-                'name'        => 'Application 1',
-                'description' => 'Description 1',
-            ]
-        );
+        $applications = require database_path('data/mock-applications.php');
+
+        foreach ($applications as $application) {
+            Application::updateOrCreate(
+                ['id' => $application['id']],
+                [
+                    'name' => $application['name'],
+                    'description' => $application['description'],
+                ]
+            );
+        }
     }
 }

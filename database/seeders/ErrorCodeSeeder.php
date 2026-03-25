@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\ErrorCode;
+use Illuminate\Support\Facades\DB;
 
 class ErrorCodeSeeder extends Seeder
 {
@@ -13,15 +14,25 @@ class ErrorCodeSeeder extends Seeder
      */
     public function run(): void
     {
-        ErrorCode::updateOrCreate(
-            ['id' => 1],
-            [
-                'code'        => 'ERR-001',
-                'application_id' => 1,
-                'name'        => 'Error Code 1',
-                'description' => 'Description 1',
-                'severity'    => 'low',
-            ]
-        );
+        $errorCodes = require database_path('data/mock-error-codes.php');
+
+        foreach ($errorCodes as $errorCode) {
+            ErrorCode::updateOrCreate(
+                ['id' => $errorCode['id']],
+                [
+                    'code' => $errorCode['code'],
+                    'application_id' => $errorCode['application_id'],
+                    'name' => $errorCode['name'],
+                    'description' => $errorCode['description'],
+                    'severity' => $errorCode['severity'],
+                ]
+            );
+        }
+
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement(
+                "SELECT setval(pg_get_serial_sequence('error_codes', 'id'), (SELECT COALESCE(MAX(id), 1) FROM error_codes))"
+            );
+        }
     }
 }

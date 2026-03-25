@@ -51,8 +51,10 @@ class ArchivedLogSeeder extends Seeder
         Resync de la secuencia PostgreSQL para evitar UniqueConstraintViolation al insertar nuevos ArchivedLogs 
         Al eliminarlo será necesario hacer "sail migrate:fresh --seed"
         */
-        DB::statement(
-            "SELECT setval(pg_get_serial_sequence('archived_logs', 'id'), (SELECT COALESCE(MAX(id), 1) FROM archived_logs))"
-        );
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement(
+                "SELECT setval(pg_get_serial_sequence('archived_logs', 'id'), (SELECT COALESCE(MAX(id), 1) FROM archived_logs))"
+            );
+        }
     }
 }
