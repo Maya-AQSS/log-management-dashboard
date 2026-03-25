@@ -9,6 +9,7 @@ GRANT SELECT ON applications TO panel_user;
 
 -- archived_logs: lectura/escritura, sin DELETE por diseño (Escenario 2)
 GRANT SELECT, INSERT, UPDATE ON archived_logs TO panel_user;
+REVOKE DELETE, TRUNCATE ON archived_logs FROM panel_user;
 
 -- comments: lectura/escritura (polimórfica: cubre archived_logs y error_codes)
 GRANT SELECT, INSERT, UPDATE ON comments TO panel_user;

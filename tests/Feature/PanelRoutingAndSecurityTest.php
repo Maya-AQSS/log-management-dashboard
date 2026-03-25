@@ -98,7 +98,7 @@ class PanelRoutingAndSecurityTest extends TestCase
             ->assertHeader('Content-Type', 'text/event-stream; charset=UTF-8');
     }
 
-    public function test_archived_log_delete_route_uses_policy_authorization(): void
+    public function test_archived_log_delete_route_soft_deletes_and_hides_from_default_views(): void
     {
         [$owner, , $archivedLog] = $this->seedPanelRecords();
 
@@ -112,9 +112,48 @@ class PanelRoutingAndSecurityTest extends TestCase
             ->delete('/archived-logs/' . $archivedLog->id)
             ->assertRedirect(route('archived-logs.index'));
 
-        $this->assertDatabaseMissing('archived_logs', [
+        $this->assertSoftDeleted('archived_logs', [
             'id' => $archivedLog->id,
         ]);
+
+        $this->get('/archived-logs/' . $archivedLog->id)
+            ->assertNotFound();
+    }
+
+    public function test_two_year_old_archived_log_and_comments_remain_accessible_when_not_deleted(): void
+    {
+        [$user, , $archivedLog] = $this->seedPanelRecords();
+
+        $archivedLog->update([
+            'archived_at' => now()->subYears(2),
+            'original_created_at' => now()->subYears(2)->subDay(),
+        ]);
+
+        Comment::query()->create([
+            'commentable_type' => ArchivedLog::class,
+            'commentable_id' => $archivedLog->id,
+            'user_id' => $user->id,
+            'content' => 'Comentario A historico',
+        ]);
+
+        Comment::query()->create([
+            'commentable_type' => ArchivedLog::class,
+            'commentable_id' => $archivedLog->id,
+            'user_id' => $user->id,
+            'content' => 'Comentario B historico',
+        ]);
+
+        $this->actingAs($user)
+            ->get('/archived-logs/' . $archivedLog->id)
+            ->assertOk()
+            ->assertSee('Archived test log');
+
+        Livewire::test(CommentThread::class, [
+            'commentableType' => 'archived-log',
+            'commentableId' => $archivedLog->id,
+        ])
+            ->assertSee('Comentario A historico')
+            ->assertSee('Comentario B historico');
     }
 
     public function test_livewire_comment_actions_validate_user_input_before_persisting(): void
