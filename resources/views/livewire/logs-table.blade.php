@@ -1,6 +1,6 @@
 <div>
     <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
             <div>
                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
                     {{ __('logs.filters.search') }}
@@ -18,6 +18,19 @@
                     wire-model="severityInput"
                     :selected="$severityInput"
                 />
+            </div>
+
+            <div>
+                <x-date-range-filter
+                    wire-model-from="dateFromInput"
+                    wire-model-to="dateToInput"
+                />
+                @error('dateFromInput')
+                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                @enderror
+                @error('dateToInput')
+                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                @enderror
             </div>
 
             <div>
