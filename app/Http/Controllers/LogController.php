@@ -12,9 +12,7 @@ class LogController extends Controller
 
     public function index(): View
     {
-        $logs = $this->logService->paginate(15);
-
-        return view('logs.index', ['logs' => $logs]);
+        return view('logs.index');
     }
 
     public function show(int $id): View

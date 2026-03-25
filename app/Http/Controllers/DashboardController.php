@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\DashboardIndexRequest;
 use App\Services\Contracts\LogServiceInterface;
 use Illuminate\Contracts\View\View;
 
@@ -10,21 +9,23 @@ class DashboardController extends Controller
 {
     public function __construct(private LogServiceInterface $logService) {}
 
-    public function index(DashboardIndexRequest $request): View
+    /**
+     * Muestra el dashboard con las cards de resumen por severidad de error, incluyendo la card "Todos" (total de logs).
+     */
+    public function index(): View
     {
-        $includeArchived = $request->boolean('include_archived', false);
-
-        $cards = collect($this->logService->dashboardSeverityCards($includeArchived))
+        $cards = collect($this->logService->dashboardSeverityCards())
             ->map(fn (array $card): array => [
                 ...$card,
                 'title' => __('severity.' . $card['key']),
-                'href' => route('logs.index', $card['routeParams']),
+                'href' => route('logs.index', $card['key'] === 'all'
+                    ? []
+                    : ['severity' => $card['key']]),
             ])
             ->all();
 
         return view('dashboard', [
             'cards' => $cards,
-            'includeArchived' => $includeArchived,
             'unresolvedLabel' => __('logs.filters.resolved_unresolved'),
             'resolvedLabel' => __('logs.filters.resolved_resolved'),
         ]);

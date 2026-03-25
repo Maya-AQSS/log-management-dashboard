@@ -20,7 +20,6 @@ foreach ($severities as $severity) {
                 'source' => 'mock-logs.php',
                 'batch' => 'dashboard-cards',
             ],
-            'matched_archived_log_id' => $i % 4 === 0 ? 1 : null,
             'resolved' => $i % 2 === 0,
             'created_at' => $baseDate->modify('-' . (($id - 1) * 3) . ' minutes')->format('Y-m-d H:i:s'),
         ];
@@ -41,7 +40,6 @@ for($i = 1; $i <= 5; $i++) {
             'source' => 'mock-logs.php',
             'batch' => 'dashboard-cards',
         ],
-        'matched_archived_log_id' => null,
         'resolved' => false,
         'created_at' => $baseDate->modify('-' . (($id - 1) * 3) . ' minutes')->format('Y-m-d H:i:s'),
     ];

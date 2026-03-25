@@ -37,6 +37,8 @@ Thumbs.db
 /storage/logs/*
 !/storage/logs/.gitignore
 
+/storage/debugbar
+
 /coverage/
 /.php-cs-fixer.cache
 /phpstan.neon.tmp

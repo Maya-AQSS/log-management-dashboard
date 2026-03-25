@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\DB;
 
 class ArchivedLogRepository implements ArchivedLogRepositoryInterface
 {
+    /**
+     * Devuelve una página de logs archivados.
+     */
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
         return ArchivedLog::query()
@@ -20,6 +23,11 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
             ->withQueryString();
     }
 
+    /**
+     * Busca y filtra logs archivados por diferentes criterios: 
+     * - tipo de severidad de error
+     * - si tiene tutorial o no
+     */
     public function searchAndFilter(
         ?string $severity,
         ?string $tutorial,
@@ -41,6 +49,9 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
             ->withQueryString();
     }
 
+    /**
+     * Busca un log archivado por su id.
+     */
     public function findOrFail(int $id): ArchivedLog
     {
         return ArchivedLog::query()
@@ -49,19 +60,36 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
             ->findOrFail($id);
     }
 
+    /**
+     * Elimina un log archivado.
+     */
     public function delete(ArchivedLog $archivedLog): void
     {
         $archivedLog->delete();
     }
 
+    /**
+     * Archiva un log por su id.
+     */
     public function archiveFromLogId(int $logId, int $archivedById): ArchivedLog
     {
         return DB::transaction(function () use ($logId, $archivedById): ArchivedLog {
             $log = Log::query()
                 ->with(['errorCode'])
                 ->whereKey($logId)
-                ->whereNull('matched_archived_log_id') // solo activo
                 ->firstOrFail();
+
+            $existingArchived = ArchivedLog::query()
+                ->where('application_id', $log->application_id)
+                ->whereRaw('error_code_id IS NOT DISTINCT FROM ?', [$log->error_code_id])
+                ->where('severity', $log->severity)
+                ->where('message', $log->message)
+                ->where('original_created_at', $log->created_at)
+                ->first();
+
+            if ($existingArchived !== null) {
+                return $existingArchived;
+            }
 
             $archivedLog = ArchivedLog::query()->create([
                 'application_id' => (int) $log->application_id,
@@ -75,17 +103,6 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
                 'original_created_at' => $log->created_at,
                 'archived_at' => now(),
             ]);
-
-            $updated = Log::query()
-                ->whereKey($logId)
-                ->whereNull('matched_archived_log_id')
-                ->update(['matched_archived_log_id' => $archivedLog->id]);
-
-            if ($updated !== 1) {
-                // Evita inconsistencias si algo cambió entre lecturas
-                $archivedLog->forceDelete();
-                abort(409, 'Log already archived.');
-            }
 
             return $archivedLog;
         });

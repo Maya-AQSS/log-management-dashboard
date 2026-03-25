@@ -115,7 +115,7 @@
                                 </span>
                             @endif
 
-                            @if($log->matched_archived_log_id !== null)
+                            @if((bool) ($log->is_archived ?? false))
                                 <span class="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">
                                     {{ __('logs.status.archived') }}
                                 </span>

@@ -46,8 +46,4 @@ class Log extends Model
         return $this->belongsTo(ErrorCode::class);
     }
 
-    public function archivedLog(): BelongsTo
-    {
-        return $this->belongsTo(ArchivedLog::class, 'matched_archived_log_id');
-    }
 }

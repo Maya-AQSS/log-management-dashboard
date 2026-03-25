@@ -55,7 +55,6 @@ class PanelRoutingAndSecurityTest extends TestCase
             'file' => 'app/Jobs/Test.php',
             'line' => 12,
             'metadata' => json_encode(['context' => 'test']),
-            'matched_archived_log_id' => $archivedLog->id,
             'resolved' => false,
             'created_at' => now(),
         ]);
@@ -207,8 +206,9 @@ class PanelRoutingAndSecurityTest extends TestCase
         Livewire::test(CommentThread::class, [
             'commentableType' => 'archived-log',
             'commentableId' => $archivedLog->id,
-        ])->call('deleteComment', $comment->id)
-        ->assertForbidden();
+        ])
+            ->call('deleteComment', $comment->id)
+            ->assertForbidden();
     }
 
     private function seedPanelRecords(): array
@@ -249,7 +249,6 @@ class PanelRoutingAndSecurityTest extends TestCase
             'file' => 'app/Jobs/Test.php',
             'line' => 12,
             'metadata' => json_encode(['context' => 'test']),
-            'matched_archived_log_id' => $archivedLog->id,
             'resolved' => false,
             'created_at' => now(),
         ]);

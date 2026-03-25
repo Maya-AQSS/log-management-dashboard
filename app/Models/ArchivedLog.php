@@ -59,9 +59,4 @@ class ArchivedLog extends Model
     {
         return $this->morphMany(Comment::class, 'commentable');
     }
-
-    public function logs(): HasMany
-    {
-        return $this->hasMany(Log::class, 'matched_archived_log_id');
-    }
 }

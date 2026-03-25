@@ -7,8 +7,14 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface LogServiceInterface
 {
+    /**
+     * Devuelve una página de logs.
+     */
     public function paginate(int $perPage = 15): LengthAwarePaginator;
 
+    /**
+     * Encuentra un log por su id.
+     */
     public function findOrFail(int $id): Log;
 
     /**
@@ -17,7 +23,7 @@ interface LogServiceInterface
     public function streamPayload(int $limit = 10): array;
 
     /**
-     * Buscar y filtrar.
+     * Busca y filtra logs.
      */
     public function searchAndFilter(
         ?string $search,
@@ -28,14 +34,15 @@ interface LogServiceInterface
     ): LengthAwarePaginator;
 
     /**
-     * Data de cards del dashboard con estado resolved/unresolved.
+     * Devuelve los datos de las cards del dashboard con estado resolved/unresolved.
+     * Incluye todas las severidades y la card "all" usando el total de logs.
      *
-     * @return array<int,array{key:string,count:int,resolvedCount:int,unresolvedCount:int,routeParams:array<string,string>}>
+     * @return array<int,array{key:string,totalCount:int,resolvedCount:int,unresolvedCount:int}>
      */
-    public function dashboardSeverityCards(bool $includeArchived = false): array;
+    public function dashboardSeverityCards(): array;
 
     /**
-     * Devuelve el id de ArchivedLog asociado al log o null si no está archivado.
+     * Devuelve el id de ArchivedLog equivalente al log o null si no está archivado.
      */
     public function archivedLogIdFor(int $logId): ?int;
 }
