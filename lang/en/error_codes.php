@@ -5,6 +5,7 @@ return [
     'title' => 'Error Codes',
     'welcome' => 'Welcome to the error codes',
     'empty' => 'No error codes to display',
+    'deleted' => 'Error Code deleted successfully',
 
     'table' => [
         'application' => 'Application',
@@ -22,6 +23,12 @@ return [
         'reset' => 'Reset',
         'back' => 'Back',
         'create' => '+ New Error Code',
+        'edit' => 'Edit',
+        'delete' => 'Delete',
+    ],
+
+    'messages' => [
+        'delete_confirm' => 'Are you sure you want to delete this Error Code?',
     ],
 
     'filters' => [

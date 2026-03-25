@@ -5,6 +5,7 @@ return [
     'title' => 'Errors',
     'welcome' => 'Benvingut als errors',
     'empty' => 'No hi ha codis d\'error per mostrar',
+    'deleted' => 'Error Code eliminat correctament',
 
     'table' => [
         'application' => 'Aplicació',
@@ -22,6 +23,12 @@ return [
         'reset' => 'Netejar',
         'back' => 'Enrere',
         'create' => '+ Nou Error Code',
+        'edit' => 'Editar',
+        'delete' => 'Esborrar',
+    ],
+
+    'messages' => [
+        'delete_confirm' => 'Segur que vols esborrar este Error Code?',
     ],
 
     'filters' => [

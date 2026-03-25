@@ -5,6 +5,7 @@ return [
     'title' => 'Errores',
     'welcome' => 'Bienvenido a los errores',
     'empty' => 'No hay códigos de error para mostrar',
+    'deleted' => 'Error Code eliminado correctamente',
 
     'table' => [
         'application' => 'Aplicación',
@@ -22,6 +23,12 @@ return [
         'reset' => 'Limpiar',
         'back' => 'Volver',
         'create' => '+ Nuevo Error Code',
+        'edit' => 'Editar',
+        'delete' => 'Borrar',
+    ],
+
+    'messages' => [
+        'delete_confirm' => '¿Seguro que quieres borrar este Error Code?',
     ],
 
     'filters' => [
