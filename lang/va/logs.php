@@ -28,6 +28,9 @@ return [
         'search' => 'Cercar',
         'search_placeholder' => "p. ex. missatge de l'error",
         'severity' => 'Severitat',
+        'date_range' => 'Rang de dates',
+        'date_from' => 'Data inici',
+        'date_to' => 'Data fi',
 
         'archived' => 'Arxivat',
         'archived_all' => 'Tots',

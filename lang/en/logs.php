@@ -28,6 +28,9 @@ return [
         'search' => 'Search',
         'search_placeholder' => 'e.g. error message',
         'severity' => 'Severity',
+        'date_range' => 'Date range',
+        'date_from' => 'Start date',
+        'date_to' => 'End date',
 
         'archived' => 'Archived',
         'archived_all' => 'All',
