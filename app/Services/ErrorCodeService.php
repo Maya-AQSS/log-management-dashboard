@@ -31,4 +31,19 @@ class ErrorCodeService implements ErrorCodeServiceInterface
     {
         return $this->errorCodeRepository->findOrFail($id);
     }
+
+    public function create(array $data): ErrorCode
+    {
+        return $this->errorCodeRepository->create($data);
+    }
+
+    public function update(ErrorCode $errorCode, array $data): ErrorCode
+    {
+        return $this->errorCodeRepository->update($errorCode, $data);
+    }
+
+    public function delete(ErrorCode $errorCode): void
+    {
+        $this->errorCodeRepository->delete($errorCode);
+    }
 }
