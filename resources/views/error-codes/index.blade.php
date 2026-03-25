@@ -1,6 +1,7 @@
 <x-layout>
-    <h1 class="text-xl font-semibold text-center">{{ __('error_codes.title') }}</h1>
-    <p class="text-base text-gray-500 text-center mb-5">{{ __('error_codes.welcome') }}</p>
+    <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100 text-center">
+        {{ __('error_codes.title') }}
+    </h1>
 
     <div class="mb-4 flex justify-end">
         <a
