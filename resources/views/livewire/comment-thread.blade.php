@@ -1,6 +1,16 @@
 <div>
     <style>
         /* ── Estilos compartidos: editor y visualización de comentarios ── */
+        .rte-content a {
+            color: #2563eb;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .rte-content a:hover {
+            color: #1d4ed8;
+        }
+
         .rte-content img {
             max-width: 100%;
             border-radius: 0.75rem;

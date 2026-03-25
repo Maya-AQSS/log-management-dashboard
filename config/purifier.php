@@ -58,13 +58,20 @@ return [
          */
         'custom_definition' => [
             'id'    => 'tiptap-tasklist',
-            'rev'   => 2,
+            'rev'   => 4,
             'debug' => false,
+            'elements' => [
+                // <mark> es HTML5 — no existe en HTML 4.01 Transitional.
+                // Hay que registrarlo explícitamente como elemento inline.
+                // El 5.º parámetro registra atributos propios del elemento;
+                // es necesario porque mews/purifier procesa attributes ANTES
+                // que elements, así que data-color no puede ir en 'attributes'.
+                ['mark', 'Inline', 'Inline', 'Common', ['data-color' => 'Text']],
+            ],
             'attributes' => [
                 ['ul',   'data-type',    'CDATA'],
                 ['li',   'data-type',    'CDATA'],
                 ['li',   'data-checked', 'CDATA'],
-                ['mark', 'data-color',   'CDATA'],
             ],
         ],
     ],

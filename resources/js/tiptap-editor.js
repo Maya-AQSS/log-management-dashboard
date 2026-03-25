@@ -29,7 +29,7 @@ const lowlight = createLowlight({
 	yaml:       common.yaml,
 });
 
-const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 let tiptapInstanceSequence = 0;
 
 const FILE_SIGNATURES = [
@@ -196,14 +196,18 @@ window.tiptapEditor = function tiptapEditor(options = {}) {
 				extensions: [
 					StarterKit.configure({
 						link: {
-							openOnClick: false,
+							openOnClick: 'whenNotEditable',
 							autolink: true,
 							protocols: ['http', 'https'],
+							HTMLAttributes: {
+								target: '_blank',
+								rel: 'noopener noreferrer nofollow',
+							},
 						},
 						codeBlock: false,  // lo reemplaza CodeBlockLowlight
 						underline: false,  // lo registra Underline explícitamente
 					}),
-					Image,
+					Image.configure({ allowBase64: true }),
 					TaskList,
 					TaskItem.configure({ nested: true }),
 					CodeBlockLowlight.configure({ lowlight }),

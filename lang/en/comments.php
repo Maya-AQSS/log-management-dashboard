@@ -30,7 +30,7 @@ return [
         'ordered_list' => 'Ordered list',
         'link' => 'Link',
         'insert_image' => 'Image',
-        'hint' => 'Type / to insert blocks. Paste or drag images (max. 2 MB).',
+        'hint' => 'Type / to insert blocks. Paste or drag images (max. 10 MB).',
         'placeholder' => 'Describe context, root cause, and applied resolution...',
         'image_too_large' => 'The image exceeds the 2 MB limit.',
         'image_invalid_type' => 'Invalid image type.',
