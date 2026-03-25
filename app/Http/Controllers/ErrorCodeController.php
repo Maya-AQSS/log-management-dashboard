@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\Contracts\ErrorCodeServiceInterface;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Contracts\View\View;
 
 class ErrorCodeController extends Controller
@@ -21,5 +22,16 @@ class ErrorCodeController extends Controller
         return view('error-codes.show', [
             'errorCode' => $errorCode,
         ]);
+    }
+
+    public function destroy(int $id): RedirectResponse
+    {
+        $errorCode = $this->errorCodeService->findOrFail($id);
+
+        $this->errorCodeService->delete($errorCode);
+
+        return redirect()
+            ->route('error-codes.index')
+            ->with('status', __('error_codes.deleted'));
     }
 }
