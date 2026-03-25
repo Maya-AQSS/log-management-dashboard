@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ErrorCodeRequest;
+use App\Models\Application;
 use App\Models\ErrorCode;
 use App\Services\Contracts\ErrorCodeServiceInterface;
 use Illuminate\Http\RedirectResponse;
@@ -19,7 +20,13 @@ class ErrorCodeController extends Controller
 
     public function create(): View
     {
-        return view('error-codes.create');
+        $applications = Application::query()
+            ->orderBy('name')
+            ->pluck('name', 'id');
+
+        return view('error-codes.create', [
+            'applications' => $applications,
+        ]);
     }
 
     public function store(ErrorCodeRequest $request): RedirectResponse
@@ -35,9 +42,13 @@ class ErrorCodeController extends Controller
     public function edit(int $id): View
     {
         $errorCode = $this->errorCodeService->findOrFail($id);
+        $applications = Application::query()
+            ->orderBy('name')
+            ->pluck('name', 'id');
 
         return view('error-codes.edit', [
             'errorCode' => $errorCode,
+            'applications' => $applications,
         ]);
     }
 
