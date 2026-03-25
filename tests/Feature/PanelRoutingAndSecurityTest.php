@@ -204,12 +204,11 @@ class PanelRoutingAndSecurityTest extends TestCase
 
         $this->actingAs($user);
 
-        $this->expectException(\Illuminate\Auth\Access\AuthorizationException::class);
-
         Livewire::test(CommentThread::class, [
             'commentableType' => 'archived-log',
             'commentableId' => $archivedLog->id,
-        ])->call('deleteComment', $comment->id);
+        ])->call('deleteComment', $comment->id)
+        ->assertForbidden();
     }
 
     private function seedPanelRecords(): array
