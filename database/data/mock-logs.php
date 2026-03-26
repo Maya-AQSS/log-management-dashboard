@@ -13,6 +13,19 @@ $severityCounts = [
     'other' => 20,
 ];
 
+$applications = require __DIR__ . '/mock-applications.php';
+$errorCodes = require __DIR__ . '/mock-error-codes.php';
+
+$applicationIds = array_values(array_map(
+    static fn (array $application): int => (int) $application['id'],
+    $applications
+));
+
+$errorCodeByApplication = [];
+foreach ($errorCodes as $errorCode) {
+    $errorCodeByApplication[(int) $errorCode['application_id']] = (int) $errorCode['id'];
+}
+
 $lorem = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
 $messageTail = str_repeat($lorem, 3);
 $veryLongChunk = str_repeat('STACK_TRACE_CHUNK: NullReferenceException at App\\Services\\LogPipeline->process() ', 120);
@@ -22,6 +35,7 @@ foreach ($severityCounts as $severity => $count) {
         $createdAt = $baseDate
             ->modify('-' . (($id - 1) * 3) . ' minutes')
             ->format('Y-m-d H:i:s');
+
 
         $message = sprintf(
             'Seed: %s log #%03d - %s',
@@ -42,10 +56,12 @@ foreach ($severityCounts as $severity => $count) {
             $metadata['stack_trace'] = $veryLongChunk;
         }
 
+        $applicationId = $applicationIds[($id - 1) % count($applicationIds)];
+        $errorCodeId = $errorCodeByApplication[$applicationId] ?? null;
+
         $rows[] = [
-            'id' => $id++,
-            'application_id' => 1,
-            'error_code_id' => 1,
+            'application_id' => $applicationId,
+            'error_code_id' => $errorCodeId,
             'severity' => $severity,
 
             'message' => $message,
@@ -56,6 +72,33 @@ foreach ($severityCounts as $severity => $count) {
             'created_at' => $createdAt,
         ];
     }
+}
+
+// Bloque controlado de logs con mismo mensaje/código/app para comprobar matching
+// con archived_logs cuando hay potenciales "duplicados funcionales".
+$duplicateBaseDate = $baseDate->modify('+1 day');
+$duplicateApplicationId = 1; // api-gateway
+$duplicateErrorCodeId = $errorCodeByApplication[$duplicateApplicationId] ?? null;
+$duplicateMessage = 'Seed duplicate: repeated message for archived matching checks';
+
+for ($i = 1; $i <= 6; $i++) {
+    $rows[] = [
+        'application_id' => $duplicateApplicationId,
+        'error_code_id' => $duplicateErrorCodeId,
+        'severity' => 'critical',
+        'message' => $duplicateMessage,
+        'file' => 'seed/duplicates.log',
+        'line' => 500 + $i,
+        'metadata' => [
+            'seed' => true,
+            'source' => 'mock-logs.php',
+            'batch' => 'archived-matching-duplicates',
+        ],
+        'resolved' => $i % 2 === 0,
+        'created_at' => $duplicateBaseDate
+            ->modify('+' . (($i - 1) * 2) . ' minutes')
+            ->format('Y-m-d H:i:s'),
+    ];
 }
 
 return $rows;

@@ -5,9 +5,14 @@ namespace App\Livewire;
 use App\Models\ArchivedLog;
 use App\Models\Comment;
 use App\Models\ErrorCode;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
+use Mews\Purifier\Facades\Purifier;
 use Throwable;
 use Livewire\Component;
 
@@ -15,11 +20,17 @@ class CommentThread extends Component
 {
     use AuthorizesRequests;
 
+    private const MAX_COMMENT_BYTES = 10 * 1024 * 1024;
+
+    private const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+
     public string $commentableType;
 
     public int $commentableId;
 
     public string $content = '';
+
+    public int $newCommentKey = 0;
 
     public ?int $editingCommentId = null;
 
@@ -34,25 +45,45 @@ class CommentThread extends Component
         $this->resolveCommentableModel();
     }
 
-    public function addComment(): void
+    public function addComment(?string $htmlContent = null): void
     {
-        $validated = $this->validate([
-            'content' => ['required', 'string', 'min:3', 'max:1000'],
-        ]);
+        $content = $htmlContent ?? $this->content;
 
         try {
+            $validated = Validator::make([
+                'content' => $content,
+            ], [
+                'content' => ['required', 'string', 'min:3'],
+            ], [], [
+                'content' => 'content',
+            ])->validate();
+
+            $sanitizedContent = $this->sanitizeAndValidateContent($validated['content'], 'content');
+
             $this->resolveCommentableModel()
                 ->comments()
                 ->create([
                     'user_id' => auth()->id(),
-                    'content' => $validated['content'],
+                    'content' => $sanitizedContent,
                 ]);
 
-            $this->reset('content');
             session()->flash('status', __('comments.flash.created'));
+            $this->newCommentKey++;
+            $this->content = '';
+        }
+        catch (ValidationException $e) {
+            throw $e;
         } catch (Throwable $e) {
             report($e);
-            session()->flash('status', __('comments.flash.error'));
+            Log::error('comment.add.failed', [
+                'commentable_type' => $this->commentableType,
+                'commentable_id' => $this->commentableId,
+                'user_id' => auth()->id(),
+                'content_length' => strlen($content),
+                'message' => $e->getMessage(),
+            ]);
+
+            session()->flash('status', $this->errorStatus($e));
         }
     }
 
@@ -71,43 +102,66 @@ class CommentThread extends Component
         $this->editingContent = $comment->content;
     }
 
-    public function updateComment(): void
+    public function updateComment(int $commentId, ?string $htmlContent = null): void
     {
-        $validated = $this->validate([
-            'editingCommentId' => ['required', 'integer', 'exists:comments,id'],
-            'editingContent' => ['required', 'string', 'min:3', 'max:1000'],
-        ]);
-
-        $comment = $this->findCommentOrFail($validated['editingCommentId']);
-
-        $this->authorize('update', $comment);
+        $content = $htmlContent ?? $this->editingContent;
 
         try {
+            $validated = Validator::make([
+                'commentId' => $commentId,
+                'editingContent' => $content,
+            ], [
+                'commentId' => ['required', 'integer', 'exists:comments,id'],
+                'editingContent' => ['required', 'string', 'min:3'],
+            ], [], [
+                'commentId' => 'comment',
+                'editingContent' => 'content',
+            ])->validate();
+
+            $sanitizedContent = $this->sanitizeAndValidateContent($validated['editingContent'], 'editingContent');
+
+            $comment = $this->findCommentOrFail($validated['commentId']);
+
+            $this->authorize('update', $comment);
+
             $comment->update([
-                'content' => $validated['editingContent'],
+                'content' => $sanitizedContent,
             ]);
 
             $this->cancelEditing();
             session()->flash('status', __('comments.flash.updated'));
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (AuthorizationException $e) {
+            throw $e;
         } catch (Throwable $e) {
             report($e);
-            session()->flash('status', __('comments.flash.error'));
+            Log::error('comment.update.failed', [
+                'comment_id' => $commentId,
+                'user_id' => auth()->id(),
+                'content_length' => strlen($content),
+                'message' => $e->getMessage(),
+            ]);
+
+            session()->flash('status', $this->errorStatus($e));
         }
     }
 
     public function deleteComment(int $commentId): void
     {
-        $this->commentIdToDelete = $commentId;
-
-        $validated = $this->validate([
-            'commentIdToDelete' => ['required', 'integer', 'exists:comments,id'],
-        ]);
-
-        $comment = $this->findCommentOrFail($validated['commentIdToDelete']);
-
-        $this->authorize('delete', $comment);
-
         try {
+            $this->commentIdToDelete = $commentId;
+
+            $validated = Validator::make([
+                'commentIdToDelete' => $this->commentIdToDelete,
+            ], [
+                'commentIdToDelete' => ['required', 'integer', 'exists:comments,id'],
+            ])->validate();
+
+            $comment = $this->findCommentOrFail($validated['commentIdToDelete']);
+
+            $this->authorize('delete', $comment);
+
             $comment->delete();
 
             if ($this->editingCommentId === $commentId) {
@@ -116,9 +170,19 @@ class CommentThread extends Component
 
             $this->reset('commentIdToDelete');
             session()->flash('status', __('comments.flash.deleted'));
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (AuthorizationException $e) {
+            throw $e;
         } catch (Throwable $e) {
             report($e);
-            session()->flash('status', __('comments.flash.error'));
+            Log::error('comment.delete.failed', [
+                'comment_id' => $commentId,
+                'user_id' => auth()->id(),
+                'message' => $e->getMessage(),
+            ]);
+
+            session()->flash('status', $this->errorStatus($e));
         }
     }
 
@@ -174,6 +238,91 @@ class CommentThread extends Component
         return $class;
     }
 
+    private function sanitizeAndValidateContent(string $rawContent, string $field): string
+    {
+        $sanitized = Purifier::clean($rawContent, 'rich_comment');
+
+        $this->validateNotBlank($sanitized, $field);
+        $this->validateContentSize($sanitized, $field);
+        $this->validateEmbeddedImages($sanitized, $field);
+
+        return $sanitized;
+    }
+
+    private function validateNotBlank(string $html, string $field): void
+    {
+        $textOnly = trim(strip_tags(str_ireplace(['<br>', '<br/>', '<br />'], ' ', $html)));
+
+        if ($textOnly !== '' || str_contains($html, '<img')) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            $field => __('validation.required', ['attribute' => $field]),
+        ]);
+    }
+
+    private function validateContentSize(string $html, string $field): void
+    {
+        if (strlen($html) <= self::MAX_COMMENT_BYTES) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            $field => __('comments.editor.comment_too_large'),
+        ]);
+    }
+
+    private function validateEmbeddedImages(string $html, string $field): void
+    {
+        preg_match_all('/<img[^>]+src=["\']([^"\']+)["\']/i', $html, $matches);
+        $sources = $matches[1] ?? [];
+
+        foreach ($sources as $src) {
+            if (preg_match('/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/s', $src, $parts) !== 1) {
+                continue;
+            }
+
+            $decoded = base64_decode($parts[2], true);
+            if ($decoded === false) {
+                throw ValidationException::withMessages([
+                    $field => __('comments.editor.image_invalid_type'),
+                ]);
+            }
+
+            if (strlen($decoded) > self::MAX_IMAGE_BYTES) {
+                throw ValidationException::withMessages([
+                    $field => __('comments.editor.image_too_large'),
+                ]);
+            }
+
+            if (!$this->isAllowedImageByMagicBytes($decoded)) {
+                throw ValidationException::withMessages([
+                    $field => __('comments.editor.image_invalid_type'),
+                ]);
+            }
+        }
+    }
+
+    private function isAllowedImageByMagicBytes(string $binary): bool
+    {
+        $header = substr($binary, 0, 12);
+
+        if (str_starts_with($header, "\x89PNG")) {
+            return true;
+        }
+
+        if (str_starts_with($header, "\xFF\xD8\xFF")) {
+            return true;
+        }
+
+        if (str_starts_with($header, 'GIF8')) {
+            return true;
+        }
+
+        return str_starts_with($header, 'RIFF') && substr($header, 8, 4) === 'WEBP';
+    }
+
     /**
      * Mapa único slug -> clase para resolver el commentable.
      *
@@ -185,5 +334,14 @@ class CommentThread extends Component
             'archived-log' => ArchivedLog::class,
             'error-code' => ErrorCode::class,
         ];
+    }
+
+    private function errorStatus(Throwable $e): string
+    {
+        if (!config('app.debug')) {
+            return __('comments.flash.error');
+        }
+
+        return __('comments.flash.error').': '.$e->getMessage();
     }
 }

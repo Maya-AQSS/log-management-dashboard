@@ -36,7 +36,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/error-codes', [ErrorCodeController::class, 'index'])->name('error-codes.index');
     Route::get('/error-codes/create', [ErrorCodeController::class, 'create'])->name('error-codes.create');
     Route::post('/error-codes', [ErrorCodeController::class, 'store'])->name('error-codes.store');
-    Route::get('/error-codes/{id}/edit', [ErrorCodeController::class, 'edit'])->whereNumber('id')->name('error-codes.edit');
     Route::put('/error-codes/{id}', [ErrorCodeController::class, 'update'])->whereNumber('id')->name('error-codes.update');
     Route::get('/error-codes/{id}', [ErrorCodeController::class, 'show'])->whereNumber('id')->name('error-codes.show');
     Route::delete('/error-codes/{id}', [ErrorCodeController::class, 'destroy'])->whereNumber('id')->name('error-codes.destroy');

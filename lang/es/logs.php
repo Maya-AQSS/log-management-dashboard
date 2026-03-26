@@ -41,12 +41,21 @@ return [
         'search_placeholder' => 'p.ej. mensaje del error',
         'severity' => 'Severidad',
 
+        'date_range' => 'Rango de fechas',
+        'date_from' => 'Fecha inicio',
+        'date_to' => 'Fecha fin',
+        'date_range_invalid' => 'La fecha fin no puede ser anterior a la fecha inicio.',
+
+        'application' => 'Aplicación',
+        'application_all' => 'Todas las aplicaciones',
+
         'archived' => 'Archivado',
         'archived_all' => 'Todos',
         'archived_archived' => 'Archivados',
         'archived_not_archived' => 'No archivados',
 
         'resolved' => 'Resuelto',
+        'resolved_group' => 'Resuelto / No resuelto',
         'resolved_all' => 'Todos',
         'resolved_resolved' => 'Resueltos',
         'resolved_unresolved' => 'No resueltos',

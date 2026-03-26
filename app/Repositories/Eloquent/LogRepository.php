@@ -7,6 +7,7 @@ use App\Models\ArchivedLog;
 use App\Models\Log;
 use App\Repositories\Contracts\LogRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Collection;
@@ -50,14 +51,18 @@ class LogRepository implements LogRepositoryInterface
      * Busca y filtra logs por diferentes criterios:
      * - texto libre en el mensaje
      * - tipo de severidad de error
+     * - aplicación (application_id)
      * - si está archivado o no
      * - si está resuelto o no
      */
     public function searchAndFilter(
         ?string $search,
         ?array $severity,
+        ?int $applicationId,
         ?string $archived,
         ?string $resolved,
+        ?string $dateFrom,
+        ?string $dateTo,
         int $perPage = 25
     ): LengthAwarePaginator {
         $archivedFlagSubquery = ArchivedLog::query()->selectRaw('1');
@@ -71,6 +76,7 @@ class LogRepository implements LogRepositoryInterface
             ->with(['application', 'errorCode'])
             ->when($search, fn ($q) => $q->where('message', 'ilike', '%'.$search.'%'))
             ->when($severity, fn ($q) => $q->whereIn('severity', $severity))
+            ->when($applicationId !== null, fn ($q) => $q->where('application_id', $applicationId))
             ->when($archived, function ($q) use ($archived): void {
                 if ($archived === 'archived') {
                     $q->whereExists(fn ($subQuery) => $this->applyArchivedMatchForLogsQuery($subQuery));
@@ -85,6 +91,9 @@ class LogRepository implements LogRepositoryInterface
                     $q->where('resolved', false);
                 }
             })
+            ->when($dateFrom, fn ($q) => $q->where('created_at', '>=', CarbonImmutable::parse($dateFrom)->utc()->toDateTimeString()))
+            ->when($dateTo, fn ($q) => $q->where('created_at', '<=', CarbonImmutable::parse($dateTo)->utc()->toDateTimeString()))
+            ->when($dateFrom && !$dateTo, fn ($q) => $q->where('created_at', '<=', now()->utc()->toDateTimeString()))
             ->latest('created_at')
             ->paginate($perPage);
     }
