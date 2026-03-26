@@ -21,6 +21,8 @@ interface ArchivedLogRepositoryInterface
 
     public function findOrFail(int $id): ArchivedLog;
 
+    public function updateUrlTutorial(ArchivedLog $archivedLog, ?string $url): void;
+
     public function delete(ArchivedLog $archivedLog): void;
 
     public function archiveFromLogId(int $logId, int $archivedById): ArchivedLog;

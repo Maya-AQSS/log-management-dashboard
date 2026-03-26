@@ -43,6 +43,13 @@ class ArchivedLogService implements ArchivedLogServiceInterface
         return $this->archivedLogRepository->findOrFail($id);
     }
 
+    public function updateUrlTutorial(ArchivedLog $archivedLog, ?string $url): ArchivedLog
+    {
+        $this->archivedLogRepository->updateUrlTutorial($archivedLog, $url);
+
+        return $archivedLog->fresh();
+    }
+
     public function delete(ArchivedLog $archivedLog): void
     {
         $this->archivedLogRepository->delete($archivedLog);

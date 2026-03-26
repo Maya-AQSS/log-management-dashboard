@@ -31,4 +31,13 @@ return [
         'message' => 'Missatge',
         'archived_at' => 'Arxivat',
     ],
+
+    'validation' => [
+        'url_tutorial' => 'Introdueix una URL vàlida',
+    ],
+
+    'url_tutorial' => [
+        'placeholder' => 'https://…',
+        'save' => 'Guardar',
+    ],
 ];

@@ -31,4 +31,13 @@ return [
         'message' => 'Message',
         'archived_at' => 'Archived At',
     ],
+
+    'validation' => [
+        'url_tutorial' => 'Please enter a valid URL',
+    ],
+
+    'url_tutorial' => [
+        'placeholder' => 'https://…',
+        'save' => 'Save',
+    ],
 ];

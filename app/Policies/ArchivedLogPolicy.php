@@ -7,6 +7,11 @@ use App\Models\User;
 
 class ArchivedLogPolicy
 {
+    public function update(User $user, ArchivedLog $archivedLog): bool
+    {
+        return $user->id === (int) $archivedLog->archived_by_id;
+    }
+
     public function delete(User $user, ArchivedLog $archivedLog): bool
     {
         return $user->id === (int) $archivedLog->archived_by_id;
