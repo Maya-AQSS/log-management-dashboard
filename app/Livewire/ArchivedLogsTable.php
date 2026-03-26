@@ -16,6 +16,10 @@ class ArchivedLogsTable extends Component
 {
     use WithPagination;
 
+    private const SORTABLE_COLUMNS = ['archived_at'];
+
+    private const SORT_DIRECTIONS = ['asc', 'desc'];
+
     public array $severityInput = [];
     public ?string $dateFromInput = null;
     public ?string $dateToInput = null;
@@ -33,10 +37,18 @@ class ArchivedLogsTable extends Component
     #[Url(as: 'application', except: null)]
     public ?int $selectedApplicationId = null;
 
+    #[Url(as: 'sort_by', except: null)]
+    public ?string $sortBy = null;
+
+    #[Url(as: 'sort_dir', except: 'asc')]
+    public string $sortDir = 'asc';
+
     public function mount(): void
     {
         $this->severity = SeverityFilter::normalize($this->severity);
         [$this->dateFrom, $this->dateTo] = DateRangeFilter::normalize($this->dateFrom, $this->dateTo, 'date_from', 'date_to');
+
+        $this->normalizeSortState();
 
         $this->severityInput = $this->severity;
         $this->dateFromInput = $this->dateFrom;
@@ -69,6 +81,24 @@ class ArchivedLogsTable extends Component
             ? (int) $validated['selectedApplicationIdInput']
             : null;
 
+        $this->normalizeSortState();
+
+        $this->resetPage();
+    }
+
+    public function sortByColumn(string $column): void
+    {
+        if (!in_array($column, self::SORTABLE_COLUMNS, true)) {
+            return;
+        }
+
+        if ($this->sortBy === $column) {
+            $this->sortDir = $this->sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortBy = $column;
+            $this->sortDir = 'asc';
+        }
+
         $this->resetPage();
     }
 
@@ -90,6 +120,8 @@ class ArchivedLogsTable extends Component
 
     public function render(): View
     {
+        $this->normalizeSortState();
+
         $applications = Application::query()
             ->whereHas('archivedLogs')
             ->orderBy('name')
@@ -100,6 +132,8 @@ class ArchivedLogsTable extends Component
             $this->selectedApplicationId,
             $this->dateFrom,
             $this->dateTo,
+            $this->sortBy,
+            $this->sortDir,
             15
         );
 
@@ -107,5 +141,16 @@ class ArchivedLogsTable extends Component
             'archivedLogs' => $archivedLogs,
             'applications' => $applications,
         ]);
+    }
+
+    private function normalizeSortState(): void
+    {
+        if (!in_array($this->sortBy, self::SORTABLE_COLUMNS, true)) {
+            $this->sortBy = null;
+        }
+
+        if (!in_array($this->sortDir, self::SORT_DIRECTIONS, true)) {
+            $this->sortDir = 'asc';
+        }
     }
 }

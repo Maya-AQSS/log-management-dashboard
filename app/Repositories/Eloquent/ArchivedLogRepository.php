@@ -10,6 +10,12 @@ use Illuminate\Support\Facades\DB;
 
 class ArchivedLogRepository implements ArchivedLogRepositoryInterface
 {
+    private const SORT_COLUMN_MAP = [
+        'archived_at' => 'archived_at',
+    ];
+
+    private const SORT_DIRECTIONS = ['asc', 'desc'];
+
     /**
      * Devuelve una página de logs archivados.
      */
@@ -33,8 +39,13 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
         ?int $applicationId,
         ?string $dateFrom,
         ?string $dateTo,
+        ?string $sortBy,
+        string $sortDir,
         int $perPage = 15
     ): LengthAwarePaginator {
+        $validatedSortDirection = in_array($sortDir, self::SORT_DIRECTIONS, true) ? $sortDir : 'asc';
+        $sortColumn = $sortBy !== null ? (self::SORT_COLUMN_MAP[$sortBy] ?? null) : null;
+
         return ArchivedLog::query()
             ->with(['application', 'archivedBy', 'errorCode'])
             ->withCount('comments')
@@ -42,7 +53,11 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
             ->when($applicationId !== null, fn ($q) => $q->where('application_id', $applicationId))
             ->when($dateFrom !== null, fn ($q) => $q->where('archived_at', '>=', $dateFrom))
             ->when($dateTo !== null, fn ($q) => $q->where('archived_at', '<=', $dateTo))
-            ->latest('archived_at')
+            ->when(
+                $sortColumn !== null,
+                fn ($q) => $q->orderBy($sortColumn, $validatedSortDirection),
+                fn ($q) => $q->orderBy('archived_at', 'desc')
+            )
             ->paginate($perPage)
             ->withQueryString();
     }
