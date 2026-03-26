@@ -195,6 +195,11 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'dateFromInput' => 'start date',
+        'dateToInput' => 'end date',
+        'date_from' => 'start date',
+        'date_to' => 'end date',
+    ],
 
 ];

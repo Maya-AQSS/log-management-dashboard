@@ -39,7 +39,6 @@ foreach ($severityCounts as $severity => $count) {
         $errorCodeId = $errorCodeByApplication[$applicationId] ?? null;
 
         $rows[] = [
-            'id' => $id++,
             'application_id' => $applicationId,
             'error_code_id' => $errorCodeId,
             'severity' => $severity,
@@ -72,7 +71,6 @@ $duplicateMessage = 'Seed duplicate: repeated message for archived matching chec
 
 for ($i = 1; $i <= 6; $i++) {
     $rows[] = [
-        'id' => $id++,
         'application_id' => $duplicateApplicationId,
         'error_code_id' => $duplicateErrorCodeId,
         'severity' => 'critical',

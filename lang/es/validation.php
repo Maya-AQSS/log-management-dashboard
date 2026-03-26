@@ -198,7 +198,10 @@ return [
     */
 
     'attributes' => [
-        // 'url' => 'URL',
+        'dateFromInput' => 'fecha inicio',
+        'dateToInput' => 'fecha fin',
+        'date_from' => 'fecha inicio',
+        'date_to' => 'fecha fin',
     ],
 
 ];

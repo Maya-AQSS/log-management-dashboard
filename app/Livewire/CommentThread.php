@@ -45,18 +45,20 @@ class CommentThread extends Component
         $this->resolveCommentableModel();
     }
 
-    public function addComment(string $htmlContent): void
+    public function addComment(?string $htmlContent = null): void
     {
+        $content = $htmlContent ?? $this->content;
+
         try {
             $validated = Validator::make([
-                'htmlContent' => $htmlContent,
+                'content' => $content,
             ], [
-                'htmlContent' => ['required', 'string', 'min:3'],
+                'content' => ['required', 'string', 'min:3'],
             ], [], [
-                'htmlContent' => 'content',
+                'content' => 'content',
             ])->validate();
 
-            $sanitizedContent = $this->sanitizeAndValidateContent($validated['htmlContent'], 'content');
+            $sanitizedContent = $this->sanitizeAndValidateContent($validated['content'], 'content');
 
             $this->resolveCommentableModel()
                 ->comments()
@@ -67,6 +69,7 @@ class CommentThread extends Component
 
             session()->flash('status', __('comments.flash.created'));
             $this->newCommentKey++;
+            $this->content = '';
         }
         catch (ValidationException $e) {
             throw $e;
@@ -76,7 +79,7 @@ class CommentThread extends Component
                 'commentable_type' => $this->commentableType,
                 'commentable_id' => $this->commentableId,
                 'user_id' => auth()->id(),
-                'content_length' => strlen($htmlContent),
+                'content_length' => strlen($content),
                 'message' => $e->getMessage(),
             ]);
 
@@ -99,21 +102,23 @@ class CommentThread extends Component
         $this->editingContent = $comment->content;
     }
 
-    public function updateComment(int $commentId, string $htmlContent): void
+    public function updateComment(int $commentId, ?string $htmlContent = null): void
     {
+        $content = $htmlContent ?? $this->editingContent;
+
         try {
             $validated = Validator::make([
                 'commentId' => $commentId,
-                'htmlContent' => $htmlContent,
+                'editingContent' => $content,
             ], [
                 'commentId' => ['required', 'integer', 'exists:comments,id'],
-                'htmlContent' => ['required', 'string', 'min:3'],
+                'editingContent' => ['required', 'string', 'min:3'],
             ], [], [
                 'commentId' => 'comment',
-                'htmlContent' => 'content',
+                'editingContent' => 'content',
             ])->validate();
 
-            $sanitizedContent = $this->sanitizeAndValidateContent($validated['htmlContent'], 'content');
+            $sanitizedContent = $this->sanitizeAndValidateContent($validated['editingContent'], 'editingContent');
 
             $comment = $this->findCommentOrFail($validated['commentId']);
 
@@ -134,7 +139,7 @@ class CommentThread extends Component
             Log::error('comment.update.failed', [
                 'comment_id' => $commentId,
                 'user_id' => auth()->id(),
-                'content_length' => strlen($htmlContent),
+                'content_length' => strlen($content),
                 'message' => $e->getMessage(),
             ]);
 

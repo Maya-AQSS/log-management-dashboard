@@ -26,6 +26,8 @@ interface LogRepositoryInterface
         ?int $applicationId,
         ?string $archived,
         ?string $resolved,
+        ?string $dateFrom,
+        ?string $dateTo,
         int $perPage = 25
     ): LengthAwarePaginator;
 

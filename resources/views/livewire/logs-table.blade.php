@@ -1,7 +1,7 @@
-<div>
+<div x-data="{}">
     <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
-        <div class="space-y-5">
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div class="space-y-4">
                 <div>
                     <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
                         {{ __('logs.filters.search') }}
@@ -14,19 +14,33 @@
                     />
                 </div>
 
-                <x-filters.application-select
-                    wire:model.defer="selectedApplicationIdInput"
-                    :label="__('logs.filters.application')"
-                    :placeholder="__('logs.filters.application_all')"
-                    :applications="$applications"
-                    :selected="$selectedApplicationIdInput"
-                />
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <x-filters.severity-filter-checkboxes
                     wire-model="severityInput"
                     :selected="$severityInput"
+                />
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <x-date-range-filter
+                        wire-model-from="dateFromInput"
+                        wire-model-to="dateToInput"
+                    />
+                    @error('dateFromInput')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                    @error('dateToInput')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <x-filters.application-select
+                    wire:model.defer="selectedApplicationIdInput"
+                    :hide-label="true"
+                    :placeholder="__('logs.filters.application_all')"
+                    :applications="$applications"
+                    :selected="$selectedApplicationIdInput"
+                    class="text-sm font-medium"
                 />
 
                 @php
@@ -80,7 +94,7 @@
         <div class="mt-4 flex w-full justify-center gap-2">
             <button
                 type="button"
-                wire:click="applyFilters"
+                x-on:click="$dispatch('logs-apply-requested')"
                 class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-base font-semibold text-white hover:bg-[#4a2d44]"
             >
                 {{ __('logs.buttons.apply') }}
