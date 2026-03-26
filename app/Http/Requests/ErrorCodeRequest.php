@@ -27,16 +27,16 @@ class ErrorCodeRequest extends FormRequest
             'code' => [
                 'required',
                 'string',
-                'max:255',
+                'max:50',
                 Rule::unique('error_codes')
                     ->where('application_id', $this->application_id)
                     ->ignore($this->errorCodeId),
             ],
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:200'],
             'file' => ['nullable', 'string', 'max:255'],
             'line' => ['nullable', 'integer', 'min:1'],
             'severity' => ['nullable', Rule::in(['critical', 'high', 'medium', 'low', 'other'])],
-            'description' => ['nullable', 'string'],
+            'description' => ['nullable', 'string', 'max:5000'],
         ];
     }
 
@@ -50,6 +50,7 @@ class ErrorCodeRequest extends FormRequest
             'code.unique' => __('error_codes.validation.code_unique'),
             'name.required' => __('error_codes.validation.name_required'),
             'name.max' => __('error_codes.validation.name_max'),
+            'description.max' => __('error_codes.validation.description_max'),
             'file.max' => __('error_codes.validation.file_max'),
             'line.integer' => __('error_codes.validation.line_integer'),
             'line.min' => __('error_codes.validation.line_min'),
