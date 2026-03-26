@@ -14,17 +14,18 @@ class ErrorCodeRequest extends FormRequest
 
     public function rules(): array
     {
-        $idToIgnore = $this->route('id');
+        $errorCodeId = $this->input('errorCodeId', $this->route('id'));
 
         return [
             'application_id' => ['required', 'integer', 'exists:applications,id'],
+            'errorCodeId' => ['nullable', 'integer', 'exists:error_codes,id'],
             'code' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('error_codes', 'code')
-                    ->ignore($idToIgnore)
-                    ->where(fn ($query) => $query->where('application_id', $this->integer('application_id'))),
+                Rule::unique('error_codes')
+                    ->where('application_id', $this->application_id)
+                    ->ignore($errorCodeId),
             ],
             'name' => ['required', 'string', 'max:255'],
             'file' => ['nullable', 'string', 'max:255'],
