@@ -8,6 +8,7 @@ return [
     'create_subtitle' => 'Completa els camps per registrar un nou error code',
     'edit_title' => 'Editar Error Code',
     'edit_subtitle' => 'Actualitza els camps del error code',
+    'detail_subtitle' => 'Prem editar per modificar este error code',
     'empty' => 'No hi ha codis d\'error per mostrar',
     'deleted' => 'Error Code eliminat correctament',
     'created' => 'Error Code creat correctament',

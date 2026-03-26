@@ -8,6 +8,7 @@ return [
     'create_subtitle' => 'Complete the fields to register a new error code',
     'edit_title' => 'Edit Error Code',
     'edit_subtitle' => 'Update the fields for the error code',
+    'detail_subtitle' => 'Press edit to update this error code',
     'empty' => 'No error codes to display',
     'deleted' => 'Error Code deleted successfully',
     'created' => 'Error Code created successfully',
