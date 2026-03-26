@@ -51,7 +51,7 @@ class LogRepository implements LogRepositoryInterface
     }
 
     /**
-     * Busca y filtra logs por diferentes criterios: 
+     * Busca y filtra logs por diferentes criterios:
      * - texto libre en el mensaje
      * - tipo de severidad de error
      * - aplicación (application_id)
@@ -67,8 +67,7 @@ class LogRepository implements LogRepositoryInterface
         ?string $dateFrom,
         ?string $dateTo,
         int $perPage = 25
-    ): LengthAwarePaginator
-    {
+    ): LengthAwarePaginator {
         $archivedFlagSubquery = ArchivedLog::query()->selectRaw('1');
         $this->applyArchivedMatchForLogsQuery($archivedFlagSubquery);
 
@@ -132,7 +131,7 @@ class LogRepository implements LogRepositoryInterface
         $severities = Severity::values();
 
         $rows = Log::query()
-            ->when(!$includeArchived, fn ($q) => $q->whereNotExists(fn ($subQuery) => $this->applyArchivedMatchForLogsQuery($subQuery)))
+            ->when(! $includeArchived, fn ($q) => $q->whereNotExists(fn ($subQuery) => $this->applyArchivedMatchForLogsQuery($subQuery)))
             ->selectRaw('severity, resolved, count(*) as count')
             ->whereIn('severity', $severities)
             ->groupBy('severity', 'resolved')
@@ -152,7 +151,7 @@ class LogRepository implements LogRepositoryInterface
             $count = (int) $row->count;
             $bucket = (bool) $row->resolved ? 'resolved' : 'unresolved';
 
-            if (!isset($result[$severity])) {
+            if (! isset($result[$severity])) {
                 continue;
             }
 
@@ -170,7 +169,7 @@ class LogRepository implements LogRepositoryInterface
     public function logsCount(bool $includeArchived = false): int
     {
         return Log::query()
-            ->when(!$includeArchived, fn ($q) => $q->whereNotExists(fn ($subQuery) => $this->applyArchivedMatchForLogsQuery($subQuery)))
+            ->when(! $includeArchived, fn ($q) => $q->whereNotExists(fn ($subQuery) => $this->applyArchivedMatchForLogsQuery($subQuery)))
             ->count();
     }
 
@@ -189,14 +188,17 @@ class LogRepository implements LogRepositoryInterface
 
         $archivedQuery = ArchivedLog::query();
         $this->applyArchivedMatchForConcreteLog($archivedQuery, $log);
-        $archivedId = $archivedQuery->value('id');
+        $archivedId = $archivedQuery
+            ->orderByDesc('archived_at')
+            ->orderByDesc('id')
+            ->value('id');
 
         return $archivedId !== null ? (int) $archivedId : null;
     }
 
     /**
-     * Aplica a una subquery la condición de equivalencia
-     * archived_logs <-> logs (fila externa).
+     * Aplica a una subquery la condición de equivalencia lógica
+     * archived_logs <-> logs (sin FK; misma aplicación, código de error, severidad y mensaje).
      *
      * Se usa para whereExists/whereNotExists y para calcular is_archived.
      */
@@ -207,13 +209,12 @@ class LogRepository implements LogRepositoryInterface
             ->whereColumn('archived_logs.application_id', 'logs.application_id')
             ->whereRaw('archived_logs.error_code_id IS NOT DISTINCT FROM logs.error_code_id')
             ->whereColumn('archived_logs.severity', 'logs.severity')
-            ->whereColumn('archived_logs.message', 'logs.message')
-            ->whereColumn('archived_logs.original_created_at', 'logs.created_at');
+            ->whereColumn('archived_logs.message', 'logs.message');
     }
 
     /**
-     * Aplica la misma condición de equivalencia para un Log concreto.
-     * Se usa para obtener el id del ArchivedLog equivalente.
+     * Misma equivalencia lógica para un Log concreto.
+     * Se usa para obtener el id del ArchivedLog equivalente (si hay varios, el más reciente por archivado).
      */
     private function applyArchivedMatchForConcreteLog(Builder $query, Log $log): Builder
     {
@@ -221,8 +222,7 @@ class LogRepository implements LogRepositoryInterface
             ->where('application_id', $log->application_id)
             ->whereRaw('error_code_id IS NOT DISTINCT FROM ?', [$log->error_code_id])
             ->where('severity', $log->severity)
-            ->where('message', $log->message)
-            ->where('original_created_at', $log->created_at);
+            ->where('message', $log->message);
     }
 
     private function escapeLikePattern(string $value): string

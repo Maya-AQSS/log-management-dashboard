@@ -28,12 +28,33 @@ foreach ($errorCodes as $errorCode) {
 
 $lorem = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
 $messageTail = str_repeat($lorem, 3);
+$veryLongChunk = str_repeat('STACK_TRACE_CHUNK: NullReferenceException at App\\Services\\LogPipeline->process() ', 120);
 
 foreach ($severityCounts as $severity => $count) {
     for ($i = 1; $i <= $count; $i++) {
         $createdAt = $baseDate
             ->modify('-' . (($id - 1) * 3) . ' minutes')
             ->format('Y-m-d H:i:s');
+
+
+        $message = sprintf(
+            'Seed: %s log #%03d - %s',
+            $severity,
+            $i,
+            $messageTail
+        );
+
+        $metadata = [
+            'seed' => true,
+            'source' => 'mock-logs.php',
+            'batch' => 'dashboard-cards',
+        ];
+
+        // Dedicated fixture to validate long-content scrolling in detail view.
+        if ($severity === 'critical' && $i === 2) {
+            $message .= "\n\n" . $veryLongChunk;
+            $metadata['stack_trace'] = $veryLongChunk;
+        }
 
         $applicationId = $applicationIds[($id - 1) % count($applicationIds)];
         $errorCodeId = $errorCodeByApplication[$applicationId] ?? null;
@@ -42,20 +63,11 @@ foreach ($severityCounts as $severity => $count) {
             'application_id' => $applicationId,
             'error_code_id' => $errorCodeId,
             'severity' => $severity,
-            
-            'message' => sprintf(
-                'Seed: %s log #%03d - %s',
-                $severity,
-                $i,
-                $messageTail
-            ),
+
+            'message' => $message,
             'file' => sprintf('seed/%s.log', $severity),
             'line' => 100 + $i,
-            'metadata' => [
-                'seed' => true,
-                'source' => 'mock-logs.php',
-                'batch' => 'dashboard-cards',
-            ],
+            'metadata' => $metadata,
             'resolved' => $i % 2 === 0,
             'created_at' => $createdAt,
         ];

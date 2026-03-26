@@ -89,13 +89,41 @@ class PanelRoutingAndSecurityTest extends TestCase
         $this->get('/logs')->assertOk()->assertViewIs('logs.index');
         $this->get('/logs/' . $logId)->assertOk()->assertViewIs('logs.show');
         $this->get('/archived-logs')->assertOk()->assertViewIs('archived-logs.index');
-        $this->get('/archived-logs/' . $archivedLog->id)->assertOk()->assertViewIs('archived-logs.show');
+        $this->get('/archived-logs/' . $archivedLog->id)->assertOk()->assertViewIs('logs.show');
         $this->get('/error-codes')->assertOk()->assertViewIs('error-codes.index');
         $this->get('/error-codes/' . $errorCode->id)->assertOk()->assertViewIs('error-codes.show');
 
         $this->get('/sse/logs')
             ->assertOk()
             ->assertHeader('Content-Type', 'text/event-stream; charset=UTF-8');
+    }
+
+    public function test_back_navigation_chain_preserves_logs_origin_without_back_query_param(): void
+    {
+        [$user, , $archivedLog, $logId] = $this->seedPanelRecords();
+        $this->actingAs($user);
+
+        $logsListUrl = url('/logs?search=seed&resolved=unresolved');
+        $logDetailUrl = url('/logs/' . $logId);
+        $archivedDetailUrl = url('/archived-logs/' . $archivedLog->id);
+
+        $this->withHeader('referer', $logsListUrl)
+            ->get('/logs/' . $logId)
+            ->assertOk()
+            ->assertViewHas('backHref', $logsListUrl)
+            ->assertDontSee('back=');
+
+        $this->withHeader('referer', $logDetailUrl)
+            ->get('/archived-logs/' . $archivedLog->id)
+            ->assertOk()
+            ->assertViewHas('backHref', $logDetailUrl)
+            ->assertDontSee('back=');
+
+        $this->withHeader('referer', $archivedDetailUrl)
+            ->get('/logs/' . $logId)
+            ->assertOk()
+            ->assertViewHas('backHref', $logsListUrl)
+            ->assertDontSee('back=');
     }
 
     public function test_archived_log_delete_route_soft_deletes_and_hides_from_default_views(): void

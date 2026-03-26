@@ -10,6 +10,16 @@ return [
     'archived_success' => 'Log archivado correctamente',
     'archived_error' => 'No ha podido archivarse el log',
 
+    'detail' => [
+        'title' => 'Detalle del log',
+        'id' => 'ID',
+        'file' => 'Archivo',
+        'line' => 'Línea',
+        'metadata' => 'Metadatos (JSON)',
+        'no_metadata' => 'Sin metadatos',
+        'archived_match' => 'Este log coincide con una entrada del histórico archivado (misma aplicación, código de error, severidad y mensaje).',
+    ],
+
     'table' => [
         'application' => 'Aplicación',
         'severity' => 'Severidad',
@@ -17,11 +27,13 @@ return [
         'error_code' => 'Código de error',
         'created_at' => 'Creado',
         'status' => 'Estado',
+        'url_tutorial' => 'URL Tutorial',
     ],
 
     'status' => [
         'archived' => 'Archivado',
         'resolved' => 'Resuelto',
+        'unresolved' => 'No resuelto',
     ],
 
     'filters' => [
@@ -50,9 +62,11 @@ return [
     ],
 
     'buttons' => [
+        'back' => 'Volver',
         'apply' => 'Aplicar',
         'reset' => 'Limpiar',
-        'archive' => 'Archivar',
+        'archive' => 'Guardar en Histórico',
         'view_archived' => 'Ver archivado',
+        'solved' => 'Resolver',
     ],
 ];

@@ -5,10 +5,20 @@ return [
     'title' => 'Llistat de logs',
     'welcome' => 'Benvingut als logs',
 
-    'empty' => "No hi ha logs que coincideixin amb els filtres aplicats",
+    'empty' => 'No hi ha logs que coincideixin amb els filtres aplicats',
 
     'archived_success' => 'Log arxivat correctament',
     'archived_error' => "No s'ha pogut arxivar el log",
+
+    'detail' => [
+        'title' => 'Detall del log',
+        'id' => 'ID',
+        'file' => 'Fitxer',
+        'line' => 'Línia',
+        'metadata' => 'Metadades (JSON)',
+        'no_metadata' => 'Sense metadades',
+        'archived_match' => "Aquest log coincideix amb una entrada de l'històric arxivat (mateixa aplicació, codi d'error, severitat i missatge).",
+    ],
 
     'table' => [
         'application' => 'Aplicació',
@@ -17,11 +27,13 @@ return [
         'error_code' => "Codi d'error",
         'created_at' => 'Creat',
         'status' => 'Estat',
+        'url_tutorial' => "URL Tutorial",
     ],
 
     'status' => [
         'archived' => 'Arxivat',
-        'resolved' => 'Resolts',
+        'resolved' => 'Resolt',
+        'unresolved' => 'No resolt',
     ],
 
     'filters' => [
@@ -42,7 +54,7 @@ return [
         'archived_archived' => 'Arxivats',
         'archived_not_archived' => 'No arxivats',
 
-        'resolved' => 'Resolts',
+        'resolved' => 'Resolt',
         'resolved_group' => 'Resolts / No resolts',
         'resolved_all' => 'Tots',
         'resolved_resolved' => 'Resolts',
@@ -50,9 +62,11 @@ return [
     ],
 
     'buttons' => [
+        'back' => 'Tornar',
         'apply' => 'Aplicar',
         'reset' => 'Netejar',
-        'archive' => 'Arxivar',
+        'archive' => "Desar a l'històric",
         'view_archived' => 'Veure arxivat',
+        'solved' => 'Resoldre',
     ],
 ];
