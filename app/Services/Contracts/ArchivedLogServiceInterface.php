@@ -10,8 +10,10 @@ interface ArchivedLogServiceInterface
     public function paginate(int $perPage = 15): LengthAwarePaginator;
 
     public function searchAndFilter(
-        ?string $severity,
-        ?string $tutorial,
+        ?array $severities,
+        ?int $applicationId,
+        ?string $dateFrom,
+        ?string $dateTo,
         int $perPage = 15
     ): LengthAwarePaginator;
 

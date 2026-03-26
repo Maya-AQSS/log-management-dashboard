@@ -13,6 +13,7 @@ return [
 
     'detail' => [
         'title' => 'Detalle del log',
+        'archived_title' => 'Detalle del log archivado',
         'id' => 'ID',
         'by' => 'por',
         'archived_by' => 'Archivado por',

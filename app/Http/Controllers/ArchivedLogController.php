@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ArchivedLogIndexRequest;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -13,20 +12,9 @@ class ArchivedLogController extends Controller
 {
     public function __construct(private ArchivedLogServiceInterface $archivedLogService) {}
 
-    public function index(ArchivedLogIndexRequest $request): View
+    public function index(): View
     {
-        $validated = $request->validated();
-
-        $severity = $validated['severity'] ?? null;
-        $tutorial = $validated['tutorial'] ?? null;
-
-        $archivedLogs = $this->archivedLogService->searchAndFilter($severity, $tutorial, 15);
-
-        return view('archived-logs.index', [
-            'archivedLogs' => $archivedLogs,
-            'severity' => $severity,
-            'tutorial' => $tutorial,
-        ]);
+        return view('archived-logs.index');
     }
 
     public function show(Request $request, int $id): View
