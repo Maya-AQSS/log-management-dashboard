@@ -129,6 +129,12 @@ class LogsTable extends Component
         $this->resetPage();
     }
 
+    public function updatedSearchInput(string $value): void
+    {
+        $this->search = trim(mb_substr($value, 0, 255));
+        $this->resetPage();
+    }
+
     public function render(): View
     {
         $applications = Application::query()
