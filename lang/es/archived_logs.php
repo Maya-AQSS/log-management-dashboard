@@ -13,6 +13,8 @@ return [
         'apply' => 'Aplicar',
         'reset' => 'Limpiar',
         'edit' => 'Editar',
+        'save' => 'Guardar',
+        'cancel' => 'Cancelar',
         'view_tutorial' => 'Ver tutorial',
         'delete' => 'Eliminar',
     ],
@@ -37,10 +39,21 @@ return [
     ],
 
     'url_tutorial' => [
+        'section_title' => 'URL del tutorial',
         'placeholder' => 'https://…',
         'save' => 'Guardar',
         'cancel' => 'Cancelar',
         'empty' => 'Sin URL de tutorial.',
         'edit_aria' => 'Editar URL de tutorial',
+    ],
+
+    'description' => [
+        'section_title' => 'Descripción del histórico',
+        'field_label' => 'descripción',
+        'empty' => 'Sin descripción.',
+        'placeholder' => 'Contexto del error, causa raíz o pasos de resolución…',
+        'save' => 'Guardar',
+        'cancel' => 'Cancelar',
+        'edit_aria' => 'Editar descripción',
     ],
 ];

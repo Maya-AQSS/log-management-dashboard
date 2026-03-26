@@ -28,7 +28,7 @@
             </div>
         @endif
 
-        <main class="bg-white dark:bg-slate-900 rounded-2xl shadow-md p-4 md:p-6 border border-[#e2d8eb] dark:border-slate-700">
+        <main class="rounded-2xl border border-[#e2d8eb] bg-white p-4 shadow-md md:p-6 dark:border-slate-700 dark:bg-slate-950 dark:shadow-none">
             {{ $slot }}
         </main>
     </div>
