@@ -2,11 +2,15 @@
     <div class="mt-4 overflow-x-auto">
         <table class="min-w-full text-base">
             <thead class="bg-slate-50 text-base uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-300">
-                <tr>
-                    @foreach($headers as $header)
-                        <th class="px-3 py-2 text-left">{{ $header }}</th>
-                    @endforeach
-                </tr>
+                @isset($head)
+                    {{ $head }}
+                @else
+                    <tr>
+                        @foreach($headers as $header)
+                            <th class="px-3 py-2 text-left">{{ $header }}</th>
+                        @endforeach
+                    </tr>
+                @endisset
             </thead>
 
             <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-900">

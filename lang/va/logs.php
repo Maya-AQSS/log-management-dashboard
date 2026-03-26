@@ -32,6 +32,7 @@ return [
         'created_at' => 'Creat',
         'status' => 'Estat',
         'url_tutorial' => "URL Tutorial",
+        'sortable_hint' => 'Clic per ordenar per aquesta columna',
     ],
 
     'status' => [

@@ -43,21 +43,20 @@
         </div>
     </div>
 
-    <div class="mt-4 overflow-x-auto">
-        <table class="min-w-full text-base">
-            <thead class="bg-slate-50 text-base uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-300">
-                <tr>
-                    <th class="px-3 py-2 text-left">{{ __('error_codes.table.code') }}</th>
-                    <th class="px-3 py-2 text-left">{{ __('error_codes.table.application') }}</th>
-                    <th class="px-3 py-2 text-left">{{ __('error_codes.table.name') }}</th>
-                    <th class="px-3 py-2 text-left">{{ __('error_codes.table.file') }}</th>
-                    <th class="px-3 py-2 text-left">{{ __('error_codes.table.line') }}</th>
-                    <th class="px-3 py-2 text-left">{{ __('error_codes.table.actions') }}</th>
-                </tr>
-            </thead>
-
-            <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-900">
-            @forelse($errorCodes as $item)
+    <x-index-table
+        :headers="[
+            __('error_codes.table.code'),
+            __('error_codes.table.application'),
+            __('error_codes.table.name'),
+            __('error_codes.table.file'),
+            __('error_codes.table.line'),
+            __('error_codes.table.actions'),
+        ]"
+        :emptyText="__('error_codes.empty')"
+        :hasItems="$errorCodes->isNotEmpty()"
+        :paginator="$errorCodes"
+    >
+        @foreach($errorCodes as $item)
                 <tr
                     x-data="{ confirmDeleteOpen: false }"
                     class="align-top cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
@@ -95,18 +94,6 @@
                         </div>
                     </td>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="6" class="px-3 py-4 text-center text-base text-slate-500 dark:text-slate-400">
-                        {{ __('error_codes.empty') }}
-                    </td>
-                </tr>
-            @endforelse
-            </tbody>
-        </table>
-
-        <div class="mt-4">
-            {{ $errorCodes->links() }}
-        </div>
-    </div>
+        @endforeach
+    </x-index-table>
 </div>

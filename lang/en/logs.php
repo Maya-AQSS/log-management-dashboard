@@ -32,6 +32,7 @@ return [
         'created_at' => 'Created at',
         'status' => 'Status',
         'url_tutorial' => 'URL Tutorial',
+        'sortable_hint' => 'Click to sort by this column',
     ],
 
     'status' => [

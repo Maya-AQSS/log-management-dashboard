@@ -1,27 +1,27 @@
 <div x-data="{}">
     <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div class="space-y-4">
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-5 md:items-end">
+            <div class="md:col-span-2">
+                <x-date-range-filter
+                    wire-model-from="dateFromInput"
+                    wire-model-to="dateToInput"
+                />
+                @error('dateFromInput')
+                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                @enderror
+                @error('dateToInput')
+                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
                 <x-filters.severity-filter-checkboxes
                     wire-model="severityInput"
                     :selected="$severityInput"
                 />
             </div>
 
-            <div class="space-y-4">
-                <div>
-                    <x-date-range-filter
-                        wire-model-from="dateFromInput"
-                        wire-model-to="dateToInput"
-                    />
-                    @error('dateFromInput')
-                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                    @enderror
-                    @error('dateToInput')
-                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
+            <div>
                 <x-filters.application-select
                     wire:model.defer="selectedApplicationIdInput"
                     :hide-label="true"
@@ -31,24 +31,24 @@
                     class="text-sm font-medium"
                 />
             </div>
-        </div>
 
-        <div class="mt-4 flex w-full justify-center gap-2">
-            <button
-                type="button"
-                x-on:click="$dispatch('logs-apply-requested')"
-                class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-base font-semibold text-white hover:bg-[#4a2d44]"
-            >
-                {{ __('archived_logs.buttons.apply') }}
-            </button>
+            <div class="flex w-full gap-2 md:justify-end">
+                <button
+                    type="button"
+                    x-on:click="$dispatch('logs-apply-requested')"
+                    class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-base font-semibold text-white hover:bg-[#4a2d44]"
+                >
+                    {{ __('archived_logs.buttons.apply') }}
+                </button>
 
-            <button
-                type="button"
-                wire:click="resetFilters"
-                class="inline-flex items-center rounded-full border border-slate-300 bg-white px-4 py-2 text-base font-semibold text-slate-800 hover:bg-slate-50"
-            >
-                {{ __('archived_logs.buttons.reset') }}
-            </button>
+                <button
+                    type="button"
+                    wire:click="resetFilters"
+                    class="inline-flex items-center rounded-full border border-slate-300 bg-white px-4 py-2 text-base font-semibold text-slate-800 hover:bg-slate-50"
+                >
+                    {{ __('archived_logs.buttons.reset') }}
+                </button>
+            </div>
         </div>
     </div>
 
