@@ -50,7 +50,6 @@
             __('error_codes.table.name'),
             __('error_codes.table.file'),
             __('error_codes.table.line'),
-            __('error_codes.table.actions'),
         ]"
         :emptyText="__('error_codes.empty')"
         :hasItems="$errorCodes->isNotEmpty()"
@@ -58,7 +57,6 @@
     >
         @foreach($errorCodes as $item)
                 <tr
-                    x-data="{ confirmDeleteOpen: false }"
                     class="align-top cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
                     data-href="{{ route('error-codes.show', $item->id) }}"
                     onclick="window.location.href=this.dataset.href"
@@ -68,31 +66,6 @@
                     <td class="px-3 py-2 text-slate-700 dark:text-slate-200">{{ $item->name ?? '-' }}</td>
                     <td class="px-3 py-2 text-slate-700 dark:text-slate-200">{{ $item->file ?? '-' }}</td>
                     <td class="px-3 py-2 text-slate-700 dark:text-slate-200">{{ $item->line ?? '-' }}</td>
-                    <td class="px-3 py-2 text-slate-700 dark:text-slate-200 whitespace-nowrap">
-                        <div class="flex gap-2">
-                            <a
-                                href="{{ route('error-codes.show', $item->id) }}"
-                                onclick="event.stopPropagation()"
-                                class="inline-flex items-center rounded-full border border-slate-300 bg-white px-3 py-1 text-sm font-semibold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                            >
-                                {{ __('error_codes.buttons.edit') }}
-                            </a>
-
-                            <button
-                                type="button"
-                                onclick="event.stopPropagation()"
-                                x-on:click="confirmDeleteOpen = true"
-                                class="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-3 py-1 text-sm font-semibold text-red-700 hover:bg-red-100"
-                            >
-                                {{ __('error_codes.buttons.delete') }}
-                            </button>
-
-                            <x-confirm-delete-modal
-                                :action="route('error-codes.destroy', $item->id)"
-                                openVar="confirmDeleteOpen"
-                            />
-                        </div>
-                    </td>
                 </tr>
         @endforeach
     </x-index-table>
