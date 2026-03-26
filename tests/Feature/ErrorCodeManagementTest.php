@@ -1,0 +1,99 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Application;
+use App\Models\Comment;
+use App\Models\ErrorCode;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class ErrorCodeManagementTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_user_can_update_error_code_from_detail_flow(): void
+    {
+        $user = User::factory()->create();
+
+        $application = Application::query()->create([
+            'name' => 'App A',
+            'description' => 'App for update test',
+            'created_at' => now(),
+        ]);
+
+        $errorCode = ErrorCode::query()->create([
+            'application_id' => $application->id,
+            'code' => 'E-400',
+            'name' => 'Original name',
+            'description' => 'Original description',
+            'severity' => 'high',
+            'file' => 'app/File.php',
+            'line' => 10,
+        ]);
+
+        $this->actingAs($user)
+            ->put('/error-codes/' . $errorCode->id, [
+                'errorCodeId' => $errorCode->id,
+                'application_id' => $application->id,
+                'code' => 'E-400',
+                'name' => 'Updated name',
+                'description' => 'Updated description',
+                'severity' => 'critical',
+                'file' => 'app/UpdatedFile.php',
+                'line' => 20,
+            ])
+            ->assertRedirect(route('error-codes.show', $errorCode->id))
+            ->assertSessionHas('status', __('error_codes.updated'));
+
+        $this->assertDatabaseHas('error_codes', [
+            'id' => $errorCode->id,
+            'application_id' => $application->id,
+            'code' => 'E-400',
+            'name' => 'Updated name',
+            'description' => 'Updated description',
+            'severity' => 'critical',
+            'file' => 'app/UpdatedFile.php',
+            'line' => 20,
+        ]);
+    }
+
+    public function test_delete_error_code_cascades_comments_and_redirects_to_index(): void
+    {
+        $owner = User::factory()->create();
+
+        $application = Application::query()->create([
+            'name' => 'App B',
+            'description' => 'App for delete test',
+            'created_at' => now(),
+        ]);
+
+        $errorCode = ErrorCode::query()->create([
+            'application_id' => $application->id,
+            'code' => 'E-500',
+            'name' => 'Delete me',
+            'severity' => 'medium',
+        ]);
+
+        $comment = Comment::query()->create([
+            'commentable_type' => ErrorCode::class,
+            'commentable_id' => $errorCode->id,
+            'user_id' => $owner->id,
+            'content' => 'Comment tied to error code',
+        ]);
+
+        $this->actingAs($owner)
+            ->delete('/error-codes/' . $errorCode->id)
+            ->assertRedirect(route('error-codes.index'))
+            ->assertSessionHas('status', __('error_codes.deleted'));
+
+        $this->assertDatabaseMissing('error_codes', [
+            'id' => $errorCode->id,
+        ]);
+
+        $this->assertDatabaseMissing('comments', [
+            'id' => $comment->id,
+        ]);
+    }
+}
