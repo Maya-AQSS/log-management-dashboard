@@ -12,6 +12,16 @@ class ErrorCode extends Model
 {
     use HasFactory;
 
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        // Cascade delete comments when error code is deleted
+        static::deleting(function (self $errorCode) {
+            $errorCode->comments()->delete();
+        });
+    }
+
     protected $fillable = [
         'code',
         'application_id',
