@@ -51,12 +51,14 @@ class LogRepository implements LogRepositoryInterface
      * Busca y filtra logs por diferentes criterios: 
      * - texto libre en el mensaje
      * - tipo de severidad de error
+     * - aplicación (application_id)
      * - si está archivado o no
      * - si está resuelto o no
      */
     public function searchAndFilter(
         ?string $search,
         ?array $severity,
+        ?int $applicationId,
         ?string $archived,
         ?string $resolved,
         ?string $dateFrom,
@@ -75,6 +77,7 @@ class LogRepository implements LogRepositoryInterface
             ->with(['application', 'errorCode'])
             ->when($search, fn ($q) => $q->where('message', 'ilike', '%' . $search . '%'))
             ->when($severity, fn ($q) => $q->whereIn('severity', $severity))
+            ->when($applicationId !== null, fn ($q) => $q->where('application_id', $applicationId))
             ->when($archived, function ($q) use ($archived): void {
                 if ($archived === 'archived') {
                     $q->whereExists(fn ($subQuery) => $this->applyArchivedMatchForLogsQuery($subQuery));

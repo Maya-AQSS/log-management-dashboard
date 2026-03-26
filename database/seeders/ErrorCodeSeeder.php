@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\ErrorCode;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class ErrorCodeSeeder extends Seeder
@@ -16,17 +16,22 @@ class ErrorCodeSeeder extends Seeder
         $errorCodes = require database_path('data/mock-error-codes.php');
 
         foreach ($errorCodes as $errorCode) {
+            $attributes = [
+                'code' => $errorCode['code'],
+                'application_id' => $errorCode['application_id'],
+                'name' => $errorCode['name'],
+                'description' => $errorCode['description'] ?? null,
+                'severity' => $errorCode['severity'],
+                'file' => $errorCode['file'] ?? null,
+                'line' => $errorCode['line'] ?? null,
+            ];
+
             ErrorCode::updateOrCreate(
-                ['id' => $errorCode['id']],
                 [
                     'code' => $errorCode['code'],
                     'application_id' => $errorCode['application_id'],
-                    'name' => $errorCode['name'],
-                    'file' => $errorCode['file'] ?? null,
-                    'line' => $errorCode['line'] ?? null,
-                    'description' => $errorCode['description'],
-                    'severity' => $errorCode['severity'],
-                ]
+                ],
+                $attributes
             );
         }
 

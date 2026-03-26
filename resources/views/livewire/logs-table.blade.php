@@ -1,7 +1,7 @@
 <div x-data="{}">
     <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
-        <div class="space-y-5">
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div class="space-y-4">
                 <div>
                     <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
                         {{ __('logs.filters.search') }}
@@ -14,6 +14,13 @@
                     />
                 </div>
 
+                <x-filters.severity-filter-checkboxes
+                    wire-model="severityInput"
+                    :selected="$severityInput"
+                />
+            </div>
+
+            <div class="space-y-4">
                 <div>
                     <x-date-range-filter
                         wire-model-from="dateFromInput"
@@ -26,12 +33,14 @@
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
-            </div>
 
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <x-severity-filter-checkboxes
-                    wire-model="severityInput"
-                    :selected="$severityInput"
+                <x-filters.application-select
+                    wire:model.defer="selectedApplicationIdInput"
+                    :hide-label="true"
+                    :placeholder="__('logs.filters.application_all')"
+                    :applications="$applications"
+                    :selected="$selectedApplicationIdInput"
+                    class="text-sm font-medium"
                 />
 
                 @php
@@ -42,7 +51,7 @@
                     class="group rounded-xl border border-slate-300 bg-white px-3 py-2 shadow-sm dark:border-slate-700 dark:bg-slate-800"
                 >
                     <summary class="list-none cursor-pointer select-none flex items-center justify-between gap-3 text-sm font-medium text-slate-700 dark:text-slate-200">
-                        <span>{{ __('logs.filters.resolved') }}</span>
+                        <span>{{ __('logs.filters.resolved_group') }}</span>
                         <x-chevron-down class="transition-transform group-open:rotate-180" />
                     </summary>
 
@@ -83,21 +92,21 @@
         </div>
 
         <div class="mt-4 flex w-full justify-center gap-2">
-                <button
-                    type="button"
-                    x-on:click="$dispatch('logs-apply-requested')"
-                    class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-base font-semibold text-white hover:bg-[#4a2d44]"
-                >
-                    {{ __('logs.buttons.apply') }}
-                </button>
+            <button
+                type="button"
+                x-on:click="$dispatch('logs-apply-requested')"
+                class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-base font-semibold text-white hover:bg-[#4a2d44]"
+            >
+                {{ __('logs.buttons.apply') }}
+            </button>
 
-                <button
-                    type="button"
-                    wire:click="resetFilters"
-                    class="inline-flex items-center rounded-full border border-slate-300 bg-white px-4 py-2 text-base font-semibold text-slate-800 hover:bg-slate-50"
-                >
-                    {{ __('logs.buttons.reset') }}
-                </button>
+            <button
+                type="button"
+                wire:click="resetFilters"
+                class="inline-flex items-center rounded-full border border-slate-300 bg-white px-4 py-2 text-base font-semibold text-slate-800 hover:bg-slate-50"
+            >
+                {{ __('logs.buttons.reset') }}
+            </button>
         </div>
     </div>
 

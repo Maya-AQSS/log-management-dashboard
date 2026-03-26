@@ -27,4 +27,3 @@
         @endforeach
     </div>
 </details>
-

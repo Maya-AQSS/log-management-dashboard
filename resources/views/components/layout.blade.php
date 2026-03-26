@@ -6,7 +6,7 @@
 
     <title>{{ __('app.app_name') }}</title>
 
-    @vite('resources/css/app.css')
+    @vite(['resources/css/app.css', 'resources/js/tiptap-editor.js'])
     @livewireStyles
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">

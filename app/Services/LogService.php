@@ -61,6 +61,7 @@ class LogService implements LogServiceInterface
     public function searchAndFilter(
         ?string $search,
         ?array $severity,
+        ?int $applicationId,
         ?string $archived,
         ?string $resolved,
         ?string $dateFrom,
@@ -71,6 +72,7 @@ class LogService implements LogServiceInterface
         return $this->logRepository->searchAndFilter(
             $search,
             $severity,
+            $applicationId,
             $archived,
             $resolved,
             $dateFrom,

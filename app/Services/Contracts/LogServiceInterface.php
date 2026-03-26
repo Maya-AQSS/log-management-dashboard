@@ -28,6 +28,7 @@ interface LogServiceInterface
     public function searchAndFilter(
         ?string $search,
         ?array $severity,
+        ?int $applicationId,
         ?string $archived,
         ?string $resolved,
         ?string $dateFrom,

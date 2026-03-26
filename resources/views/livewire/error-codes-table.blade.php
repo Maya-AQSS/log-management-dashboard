@@ -10,17 +10,14 @@
                 />
             </div>
 
-            <div>
-                <select
-                    wire:model.defer="filterAppInput"
-                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
-                >
-                    <option value="">{{ __('error_codes.filters.app') }}: {{ __('error_codes.filters.app_all') }}</option>
-                    @foreach($applications as $id => $name)
-                        <option value="{{ $id }}">{{ $name }}</option>
-                    @endforeach
-                </select>
-            </div>
+            <x-filters.application-select
+                wire:model.defer="filterAppInput"
+                :label="__('error_codes.filters.app')"
+                :placeholder="__('error_codes.filters.app_all')"
+                :applications="$applications"
+                :selected="$filterAppInput"
+            />
+
 
             <div class="flex gap-2 md:justify-end">
                 <button
