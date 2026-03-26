@@ -2,9 +2,6 @@
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
         {{-- Logo / título izquierda --}}
         <div class="flex items-center gap-2">
-            <div class="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-base font-semibold">
-                LM
-            </div>
             <span class="text-base font-semibold tracking-wide uppercase">
                 {{ __('app.app_name') }}
             </span>
