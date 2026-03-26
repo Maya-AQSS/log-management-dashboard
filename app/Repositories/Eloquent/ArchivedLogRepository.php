@@ -91,6 +91,12 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
             ->findOrFail($id);
     }
 
+    public function updateUrlTutorial(ArchivedLog $archivedLog, ?string $url): void
+    {
+        $archivedLog->url_tutorial = $url;
+        $archivedLog->save();
+    }
+
     /**
      * Elimina un log archivado.
      */

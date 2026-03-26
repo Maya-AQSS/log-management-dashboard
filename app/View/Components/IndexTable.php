@@ -19,6 +19,8 @@ class IndexTable extends Component
 
     public LengthAwarePaginator|Collection|null $paginator;
 
+    public string $tableClass;
+
     /**
      * @param  array<int,string>  $headers
      */
@@ -26,12 +28,14 @@ class IndexTable extends Component
         array $headers = [],
         string $emptyText = '',
         bool $hasItems = false,
-        LengthAwarePaginator|Collection|null $paginator = null
+        LengthAwarePaginator|Collection|null $paginator = null,
+        string $tableClass = ''
     ) {
         $this->headers = $headers;
         $this->emptyText = $emptyText;
         $this->hasItems = $hasItems;
         $this->paginator = $paginator;
+        $this->tableClass = $tableClass;
     }
 
     public function render(): View|Closure|string

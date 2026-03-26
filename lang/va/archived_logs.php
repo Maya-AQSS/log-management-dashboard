@@ -5,9 +5,9 @@ return [
     'title' => 'Històric de logs',
     'welcome' => 'Benvingut a l’històric de logs',
 
-    'empty' => 'No hi ha historic de logs per mostrar',
-    'deleted' => 'Historic de logs eliminat correctament',
-    'confirm_delete' => 'Segur que vols eliminar este historic de logs?',
+    'empty' => 'No hi ha cap històric de logs per mostrar',
+    'deleted' => 'Històric de logs eliminat correctament',
+    'confirm_delete' => 'Segur que vols eliminar aquest històric de logs?',
 
     'buttons' => [
         'apply' => 'Aplicar',
@@ -26,9 +26,21 @@ return [
     ],
 
     'table' => [
-        'application' => 'Aplicacio',
+        'application' => 'Aplicació',
         'severity' => 'Severitat',
         'message' => 'Missatge',
         'archived_at' => 'Arxivat',
+    ],
+
+    'validation' => [
+        'url_tutorial' => 'Introdueix una URL vàlida',
+    ],
+
+    'url_tutorial' => [
+        'placeholder' => 'https://…',
+        'save' => 'Guardar',
+        'cancel' => 'Cancel·lar',
+        'empty' => 'Sense URL de tutorial.',
+        'edit_aria' => 'Editar URL de tutorial',
     ],
 ];

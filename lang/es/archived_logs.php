@@ -31,4 +31,16 @@ return [
         'message' => 'Mensaje',
         'archived_at' => 'Archivado',
     ],
+
+    'validation' => [
+        'url_tutorial' => 'Introduce una URL válida',
+    ],
+
+    'url_tutorial' => [
+        'placeholder' => 'https://…',
+        'save' => 'Guardar',
+        'cancel' => 'Cancelar',
+        'empty' => 'Sin URL de tutorial.',
+        'edit_aria' => 'Editar URL de tutorial',
+    ],
 ];

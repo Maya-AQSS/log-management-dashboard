@@ -114,6 +114,7 @@
         :emptyText="__('logs.empty')"
         :hasItems="$logs->isNotEmpty()"
         :paginator="$logs"
+        table-class="min-w-[56rem]"
     >
         <x-slot:head>
             <tr>
@@ -122,7 +123,7 @@
                         type="button"
                         wire:click="sortByColumn('application')"
                         title="{{ __('logs.table.sortable_hint') }}"
-                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-normal text-inherit cursor-pointer rounded-sm hover:bg-slate-100/70 dark:hover:bg-slate-700/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b3853]/40"
+                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-bold text-inherit cursor-pointer rounded-sm hover:bg-slate-100/70 dark:hover:bg-slate-700/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b3853]/40"
                     >
                         <span class="truncate">{{ __('logs.table.application') }}</span>
                         @if($sortBy === 'application')
@@ -137,7 +138,7 @@
                         type="button"
                         wire:click="sortByColumn('severity')"
                         title="{{ __('logs.table.sortable_hint') }}"
-                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-normal text-inherit cursor-pointer rounded-sm hover:bg-slate-100/70 dark:hover:bg-slate-700/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b3853]/40"
+                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-bold text-inherit cursor-pointer rounded-sm hover:bg-slate-100/70 dark:hover:bg-slate-700/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b3853]/40"
                     >
                         <span class="truncate">{{ __('logs.table.severity') }}</span>
                         @if($sortBy === 'severity')
@@ -147,14 +148,14 @@
                         @endif
                     </button>
                 </th>
-                <th class="px-3 py-2 text-left">{{ __('logs.table.message') }}</th>
+                <th class="min-w-[16rem] px-3 py-2 text-left md:min-w-[18rem]">{{ __('logs.table.message') }}</th>
                 <th class="px-3 py-2 text-left">{{ __('logs.table.error_code') }}</th>
                 <th class="px-3 py-2 text-left">
                     <button
                         type="button"
                         wire:click="sortByColumn('created_at')"
                         title="{{ __('logs.table.sortable_hint') }}"
-                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-normal text-inherit cursor-pointer rounded-sm hover:bg-slate-100/70 dark:hover:bg-slate-700/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b3853]/40"
+                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-bold text-inherit cursor-pointer rounded-sm hover:bg-slate-100/70 dark:hover:bg-slate-700/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b3853]/40"
                     >
                         <span class="truncate">{{ __('logs.table.created_at') }}</span>
                         @if($sortBy === 'created_at')
@@ -176,10 +177,10 @@
                     <td class="px-3 py-2 whitespace-nowrap">
                         <x-severity-badge :severity="$log->severity" />
                     </td>
-                    <td class="px-3 py-2 text-slate-700 dark:text-slate-200">
+                    <td class="min-w-[16rem] max-w-md px-3 py-2 text-slate-700 dark:text-slate-200 md:min-w-[18rem]">
                         <a
                             href="{{ route('logs.show', $log->id) }}"
-                            class="hover:underline focus:outline-none focus:ring-2 focus:ring-[#5b3853]/30 rounded"
+                            class="inline-block break-words hover:underline focus:outline-none focus:ring-2 focus:ring-[#5b3853]/30 rounded"
                         >
                             {{ \Illuminate\Support\Str::limit($log->message ?? '-', 120) }}
                         </a>

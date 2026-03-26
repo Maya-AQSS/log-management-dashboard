@@ -1,6 +1,6 @@
 @if($hasItems)
     <div class="mt-4 overflow-x-auto">
-        <table class="min-w-full text-base">
+        <table class="min-w-full text-base {{ $tableClass }}">
             <thead class="bg-slate-50 text-base uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-300">
                 @isset($head)
                     {{ $head }}

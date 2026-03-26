@@ -65,7 +65,7 @@
                         type="button"
                         wire:click="sortByColumn('severity')"
                         title="{{ __('logs.table.sortable_hint') }}"
-                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-normal text-inherit cursor-pointer rounded-sm hover:bg-slate-100/70 dark:hover:bg-slate-700/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b3853]/40"
+                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-bold text-inherit cursor-pointer rounded-sm hover:bg-slate-100/70 dark:hover:bg-slate-700/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b3853]/40"
                     >
                         <span class="truncate">{{ __('archived_logs.table.severity') }}</span>
                         @if($sortBy === 'severity')
@@ -81,7 +81,7 @@
                         type="button"
                         wire:click="sortByColumn('archived_at')"
                         title="{{ __('logs.table.sortable_hint') }}"
-                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-normal text-inherit cursor-pointer rounded-sm hover:bg-slate-100/70 dark:hover:bg-slate-700/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b3853]/40"
+                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-bold text-inherit cursor-pointer rounded-sm hover:bg-slate-100/70 dark:hover:bg-slate-700/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b3853]/40"
                     >
                         <span class="truncate">{{ __('archived_logs.table.archived_at') }}</span>
                         @if($sortBy === 'archived_at')
