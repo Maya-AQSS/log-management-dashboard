@@ -68,7 +68,7 @@
                     <td class="px-3 py-2 text-slate-700 dark:text-slate-200 whitespace-nowrap">
                         <div class="flex gap-2">
                             <a
-                                href="{{ route('error-codes.edit', $item->id) }}"
+                                href="{{ route('error-codes.show', $item->id) }}"
                                 onclick="event.stopPropagation()"
                                 class="inline-flex items-center rounded-full border border-slate-300 bg-white px-3 py-1 text-sm font-semibold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                             >
