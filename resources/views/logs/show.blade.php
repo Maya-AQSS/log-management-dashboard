@@ -13,7 +13,7 @@
             />
         </div>
     @else
-        <div class="flex items-start justify-between gap-3">
+        <div class="flex min-h-[2.5rem] items-start justify-between gap-3">
             <a
                 href="{{ $backHref }}"
                 class="inline-flex items-center rounded-full bg-[#f7a736] px-4 py-2 text-sm font-semibold text-[#1e1a24] shadow-sm hover:bg-[#e28f1f] dark:bg-amber-500 dark:hover:bg-amber-400"
@@ -21,14 +21,14 @@
                 {{ __('logs.buttons.back') }}
             </a>
 
-            <div class="text-center">
-                <h1 class="text-3xl font-bold text-slate-900 md:text-4xl dark:text-slate-100">
+            <div class="flex flex-1 flex-col items-center justify-center text-center">
+                <h1 class="text-xl font-semibold leading-tight text-slate-900 md:text-2xl dark:text-slate-100">
                     {{ __('logs.detail.title') }} #{{ $log->id }}
                 </h1>
             </div>
 
-            <div class="flex items-center">
-                <div x-data="{ confirmArchiveOpen: false }" class="flex items-center gap-2">
+            <div class="flex shrink-0 flex-wrap items-center justify-end gap-2 sm:gap-3">
+                <div x-data="{ confirmArchiveOpen: false }" class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
                     @if($archivedLogId === null)
                         <button
                             type="button"
