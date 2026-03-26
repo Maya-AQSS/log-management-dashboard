@@ -97,6 +97,12 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
         $archivedLog->save();
     }
 
+    public function updateDescription(ArchivedLog $archivedLog, ?string $description): void
+    {
+        $archivedLog->description = $description;
+        $archivedLog->save();
+    }
+
     /**
      * Elimina un log archivado.
      */
@@ -136,7 +142,7 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
                 'severity' => $log->severity,
                 'message' => $log->message,
                 'metadata' => $log->metadata,
-                'description' => $log->errorCode?->description,
+                'description' => null,
                 'url_tutorial' => null,
                 'original_created_at' => $log->created_at,
                 'archived_at' => now(),
