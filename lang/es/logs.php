@@ -31,7 +31,7 @@ return [
         'error_code' => 'Código de error',
         'created_at' => 'Creado',
         'status' => 'Estado',
-        'url_tutorial' => 'URL Tutorial',
+        'url_tutorial' => 'URL del tutorial',
         'sortable_hint' => 'Clic para ordenar por esta columna',
     ],
 

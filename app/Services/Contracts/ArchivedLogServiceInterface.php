@@ -23,6 +23,8 @@ interface ArchivedLogServiceInterface
 
     public function updateUrlTutorial(ArchivedLog $archivedLog, ?string $url): ArchivedLog;
 
+    public function updateDescription(ArchivedLog $archivedLog, ?string $description): ArchivedLog;
+
     public function delete(ArchivedLog $archivedLog): void;
 
     public function archiveFromLogId(int $logId, int $archivedById): ArchivedLog;

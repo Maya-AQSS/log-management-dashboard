@@ -13,6 +13,8 @@ return [
         'apply' => 'Apply',
         'reset' => 'Reset',
         'edit' => 'Edit',
+        'save' => 'Save',
+        'cancel' => 'Cancel',
         'view_tutorial' => 'View tutorial',
         'delete' => 'Delete',
     ],
@@ -37,10 +39,21 @@ return [
     ],
 
     'url_tutorial' => [
+        'section_title' => 'Tutorial URL',
         'placeholder' => 'https://…',
         'save' => 'Save',
         'cancel' => 'Cancel',
         'empty' => 'No tutorial URL yet.',
         'edit_aria' => 'Edit tutorial URL',
+    ],
+
+    'description' => [
+        'section_title' => 'Archived log description',
+        'field_label' => 'description',
+        'empty' => 'No description yet.',
+        'placeholder' => 'Error context, root cause, or resolution steps…',
+        'save' => 'Save',
+        'cancel' => 'Cancel',
+        'edit_aria' => 'Edit description',
     ],
 ];

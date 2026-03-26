@@ -50,6 +50,13 @@ class ArchivedLogService implements ArchivedLogServiceInterface
         return $archivedLog->fresh();
     }
 
+    public function updateDescription(ArchivedLog $archivedLog, ?string $description): ArchivedLog
+    {
+        $this->archivedLogRepository->updateDescription($archivedLog, $description);
+
+        return $archivedLog->fresh();
+    }
+
     public function delete(ArchivedLog $archivedLog): void
     {
         $this->archivedLogRepository->delete($archivedLog);

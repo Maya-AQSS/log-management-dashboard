@@ -7,10 +7,13 @@ use App\Models\Log;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use App\Services\Contracts\LogServiceInterface;
 use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 
 class LogDetail extends Component
 {
+    use AuthorizesRequests;
+
     public string $source = 'log';
 
     public int $recordId;
@@ -20,6 +23,11 @@ class LogDetail extends Component
     public string $urlTutorialInput = '';
 
     public bool $editingUrlTutorial = false;
+
+    public string $descriptionInput = '';
+
+    /** closed | editing */
+    public string $descriptionPanelMode = 'closed';
 
     public function mount(string $source, int $recordId, ?string $backHref = null): void
     {
@@ -33,30 +41,137 @@ class LogDetail extends Component
             $archivedLog = ArchivedLog::query()->findOrFail($recordId);
             $this->urlTutorialInput = $archivedLog->url_tutorial ?? '';
             $this->editingUrlTutorial = false;
+            $this->descriptionInput = $archivedLog->description ?? '';
+            $this->descriptionPanelMode = 'closed';
         }
+    }
+
+    /**
+     * Abre edición de descripción y URL a la vez (solo quien archivó: policy update).
+     */
+    public function startEditingArchivedFields(): void
+    {
+        abort_unless($this->source === 'archived_log', 403);
+
+        $archivedLog = ArchivedLog::query()->findOrFail($this->recordId);
+        $this->authorize('update', $archivedLog);
+
+        $this->descriptionInput = $archivedLog->description ?? '';
+        $this->urlTutorialInput = $archivedLog->url_tutorial ?? '';
+        $this->descriptionPanelMode = 'editing';
+        $this->editingUrlTutorial = true;
+    }
+
+    public function startEditingDescription(): void
+    {
+        $this->startEditingArchivedFields();
+    }
+
+    public function cancelEditingDescription(): void
+    {
+        $this->cancelEditingArchivedFields();
+    }
+
+    public function cancelEditingArchivedFields(): void
+    {
+        abort_unless($this->source === 'archived_log', 403);
+
+        $archivedLog = ArchivedLog::query()->findOrFail($this->recordId);
+        $this->authorize('update', $archivedLog);
+
+        $this->descriptionInput = $archivedLog->description ?? '';
+        $this->urlTutorialInput = $archivedLog->url_tutorial ?? '';
+        $this->descriptionPanelMode = 'closed';
+        $this->editingUrlTutorial = false;
+        $this->resetValidation(['descriptionInput', 'urlTutorialInput']);
+    }
+
+    public function saveArchivedDetailChanges(): void
+    {
+        abort_unless($this->source === 'archived_log', 403);
+
+        $archivedLog = ArchivedLog::query()->findOrFail($this->recordId);
+        $this->authorize('update', $archivedLog);
+
+        $this->validate(
+            [
+                'descriptionInput' => ['nullable', 'string', 'max:5000'],
+                'urlTutorialInput' => [
+                    'nullable',
+                    'string',
+                    'max:500',
+                    function (string $attribute, mixed $value, \Closure $fail): void {
+                        $v = trim((string) $value);
+                        if ($v === '') {
+                            return;
+                        }
+                        if (! $this->isAcceptableTutorialUrl($v)) {
+                            $fail(__('archived_logs.validation.url_tutorial'));
+                        }
+                    },
+                ],
+            ],
+            [
+                'descriptionInput.max' => __('validation.max.string', [
+                    'attribute' => __('archived_logs.description.field_label'),
+                    'max' => 5000,
+                ]),
+                'urlTutorialInput.max' => __('validation.max.string', ['attribute' => __('logs.table.url_tutorial'), 'max' => 500]),
+            ]
+        );
+
+        $text = trim($this->descriptionInput);
+        $text = $text === '' ? null : $text;
+
+        $urlForValidation = trim($this->urlTutorialInput);
+        $urlForValidation = $urlForValidation === '' ? null : $urlForValidation;
+
+        $archivedLog = app(ArchivedLogServiceInterface::class)->updateDescription($archivedLog, $text);
+        $archivedLog = app(ArchivedLogServiceInterface::class)->updateUrlTutorial($archivedLog, $urlForValidation);
+
+        $this->descriptionInput = $archivedLog->description ?? '';
+        $this->urlTutorialInput = $archivedLog->url_tutorial ?? '';
+        $this->descriptionPanelMode = 'closed';
+        $this->editingUrlTutorial = false;
+        $this->resetValidation(['descriptionInput', 'urlTutorialInput']);
+    }
+
+    public function updateDescription(): void
+    {
+        abort_unless($this->source === 'archived_log', 403);
+
+        $archivedLog = ArchivedLog::query()->findOrFail($this->recordId);
+        $this->authorize('update', $archivedLog);
+
+        $this->validate(
+            [
+                'descriptionInput' => ['nullable', 'string', 'max:5000'],
+            ],
+            [
+                'descriptionInput.max' => __('validation.max.string', [
+                    'attribute' => __('archived_logs.description.field_label'),
+                    'max' => 5000,
+                ]),
+            ]
+        );
+
+        $text = trim($this->descriptionInput);
+        $text = $text === '' ? null : $text;
+
+        $fresh = app(ArchivedLogServiceInterface::class)->updateDescription($archivedLog, $text);
+        $this->descriptionInput = $fresh->description ?? '';
+        $this->descriptionPanelMode = 'closed';
+        $this->editingUrlTutorial = false;
     }
 
     public function startEditingUrlTutorial(): void
     {
-        abort_unless($this->source === 'archived_log', 403);
-
-        $archivedLog = ArchivedLog::query()->findOrFail($this->recordId);
-        $this->authorize('update', $archivedLog);
-
-        $this->urlTutorialInput = $archivedLog->url_tutorial ?? '';
-        $this->editingUrlTutorial = true;
+        $this->startEditingArchivedFields();
     }
 
     public function cancelEditingUrlTutorial(): void
     {
-        abort_unless($this->source === 'archived_log', 403);
-
-        $archivedLog = ArchivedLog::query()->findOrFail($this->recordId);
-        $this->authorize('update', $archivedLog);
-
-        $this->urlTutorialInput = $archivedLog->url_tutorial ?? '';
-        $this->editingUrlTutorial = false;
-        $this->resetValidation(['urlTutorialInput']);
+        $this->cancelEditingArchivedFields();
     }
 
     public function updateUrlTutorial(): void
@@ -94,6 +209,7 @@ class LogDetail extends Component
         $fresh = app(ArchivedLogServiceInterface::class)->updateUrlTutorial($archivedLog, $urlForValidation);
         $this->urlTutorialInput = $fresh->url_tutorial ?? '';
         $this->editingUrlTutorial = false;
+        $this->descriptionPanelMode = 'closed';
     }
 
     public function render(): View
@@ -140,6 +256,12 @@ class LogDetail extends Component
             'metadataJson' => $metadataJson,
             'archivedLogId' => $archivedLogId,
             'archivedDetailUrl' => $archivedDetailUrl,
+            'descriptionPlaceholder' => $this->source === 'archived_log'
+                ? __('archived_logs.description.placeholder')
+                : '',
+            'urlTutorialPlaceholder' => $this->source === 'archived_log'
+                ? __('archived_logs.url_tutorial.placeholder')
+                : '',
         ]);
     }
 

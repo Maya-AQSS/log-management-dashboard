@@ -39,7 +39,7 @@ class LogDetailAcceptanceTest extends TestCase
             ->assertSee(route('logs.show', $logId), false);
 
         $this->actingAs($user)
-            ->get('/logs/' . $logId)
+            ->get('/logs/'.$logId)
             ->assertOk()
             ->assertSee(__('logs.detail.id'))
             ->assertSee((string) $logId)
@@ -63,8 +63,8 @@ class LogDetailAcceptanceTest extends TestCase
     {
         [$user, $application, $errorCode] = $this->seedBaseData();
 
-        $longMessage = str_repeat('Long message segment. ', 400) . 'END_OF_LONG_MESSAGE';
-        $longStackTrace = str_repeat('Stack trace line -> /app/Service.php:42\n', 200) . 'END_OF_STACK_TRACE';
+        $longMessage = str_repeat('Long message segment. ', 400).'END_OF_LONG_MESSAGE';
+        $longStackTrace = str_repeat('Stack trace line -> /app/Service.php:42\n', 200).'END_OF_STACK_TRACE';
 
         $logId = DB::table('logs')->insertGetId([
             'error_code_id' => $errorCode->id,
@@ -81,7 +81,7 @@ class LogDetailAcceptanceTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->get('/logs/' . $logId)
+            ->get('/logs/'.$logId)
             ->assertOk()
             ->assertSee('END_OF_LONG_MESSAGE')
             ->assertSee('END_OF_STACK_TRACE')
@@ -108,10 +108,10 @@ class LogDetailAcceptanceTest extends TestCase
 
         $this->actingAs($user)
             ->withHeader('referer', $filtersUrl)
-            ->get('/logs/' . $logId)
+            ->get('/logs/'.$logId)
             ->assertOk()
             ->assertViewHas('backHref', $filtersUrl)
-            ->assertSee('href="' . e($filtersUrl) . '"', false);
+            ->assertSee('href="'.e($filtersUrl).'"', false);
     }
 
     public function test_url_tutorial_is_visible_only_for_archived_detail_not_active_logs_detail(): void
@@ -127,7 +127,7 @@ class LogDetailAcceptanceTest extends TestCase
             'severity' => 'high',
             'message' => 'Archived with tutorial',
             'metadata' => ['origin' => 'tests'],
-            'description' => 'Archived detail',
+            'description' => null,
             'url_tutorial' => $tutorialUrl,
             'original_created_at' => now()->subMinute(),
             'archived_at' => now(),
@@ -146,16 +146,16 @@ class LogDetailAcceptanceTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->get('/logs/' . $activeLogId)
+            ->get('/logs/'.$activeLogId)
             ->assertOk()
-            ->assertDontSee(__('logs.table.url_tutorial'))
+            ->assertDontSee(__('archived_logs.url_tutorial.section_title'))
             ->assertDontSee($tutorialUrl);
 
         $this->actingAs($user)
-            ->get('/archived-logs/' . $archivedLog->id)
+            ->get('/archived-logs/'.$archivedLog->id)
             ->assertOk()
-            ->assertSee(__('logs.table.url_tutorial'))
-            ->assertSee('href="' . $tutorialUrl . '"', false);
+            ->assertSee(__('archived_logs.url_tutorial.section_title'))
+            ->assertSee('href="'.$tutorialUrl.'"', false);
     }
 
     /**
