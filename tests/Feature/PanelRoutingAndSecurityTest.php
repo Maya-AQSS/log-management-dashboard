@@ -89,7 +89,7 @@ class PanelRoutingAndSecurityTest extends TestCase
         $this->get('/logs')->assertOk()->assertViewIs('logs.index');
         $this->get('/logs/' . $logId)->assertOk()->assertViewIs('logs.show');
         $this->get('/archived-logs')->assertOk()->assertViewIs('archived-logs.index');
-        $this->get('/archived-logs/' . $archivedLog->id)->assertOk()->assertViewIs('archived-logs.show');
+        $this->get('/archived-logs/' . $archivedLog->id)->assertOk()->assertViewIs('logs.show');
         $this->get('/error-codes')->assertOk()->assertViewIs('error-codes.index');
         $this->get('/error-codes/' . $errorCode->id)->assertOk()->assertViewIs('error-codes.show');
 

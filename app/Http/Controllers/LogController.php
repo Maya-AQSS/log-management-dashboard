@@ -19,7 +19,10 @@ class LogController extends Controller
     {
         $log = $this->logService->findOrFail($id);
 
-        return view('logs.show', ['log' => $log]);
+        return view('logs.show', [
+            'source' => 'log',
+            'log' => $log,
+        ]);
     }
 
     public function stream(): StreamedResponse

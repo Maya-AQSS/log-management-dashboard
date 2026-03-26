@@ -27,6 +27,7 @@ return [
         'error_code' => 'Error code',
         'created_at' => 'Created at',
         'status' => 'Status',
+        'url_tutorial' => 'URL Tutorial',
     ],
 
     'status' => [
@@ -55,7 +56,8 @@ return [
         'back' => 'Back',
         'apply' => 'Apply',
         'reset' => 'Reset',
-        'archive' => 'Archive',
+        'archive' => 'Save to history',
         'view_archived' => 'View archived',
+        'solved' => 'Solved',
     ],
 ];

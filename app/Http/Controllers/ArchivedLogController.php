@@ -31,7 +31,8 @@ class ArchivedLogController extends Controller
     {
         $archivedLog = $this->archivedLogService->findOrFail($id);
 
-        return view('archived-logs.show', [
+        return view('logs.show', [
+            'source' => 'archived_log',
             'archivedLog' => $archivedLog,
         ]);
     }

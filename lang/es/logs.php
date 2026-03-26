@@ -27,6 +27,7 @@ return [
         'error_code' => 'Código de error',
         'created_at' => 'Creado',
         'status' => 'Estado',
+        'url_tutorial' => 'URL Tutorial',
     ],
 
     'status' => [
@@ -55,7 +56,8 @@ return [
         'back' => 'Volver',
         'apply' => 'Aplicar',
         'reset' => 'Limpiar',
-        'archive' => 'Archivar',
+        'archive' => 'Guardar en Histórico',
         'view_archived' => 'Ver archivado',
+        'solved' => 'Solucionado',
     ],
 ];
