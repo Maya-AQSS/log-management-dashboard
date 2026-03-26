@@ -13,10 +13,11 @@ class ApplicationSelect extends Component
      * @param  array<int|string,string>|Arrayable<int|string,string>|Collection<int|string,string>  $applications
      */
     public function __construct(
-        public string $label,
-        public string $placeholder,
+        public ?string $label = null,
+        public string $placeholder = '',
         public array|Arrayable|Collection $applications = [],
         public string|int|null $selected = null,
+        public bool $hideLabel = false,
     ) {}
 
     public function render(): View

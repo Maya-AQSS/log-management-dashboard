@@ -6,6 +6,7 @@ use App\Enums\Severity;
 use App\Models\ArchivedLog;
 use App\Models\Log;
 use App\Repositories\Contracts\LogRepositoryInterface;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -63,6 +64,8 @@ class LogRepository implements LogRepositoryInterface
         ?int $applicationId,
         ?string $archived,
         ?string $resolved,
+        ?string $dateFrom,
+        ?string $dateTo,
         int $perPage = 25
     ): LengthAwarePaginator
     {
@@ -110,6 +113,9 @@ class LogRepository implements LogRepositoryInterface
                     $q->where('resolved', false);
                 }
             })
+            ->when($dateFrom, fn ($q) => $q->where('created_at', '>=', CarbonImmutable::parse($dateFrom)->utc()->toDateTimeString()))
+            ->when($dateTo, fn ($q) => $q->where('created_at', '<=', CarbonImmutable::parse($dateTo)->utc()->toDateTimeString()))
+            ->when($dateFrom && !$dateTo, fn ($q) => $q->where('created_at', '<=', now()->utc()->toDateTimeString()))
             ->latest('created_at')
             ->paginate($perPage);
     }

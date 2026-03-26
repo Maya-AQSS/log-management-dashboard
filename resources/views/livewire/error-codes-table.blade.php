@@ -2,6 +2,7 @@
     <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
             <div>
+
                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
                     {{ __('error_codes.filters.search') }}
                 </label>
@@ -20,6 +21,7 @@
                 :applications="$applications"
                 :selected="$filterAppInput"
             />
+
 
             <div class="flex gap-2 md:justify-end">
                 <button

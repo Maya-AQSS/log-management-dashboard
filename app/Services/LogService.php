@@ -56,6 +56,7 @@ class LogService implements LogServiceInterface
      * - tipo de severidad de error
      * - si está archivado o no
      * - si está resuelto o no
+     * - rango de fechas
      */
     public function searchAndFilter(
         ?string $search,
@@ -63,10 +64,21 @@ class LogService implements LogServiceInterface
         ?int $applicationId,
         ?string $archived,
         ?string $resolved,
+        ?string $dateFrom,
+        ?string $dateTo,
         int $perPage = 25
     ): LengthAwarePaginator
     {
-        return $this->logRepository->searchAndFilter($search, $severity, $applicationId, $archived, $resolved, $perPage);
+        return $this->logRepository->searchAndFilter(
+            $search,
+            $severity,
+            $applicationId,
+            $archived,
+            $resolved,
+            $dateFrom,
+            $dateTo,
+            $perPage
+        );
     }
 
     /**

@@ -26,20 +26,13 @@ class ErrorCodeSeeder extends Seeder
                 'line' => $errorCode['line'] ?? null,
             ];
 
-            if (isset($errorCode['id'])) {
-                ErrorCode::updateOrCreate(
-                    ['id' => $errorCode['id']],
-                    $attributes
-                );
-            } else {
-                ErrorCode::updateOrCreate(
-                    [
-                        'code' => $errorCode['code'],
-                        'application_id' => $errorCode['application_id'],
-                    ],
-                    $attributes
-                );
-            }
+            ErrorCode::updateOrCreate(
+                [
+                    'code' => $errorCode['code'],
+                    'application_id' => $errorCode['application_id'],
+                ],
+                $attributes
+            );
         }
 
         if (DB::getDriverName() === 'pgsql') {
