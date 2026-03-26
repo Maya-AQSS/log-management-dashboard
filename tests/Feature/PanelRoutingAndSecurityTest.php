@@ -126,6 +126,47 @@ class PanelRoutingAndSecurityTest extends TestCase
             ->assertDontSee('back=');
     }
 
+    public function test_log_detail_shows_expected_header_actions_based_on_archive_and_resolved_state(): void
+    {
+        [$user, $errorCode, $archivedLog, $logId] = $this->seedPanelRecords();
+        $this->actingAs($user);
+
+        $this->get('/logs/' . $logId)
+            ->assertOk()
+            ->assertSee(__('logs.buttons.archive'))
+            ->assertSee(__('logs.buttons.solved'));
+
+        DB::table('logs')->where('id', $logId)->update(['resolved' => true]);
+
+        $this->get('/logs/' . $logId)
+            ->assertOk()
+            ->assertSee(__('logs.buttons.archive'))
+            ->assertDontSee(__('logs.buttons.solved'));
+
+        DB::table('logs')->where('id', $logId)->update(['resolved' => false]);
+
+        $log = DB::table('logs')->where('id', $logId)->first();
+
+        ArchivedLog::query()->create([
+            'application_id' => (int) $log->application_id,
+            'archived_by_id' => $user->id,
+            'error_code_id' => $errorCode->id,
+            'severity' => (string) $log->severity,
+            'message' => (string) $log->message,
+            'metadata' => ['source' => 'test-match'],
+            'description' => 'Matching archived details',
+            'url_tutorial' => null,
+            'original_created_at' => now()->subMinute(),
+            'archived_at' => now(),
+        ]);
+
+        $this->get('/logs/' . $logId)
+            ->assertOk()
+            ->assertDontSee(__('logs.buttons.archive'))
+            ->assertSee(__('logs.buttons.view_archived'))
+            ->assertSee(__('logs.buttons.solved'));
+    }
+
     public function test_archived_log_delete_route_soft_deletes_and_hides_from_default_views(): void
     {
         [$owner, , $archivedLog] = $this->seedPanelRecords();
