@@ -16,7 +16,7 @@ class ArchivedLogsTable extends Component
 {
     use WithPagination;
 
-    private const SORTABLE_COLUMNS = ['archived_at'];
+    private const SORTABLE_COLUMNS = ['archived_at', 'severity'];
 
     private const SORT_DIRECTIONS = ['asc', 'desc'];
 
