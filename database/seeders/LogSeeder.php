@@ -20,8 +20,10 @@ class LogSeeder extends Seeder
         
         DB::table('logs')->insert($rows);
 
-        DB::statement(
-            "SELECT setval(pg_get_serial_sequence('logs', 'id'), (SELECT COALESCE(MAX(id), 1) FROM logs))"
-        );
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement(
+                "SELECT setval(pg_get_serial_sequence('logs', 'id'), (SELECT COALESCE(MAX(id), 1) FROM logs))"
+            );
+        }
     }
 }

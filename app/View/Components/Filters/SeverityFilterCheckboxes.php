@@ -1,6 +1,6 @@
 <?php
 
-namespace App\View\Components;
+namespace App\View\Components\Filters;
 
 use App\Enums\Severity;
 use Illuminate\Contracts\View\View;
@@ -21,7 +21,7 @@ class SeverityFilterCheckboxes extends Component
 
     public function render(): View
     {
-        return view('components.severity-filter-checkboxes', [
+        return view('components.filters.severity-filter-checkboxes', [
             'title' => $this->title,
             'wireModel' => $this->wireModel,
             'selected' => $this->selected,
@@ -29,4 +29,3 @@ class SeverityFilterCheckboxes extends Component
         ]);
     }
 }
-
