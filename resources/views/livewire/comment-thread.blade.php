@@ -11,6 +11,14 @@
             color: #1d4ed8;
         }
 
+        .dark .rte-content a {
+            color: #93c5fd;
+        }
+
+        .dark .rte-content a:hover {
+            color: #bfdbfe;
+        }
+
         .rte-content img {
             max-width: 100%;
             border-radius: 0.75rem;
@@ -36,6 +44,10 @@
             color: #0f172a;
         }
 
+        .dark .rte-content h1 {
+            color: #f1f5f9;
+        }
+
         .rte-content h2 {
             font-size: 1.375rem;
             font-weight: 700;
@@ -46,12 +58,21 @@
             padding-bottom: 0.2rem;
         }
 
+        .dark .rte-content h2 {
+            color: #f1f5f9;
+            border-bottom-color: #334155;
+        }
+
         .rte-content h3 {
             font-size: 1.075rem;
             font-weight: 600;
             margin-top: 0.5rem;
             margin-bottom: 0.15rem;
             color: #475569;
+        }
+
+        .dark .rte-content h3 {
+            color: #cbd5e1;
         }
 
         .rte-content blockquote {
@@ -64,10 +85,20 @@
             border-radius: 0 0.25rem 0.25rem 0;
         }
 
+        .dark .rte-content blockquote {
+            border-left-color: #475569;
+            color: #cbd5e1;
+            background: #1e293b;
+        }
+
         .rte-content hr {
             border: none;
             border-top: 2px solid #e2e8f0;
             margin: 1rem 0;
+        }
+
+        .dark .rte-content hr {
+            border-top-color: #334155;
         }
 
         .rte-content pre {
@@ -85,6 +116,11 @@
             border-radius: 0.25rem;
             padding: 0.1em 0.35em;
             font-size: 0.85em;
+        }
+
+        .dark .rte-content code:not(pre code) {
+            background: #334155;
+            color: #e2e8f0;
         }
 
         .rte-content ul[data-type="taskList"] {
@@ -129,12 +165,21 @@
             color: #0f172a;
         }
 
+        .dark .rte-prosemirror {
+            color: #e2e8f0;
+            caret-color: #e2e8f0;
+        }
+
         .rte-prosemirror p.is-editor-empty:first-child::before {
             content: attr(data-placeholder);
             color: #94a3b8;
             float: left;
             height: 0;
             pointer-events: none;
+        }
+
+        .dark .rte-prosemirror p.is-editor-empty:first-child::before {
+            color: #64748b;
         }
 
         /* Toolbar fija */
@@ -147,6 +192,11 @@
             background: #f8fafc;
             border-bottom: 1px solid #e2e8f0;
             border-radius: 0.75rem 0.75rem 0 0;
+        }
+
+        .dark .rte-toolbar-bar {
+            background: #1e293b;
+            border-bottom-color: #334155;
         }
 
         .rte-toolbar-bar button {
@@ -162,8 +212,16 @@
             align-items: center;
         }
 
+        .dark .rte-toolbar-bar button {
+            color: #cbd5e1;
+        }
+
         .rte-toolbar-bar button:hover {
             background: #e2e8f0;
+        }
+
+        .dark .rte-toolbar-bar button:hover {
+            background: #334155;
         }
 
         .rte-toolbar-bar button.is-active {
@@ -178,12 +236,22 @@
             margin: 4px 3px;
         }
 
+        .dark .rte-tb-sep {
+            background: #334155;
+        }
+
         /* Caja del editor: toolbar arriba + contenido abajo */
         .rte-editor-box {
             border: 1px solid #cbd5e1;
             border-radius: 0.75rem;
             background: #fff;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .dark .rte-editor-box {
+            border-color: #475569;
+            background: #0f172a;
+            box-shadow: none;
         }
 
         /* Nuevos formatos inline */
@@ -222,6 +290,12 @@
             flex-direction: column;
         }
 
+        .dark .rte-slash-menu {
+            background: #0f172a;
+            border-color: #334155;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+        }
+
         .rte-slash-menu button {
             display: flex;
             align-items: center;
@@ -237,9 +311,18 @@
             cursor: pointer;
         }
 
+        .dark .rte-slash-menu button {
+            color: #e2e8f0;
+        }
+
         .rte-slash-menu button:hover,
         .rte-slash-menu button.is-active {
             background: #f1f5f9;
+        }
+
+        .dark .rte-slash-menu button:hover,
+        .dark .rte-slash-menu button.is-active {
+            background: #1e293b;
         }
 
         .rte-slash-icon {
@@ -249,12 +332,16 @@
             font-size: 0.8rem;
             color: #64748b;
         }
+
+        .dark .rte-slash-icon {
+            color: #94a3b8;
+        }
     </style>
 
     <div class="mt-4 space-y-4">
         <div
                 wire:key="comment-editor-create-{{ $newCommentKey }}"
-                class="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4"
+            class="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900"
                 x-data="tiptapEditor({
                     initialValue: '',
                     messages: {
@@ -269,12 +356,12 @@
                 x-on:drop="handleDrop($event)"
                 x-on:dragover.prevent
         >
-        <label class="block text-sm font-medium text-slate-700">{{ __('comments.form.new_comment') }}</label>
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ __('comments.form.new_comment') }}</label>
         
                 <div wire:ignore style="position: relative">
                     <div class="rte-editor-box">
                         <x-rte-toolbar />
-                        <div class="p-3 cursor-text">
+                        <div class="p-3 cursor-text bg-white dark:bg-slate-950 rounded-b-xl">
                             <div
                                 x-ref="editorEl"
                                 data-placeholder="{{ __('comments.editor.placeholder') }}"
@@ -291,7 +378,7 @@
                     >
                 </div>
         
-                <p class="text-xs text-slate-500">{{ __('comments.editor.hint') }}</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('comments.editor.hint') }}</p>
 
                 @error('content')
                     <p class="text-sm text-rose-600">{{ $message }}</p>
@@ -309,11 +396,11 @@
 
     <div class="space-y-3">
         @forelse ($comments as $comment)
-            <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
                 <div class="flex items-start justify-between gap-4">
                     <div>
-                        <p class="text-sm font-semibold text-slate-900">{{ $comment->user?->name ?? __('comments.user.unknown') }}</p>
-                        <p class="text-xs text-slate-500">{{ $comment->created_at?->format('Y-m-d H:i') }}</p>
+                        <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ $comment->user?->name ?? __('comments.user.unknown') }}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">{{ $comment->created_at?->format('Y-m-d H:i') }}</p>
                     </div>
 
                     @if (auth()->id() === $comment->user_id)
@@ -349,7 +436,7 @@
                         <div wire:ignore style="position: relative">
                             <div class="rte-editor-box">
                                 <x-rte-toolbar />
-                                <div class="p-3 cursor-text">
+                                <div class="p-3 cursor-text bg-white dark:bg-slate-950 rounded-b-xl">
                                     <div
                                         x-ref="editorEl"
                                         data-placeholder="{{ __('comments.editor.placeholder') }}"
@@ -381,7 +468,7 @@
                             <button
                                 type="button"
                                 wire:click="cancelEditing"
-                                class="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                                class="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                             >
                                 {{ __('comments.buttons.cancel') }}
                             </button>
@@ -389,11 +476,11 @@
                         </div>
                     </div>
                 @else
-                    <div class="rte-content mt-3 text-sm text-slate-700">{!! $comment->content !!}</div>
+                    <div class="rte-content mt-3 text-sm text-slate-700 dark:text-slate-300">{!! $comment->content !!}</div>
                 @endif
             </article>
         @empty
-            <p class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+            <p class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
                 {{ __('comments.empty') }}
             </p>
         @endforelse
