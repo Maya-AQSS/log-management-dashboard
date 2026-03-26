@@ -28,6 +28,8 @@ interface LogRepositoryInterface
         ?string $resolved,
         ?string $dateFrom,
         ?string $dateTo,
+        ?string $sortBy,
+        ?string $sortDir,
         int $perPage = 25
     ): LengthAwarePaginator;
 

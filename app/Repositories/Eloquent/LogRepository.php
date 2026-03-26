@@ -16,6 +16,12 @@ use Illuminate\Support\Collection;
 class LogRepository implements LogRepositoryInterface
 {
     private const LIKE_ESCAPE_CHARACTER = '!';
+    private const SORT_COLUMN_MAP = [
+        'created_at' => 'logs.created_at',
+        'severity' => 'logs.severity',
+        'application' => 'applications.name',
+    ];
+    private const SORT_DIRECTIONS = ['asc', 'desc'];
 
     /**
      * Devuelve una página de logs.
@@ -66,6 +72,8 @@ class LogRepository implements LogRepositoryInterface
         ?string $resolved,
         ?string $dateFrom,
         ?string $dateTo,
+        ?string $sortBy,
+        ?string $sortDir,
         int $perPage = 25
     ): LengthAwarePaginator {
         $archivedFlagSubquery = ArchivedLog::query()->selectRaw('1');
@@ -81,12 +89,21 @@ class LogRepository implements LogRepositoryInterface
 
         $driver = DB::connection()->getDriverName();
 
-        return Log::query()
+        $validatedSortDirection = in_array($sortDir, self::SORT_DIRECTIONS, true) ? $sortDir : 'asc';
+        $sortColumn = $sortBy !== null ? (self::SORT_COLUMN_MAP[$sortBy] ?? null) : null;
+
+        $query = Log::query()
             ->select('logs.*')
             ->addSelect([
                 'is_archived' => $archivedFlagSubquery->limit(1),
             ])
-            ->with(['application', 'errorCode'])
+            ->with(['application', 'errorCode']);
+
+        if ($sortBy === 'application') {
+            $query->leftJoin('applications', 'applications.id', '=', 'logs.application_id');
+        }
+
+        return $query
             ->when($normalizedSearch !== null, function ($q) use ($driver, $normalizedSearch, $escapedSearchPattern): void {
                 if ($driver === 'pgsql') {
                     $q->whereRaw("message ILIKE ? ESCAPE '" . self::LIKE_ESCAPE_CHARACTER . "'", [$escapedSearchPattern]);
@@ -112,10 +129,14 @@ class LogRepository implements LogRepositoryInterface
                     $q->where('resolved', false);
                 }
             })
-            ->when($dateFrom, fn ($q) => $q->where('created_at', '>=', CarbonImmutable::parse($dateFrom)->utc()->toDateTimeString()))
-            ->when($dateTo, fn ($q) => $q->where('created_at', '<=', CarbonImmutable::parse($dateTo)->utc()->toDateTimeString()))
-            ->when($dateFrom && !$dateTo, fn ($q) => $q->where('created_at', '<=', now()->utc()->toDateTimeString()))
-            ->latest('created_at')
+            ->when($dateFrom, fn ($q) => $q->where('logs.created_at', '>=', CarbonImmutable::parse($dateFrom)->utc()->toDateTimeString()))
+            ->when($dateTo, fn ($q) => $q->where('logs.created_at', '<=', CarbonImmutable::parse($dateTo)->utc()->toDateTimeString()))
+            ->when($dateFrom && !$dateTo, fn ($q) => $q->where('logs.created_at', '<=', now()->utc()->toDateTimeString()))
+            ->when(
+                $sortColumn !== null,
+                fn ($q) => $q->orderBy($sortColumn, $validatedSortDirection),
+                fn ($q) => $q->orderBy('logs.created_at', 'desc')
+            )
             ->paginate($perPage);
     }
 
