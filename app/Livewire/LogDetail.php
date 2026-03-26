@@ -31,7 +31,7 @@ class LogDetail extends Component
         $log = null;
         if ($this->source === 'archived_log') {
             $archivedLog = ArchivedLog::query()
-                ->with(['application', 'errorCode'])
+                ->with(['application', 'errorCode', 'archivedBy'])
                 ->findOrFail($this->recordId);
 
             if (is_array($archivedLog->metadata) && $archivedLog->metadata !== []) {

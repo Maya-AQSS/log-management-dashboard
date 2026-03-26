@@ -26,9 +26,8 @@ foreach ($errorCodes as $errorCode) {
     $errorCodeByApplication[(int) $errorCode['application_id']] = (int) $errorCode['id'];
 }
 
-$lorem = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
-$messageTail = str_repeat($lorem, 3);
-$veryLongChunk = str_repeat('STACK_TRACE_CHUNK: NullReferenceException at App\\Services\\LogPipeline->process() ', 120);
+$longSegment = 'trace context user request pipeline timeout retry database cache service';
+$messageBody = trim(implode(' ', array_fill(0, 36, $longSegment)));
 
 foreach ($severityCounts as $severity => $count) {
     for ($i = 1; $i <= $count; $i++) {
@@ -37,12 +36,7 @@ foreach ($severityCounts as $severity => $count) {
             ->format('Y-m-d H:i:s');
 
 
-        $message = sprintf(
-            'Seed: %s log #%03d - %s',
-            $severity,
-            $i,
-            $messageTail
-        );
+        $message = sprintf('Seed: %s log #%03d - %s', $severity, $i, $messageBody);
 
         $metadata = [
             'seed' => true,
@@ -52,8 +46,7 @@ foreach ($severityCounts as $severity => $count) {
 
         // Dedicated fixture to validate long-content scrolling in detail view.
         if ($severity === 'critical' && $i === 2) {
-            $message .= "\n\n" . $veryLongChunk;
-            $metadata['stack_trace'] = $veryLongChunk;
+            $metadata['stack_trace'] = $messageBody;
         }
 
         $applicationId = $applicationIds[($id - 1) % count($applicationIds)];
@@ -79,7 +72,7 @@ foreach ($severityCounts as $severity => $count) {
 $duplicateBaseDate = $baseDate->modify('+1 day');
 $duplicateApplicationId = 1; // api-gateway
 $duplicateErrorCodeId = $errorCodeByApplication[$duplicateApplicationId] ?? null;
-$duplicateMessage = 'Seed duplicate: repeated message for archived matching checks';
+$duplicateMessage = 'Seed duplicate: repeated message for archived matching checks - ' . $messageBody;
 
 for ($i = 1; $i <= 6; $i++) {
     $rows[] = [

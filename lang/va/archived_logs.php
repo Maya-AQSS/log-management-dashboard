@@ -29,6 +29,6 @@ return [
         'application' => 'Aplicacio',
         'severity' => 'Severitat',
         'message' => 'Missatge',
-        'archived_at' => 'Arxivada',
+        'archived_at' => 'Arxivat',
     ],
 ];

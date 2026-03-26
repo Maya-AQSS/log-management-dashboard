@@ -139,13 +139,6 @@
                 @endif
             </div>
 
-            <div class="md:col-span-2">
-                <div class="mb-1 font-semibold text-slate-800 dark:text-slate-200">{{ __('archived_logs.table.archived_at') }}</div>
-                <div class="text-slate-700 dark:text-slate-300">
-                    {{ optional($archivedLog->archived_at)->locale(app()->getLocale())->translatedFormat('d F Y H:i:s') ?? '—' }}
-                </div>
-            </div>
-
             @if(!blank($archivedLog->url_tutorial))
                 <div class="md:col-span-2">
                     <div class="mb-1 font-semibold text-slate-800 dark:text-slate-200">{{ __('logs.table.url_tutorial') }}</div>
