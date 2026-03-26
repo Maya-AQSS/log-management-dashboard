@@ -31,6 +31,7 @@ return [
         'date_range' => 'Rango de fechas',
         'date_from' => 'Fecha inicio',
         'date_to' => 'Fecha fin',
+        'date_range_invalid' => 'La fecha fin no puede ser anterior a la fecha inicio.',
 
         'archived' => 'Archivado',
         'archived_all' => 'Todos',

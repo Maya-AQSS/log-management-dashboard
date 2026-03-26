@@ -31,6 +31,7 @@ return [
         'date_range' => 'Rang de dates',
         'date_from' => 'Data inici',
         'date_to' => 'Data fi',
+        'date_range_invalid' => 'La data fi no pot ser anterior a la data inici.',
 
         'archived' => 'Arxivat',
         'archived_all' => 'Tots',

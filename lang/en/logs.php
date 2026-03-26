@@ -31,6 +31,7 @@ return [
         'date_range' => 'Date range',
         'date_from' => 'Start date',
         'date_to' => 'End date',
+        'date_range_invalid' => 'End date cannot be earlier than start date.',
 
         'archived' => 'Archived',
         'archived_all' => 'All',

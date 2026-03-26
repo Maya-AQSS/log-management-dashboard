@@ -1,4 +1,4 @@
-<div>
+<div x-data="{}">
     <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
         <div class="space-y-5">
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -85,7 +85,7 @@
         <div class="mt-4 flex w-full justify-center gap-2">
                 <button
                     type="button"
-                    wire:click="applyFilters"
+                    x-on:click="$dispatch('logs-apply-requested')"
                     class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-base font-semibold text-white hover:bg-[#4a2d44]"
                 >
                     {{ __('logs.buttons.apply') }}
