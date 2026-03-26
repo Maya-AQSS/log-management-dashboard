@@ -110,42 +110,65 @@
         </div>
     </div>
 
-    <div class="mt-4 overflow-x-auto">
-        <table class="min-w-full text-base">
-            <thead class="bg-slate-50 text-base uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-300">
-                <tr>
-                    <th class="px-3 py-2 text-left">
-                        <button type="button" wire:click="sortByColumn('application')" class="inline-flex items-center gap-1 select-none">
-                            <span>{{ __('logs.table.application') }}</span>
-                            @if($sortBy === 'application')
-                                <span aria-hidden="true">{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
-                            @endif
-                        </button>
-                    </th>
-                    <th class="px-3 py-2 text-left">
-                        <button type="button" wire:click="sortByColumn('severity')" class="inline-flex items-center gap-1 select-none">
-                            <span>{{ __('logs.table.severity') }}</span>
-                            @if($sortBy === 'severity')
-                                <span aria-hidden="true">{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
-                            @endif
-                        </button>
-                    </th>
-                    <th class="px-3 py-2 text-left">{{ __('logs.table.message') }}</th>
-                    <th class="px-3 py-2 text-left">{{ __('logs.table.error_code') }}</th>
-                    <th class="px-3 py-2 text-left">
-                        <button type="button" wire:click="sortByColumn('created_at')" class="inline-flex items-center gap-1 select-none">
-                            <span>{{ __('logs.table.created_at') }}</span>
-                            @if($sortBy === 'created_at')
-                                <span aria-hidden="true">{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
-                            @endif
-                        </button>
-                    </th>
-                    <th class="px-3 py-2 text-left">{{ __('logs.table.status') }}</th>
-                </tr>
-            </thead>
+    <x-index-table
+        :emptyText="__('logs.empty')"
+        :hasItems="$logs->isNotEmpty()"
+        :paginator="$logs"
+    >
+        <x-slot:head>
+            <tr>
+                <th class="px-3 py-2 text-left">
+                    <button
+                        type="button"
+                        wire:click="sortByColumn('application')"
+                        title="{{ __('logs.table.sortable_hint') }}"
+                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-normal text-inherit cursor-pointer rounded-sm hover:bg-slate-100/70 dark:hover:bg-slate-700/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b3853]/40"
+                    >
+                        <span class="truncate">{{ __('logs.table.application') }}</span>
+                        @if($sortBy === 'application')
+                            <span class="shrink-0 pl-1 text-slate-600 dark:text-slate-300" aria-hidden="true">{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
+                        @else
+                            <span class="shrink-0 pl-1 text-xs text-slate-400 dark:text-slate-500" aria-hidden="true">↕</span>
+                        @endif
+                    </button>
+                </th>
+                <th class="px-3 py-2 text-left">
+                    <button
+                        type="button"
+                        wire:click="sortByColumn('severity')"
+                        title="{{ __('logs.table.sortable_hint') }}"
+                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-normal text-inherit cursor-pointer rounded-sm hover:bg-slate-100/70 dark:hover:bg-slate-700/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b3853]/40"
+                    >
+                        <span class="truncate">{{ __('logs.table.severity') }}</span>
+                        @if($sortBy === 'severity')
+                            <span class="shrink-0 pl-1 text-slate-600 dark:text-slate-300" aria-hidden="true">{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
+                        @else
+                            <span class="shrink-0 pl-1 text-xs text-slate-400 dark:text-slate-500" aria-hidden="true">↕</span>
+                        @endif
+                    </button>
+                </th>
+                <th class="px-3 py-2 text-left">{{ __('logs.table.message') }}</th>
+                <th class="px-3 py-2 text-left">{{ __('logs.table.error_code') }}</th>
+                <th class="px-3 py-2 text-left">
+                    <button
+                        type="button"
+                        wire:click="sortByColumn('created_at')"
+                        title="{{ __('logs.table.sortable_hint') }}"
+                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-normal text-inherit cursor-pointer rounded-sm hover:bg-slate-100/70 dark:hover:bg-slate-700/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b3853]/40"
+                    >
+                        <span class="truncate">{{ __('logs.table.created_at') }}</span>
+                        @if($sortBy === 'created_at')
+                            <span class="shrink-0 pl-1 text-slate-600 dark:text-slate-300" aria-hidden="true">{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
+                        @else
+                            <span class="shrink-0 pl-1 text-xs text-slate-400 dark:text-slate-500" aria-hidden="true">↕</span>
+                        @endif
+                    </button>
+                </th>
+                <th class="px-3 py-2 text-left">{{ __('logs.table.status') }}</th>
+            </tr>
+        </x-slot:head>
 
-            <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-900">
-            @forelse($logs as $log)
+        @foreach($logs as $log)
                 <tr
                     class="align-top hover:bg-slate-50 dark:hover:bg-slate-800"
                 >
@@ -175,18 +198,6 @@
                         </div>
                     </td>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="6" class="px-3 py-4 text-center text-base text-slate-500 dark:text-slate-400">
-                        {{ __('logs.empty') }}
-                    </td>
-                </tr>
-            @endforelse
-            </tbody>
-        </table>
-
-        <div class="mt-4 flex justify-center">
-            {{ $logs->links() }}
-        </div>
-    </div>
+        @endforeach
+    </x-index-table>
 </div>

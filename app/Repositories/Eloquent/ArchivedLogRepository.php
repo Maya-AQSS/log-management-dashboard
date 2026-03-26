@@ -29,21 +29,19 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
      * - si tiene tutorial o no
      */
     public function searchAndFilter(
-        ?string $severity,
-        ?string $tutorial,
+        ?array $severities,
+        ?int $applicationId,
+        ?string $dateFrom,
+        ?string $dateTo,
         int $perPage = 15
     ): LengthAwarePaginator {
         return ArchivedLog::query()
             ->with(['application', 'archivedBy', 'errorCode'])
             ->withCount('comments')
-            ->when($severity, fn ($q) => $q->where('severity', $severity))
-            ->when($tutorial, function ($q) use ($tutorial): void {
-                if ($tutorial === 'with_tutorial') {
-                    $q->whereNotNull('url_tutorial');
-                } elseif ($tutorial === 'without_tutorial') {
-                    $q->whereNull('url_tutorial');
-                }
-            })
+            ->when($severities !== null && $severities !== [], fn ($q) => $q->whereIn('severity', $severities))
+            ->when($applicationId !== null, fn ($q) => $q->where('application_id', $applicationId))
+            ->when($dateFrom !== null, fn ($q) => $q->where('archived_at', '>=', $dateFrom))
+            ->when($dateTo !== null, fn ($q) => $q->where('archived_at', '<=', $dateTo))
             ->latest('archived_at')
             ->paginate($perPage)
             ->withQueryString();

@@ -13,6 +13,7 @@ return [
 
     'detail' => [
         'title' => 'Detalle del log',
+        'archived_title' => 'Detalle del log archivado',
         'id' => 'ID',
         'by' => 'por',
         'archived_by' => 'Archivado por',
@@ -31,6 +32,7 @@ return [
         'created_at' => 'Creado',
         'status' => 'Estado',
         'url_tutorial' => 'URL Tutorial',
+        'sortable_hint' => 'Clic para ordenar por esta columna',
     ],
 
     'status' => [

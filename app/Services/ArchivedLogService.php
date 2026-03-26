@@ -19,11 +19,19 @@ class ArchivedLogService implements ArchivedLogServiceInterface
     }
 
     public function searchAndFilter(
-        ?string $severity,
-        ?string $tutorial,
+        ?array $severities,
+        ?int $applicationId,
+        ?string $dateFrom,
+        ?string $dateTo,
         int $perPage = 15
     ): LengthAwarePaginator {
-        return $this->archivedLogRepository->searchAndFilter($severity, $tutorial, $perPage);
+        return $this->archivedLogRepository->searchAndFilter(
+            $severities,
+            $applicationId,
+            $dateFrom,
+            $dateTo,
+            $perPage
+        );
     }
 
     public function findOrFail(int $id): ArchivedLog

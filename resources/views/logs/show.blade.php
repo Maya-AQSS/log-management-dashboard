@@ -10,7 +10,7 @@
         <div class="text-center">
             @if($source === 'archived_log')
                 <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100">
-                    {{ __('logs.detail.title') }} #{{ $archivedLog->id }}
+                    {{ __('logs.detail.archived_title') }} #{{ $archivedLog->id }}
                 </h1>
                 <p class="text-sm text-slate-500 dark:text-slate-400">
                     <span class="font-semibold">{{ __('archived_logs.table.archived_at') }}</span>
