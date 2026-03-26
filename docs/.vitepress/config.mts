@@ -21,6 +21,7 @@ export default withMermaid(
       nav: [
         { text: 'Inicio', link: '/' },
         { text: 'Proyecto', link: '/0_descripcion_proyecto' },
+        { text: 'Manual de Usuario', link: '/UserManual/' },
         { text: 'Épicas y Features', link: '/1_epics_and_features' },
         { text: 'Backlog', link: '/backlog/F-00.1_setup_laravel_livewire' },
         { text: 'Auditoría', link: '/AUDIT_LOG' },
@@ -31,10 +32,27 @@ export default withMermaid(
           text: '📋 Proyecto',
           items: [
             { text: 'Descripción del Proyecto', link: '/0_descripcion_proyecto' },
+            { text: 'Manual de Usuario', link: '/UserManual/' },
             { text: 'Épicas y Features', link: '/1_epics_and_features' },
             { text: 'Arquitectura y Riesgos', link: '/2_architecture_risks' },
             { text: 'Diagramas C4', link: '/3_c4_diagrams' },
             { text: 'Registro de Auditoría', link: '/AUDIT_LOG' },
+          ]
+        },
+
+        {
+          text: '👤 Manual de Usuario',
+          collapsed: false,
+          items: [
+            { text: 'Indice del manual', link: '/UserManual/' },
+            { text: 'Dashboard', link: '/UserManual/01_dashboard' },
+            { text: 'Listado de logs', link: '/UserManual/02_logs_listado' },
+            { text: 'Detalle de log activo', link: '/UserManual/03_log_detalle' },
+            { text: 'Listado de logs archivados', link: '/UserManual/04_archivados_listado' },
+            { text: 'Detalle de log archivado', link: '/UserManual/05_archivado_detalle' },
+            { text: 'Listado de error codes', link: '/UserManual/06_error_codes_listado' },
+            { text: 'Alta de error code', link: '/UserManual/07_error_code_creacion' },
+            { text: 'Detalle y edicion de error code', link: '/UserManual/08_error_code_detalle_edicion' },
           ]
         },
 
