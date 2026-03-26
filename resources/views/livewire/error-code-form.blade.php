@@ -161,6 +161,14 @@
                     >
                         {{ __('error_codes.buttons.edit') }}
                     </button>
+
+                    <button
+                        type="button"
+                        x-on:click="confirmDeleteOpen = true"
+                        class="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-4 py-2 text-base font-semibold text-red-700 hover:bg-red-100"
+                    >
+                        {{ __('error_codes.buttons.delete') }}
+                    </button>
                 @endif
 
                 @if ($isEditable)
@@ -179,14 +187,6 @@
                         {{ __('error_codes.buttons.save') }}
                     </button>
                 @endif
-
-                <button
-                    type="button"
-                    x-on:click="confirmDeleteOpen = true"
-                    class="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-4 py-2 text-base font-semibold text-red-700 hover:bg-red-100"
-                >
-                    {{ __('error_codes.buttons.delete') }}
-                </button>
             @endif
         </div>
     </form>
