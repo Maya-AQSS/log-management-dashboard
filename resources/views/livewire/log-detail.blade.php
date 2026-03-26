@@ -1,3 +1,84 @@
+<div>
+    @if($source === 'archived_log')
+        <div
+            class="flex min-h-[2.5rem] items-start justify-between gap-3"
+        >
+            <a
+                href="{{ $backHref ?? '#' }}"
+                class="inline-flex items-center rounded-full bg-[#f7a736] px-4 py-2 text-sm font-semibold text-[#1e1a24] shadow-sm hover:bg-[#e28f1f] dark:bg-amber-500 dark:hover:bg-amber-400"
+            >
+                {{ __('logs.buttons.back') }}
+            </a>
+
+            <div class="text-center">
+                <h1 class="text-3xl font-bold text-slate-900 md:text-4xl dark:text-slate-100">
+                    {{ __('logs.detail.archived_title') }} #{{ $archivedLog->id }}
+                </h1>
+                <p class="text-sm text-slate-500 dark:text-slate-400">
+                    <span class="font-semibold">{{ __('archived_logs.table.archived_at') }}</span>
+                    {{ optional($archivedLog->archived_at)->locale(app()->getLocale())->translatedFormat('d F Y H:i:s') ?? '—' }}
+                    @if($archivedLog->archivedBy)
+                        <span class="font-semibold">{{ __('logs.detail.by') }}</span>
+                        {{ $archivedLog->archivedBy->name }} #{{ $archivedLog->archivedBy->id }}
+                    @endif
+                </p>
+            </div>
+
+            <div class="flex items-center">
+                <div class="flex items-center gap-3">
+                    @can('update', $archivedLog)
+                        @if(!$editingUrlTutorial)
+                            <button
+                                type="button"
+                                wire:click="startEditingUrlTutorial"
+                                class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]"
+                            >
+                                {{ __('archived_logs.buttons.edit') }}
+                            </button>
+                        @else
+                            <button
+                                type="button"
+                                wire:click="updateUrlTutorial"
+                                wire:loading.attr="disabled"
+                                class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#4a2d44] disabled:opacity-60"
+                            >
+                                <span wire:loading.remove wire:target="updateUrlTutorial">{{ __('archived_logs.url_tutorial.save') }}</span>
+                                <span wire:loading wire:target="updateUrlTutorial">{{ __('archived_logs.url_tutorial.save') }}…</span>
+                            </button>
+                            <button
+                                type="button"
+                                wire:click="cancelEditingUrlTutorial"
+                                wire:loading.attr="disabled"
+                                class="inline-flex items-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                            >
+                                {{ __('archived_logs.url_tutorial.cancel') }}
+                            </button>
+                        @endif
+                    @endcan
+
+                    @can('delete', $archivedLog)
+                        @if(!$editingUrlTutorial)
+                            <form
+                                method="POST"
+                                action="{{ route('archived-logs.destroy', $archivedLog->id) }}"
+                                onsubmit="return confirm('{{ addslashes(__('archived_logs.confirm_delete')) }}')"
+                            >
+                                @csrf
+                                @method('DELETE')
+                                <button
+                                    type="submit"
+                                    class="rounded-full bg-red-600 px-3 py-1.5 text-base font-semibold text-white shadow-sm hover:bg-red-500"
+                                >
+                                    {{ __('archived_logs.buttons.delete') }}
+                                </button>
+                            </form>
+                        @endif
+                    @endcan
+                </div>
+            </div>
+        </div>
+    @endif
+
 <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
     @if($source === 'log')
         @if($archivedLogId !== null)
@@ -121,7 +202,11 @@
 
             <div class="md:col-span-2">
                 <div
-                    class="rounded-xl border border-slate-200 bg-slate-50 p-4 shadow-sm dark:border-slate-600 dark:bg-slate-800/70"
+                    @class([
+                        'rounded-xl p-4 shadow-sm transition-colors duration-150',
+                        'border border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-800/70' => !$editingUrlTutorial,
+                        'border-2 border-[#5b3853]/45 bg-[#5b3853]/[0.06] ring-2 ring-[#5b3853]/25 dark:border-[#5b3853]/50 dark:bg-[#5b3853]/15 dark:ring-[#5b3853]/35' => $editingUrlTutorial,
+                    ])
                 >
                 <div class="mb-3 flex items-center justify-between gap-2 border-b border-slate-200 pb-3 dark:border-slate-600">
                     <div class="font-semibold text-slate-800 dark:text-slate-200">{{ __('logs.table.url_tutorial') }}</div>
@@ -144,47 +229,28 @@
 
                 @can('update', $archivedLog)
                     @if($editingUrlTutorial)
-                        <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
+                        <div class="flex flex-col gap-2">
                             <input
                                 type="text"
                                 inputmode="url"
                                 wire:model="urlTutorialInput"
                                 @class([
-                                    'w-full min-w-0 flex-1 rounded-xl border bg-white px-3 py-2 text-sm text-slate-800 shadow-sm dark:bg-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2',
+                                    'w-full min-w-0 rounded-xl border bg-white px-3 py-2.5 text-sm text-slate-800 shadow-inner dark:bg-slate-900/80 dark:text-slate-200 focus:outline-none focus:ring-2',
                                     'border-red-500 focus:border-red-500 focus:ring-red-500/30 dark:border-red-500' => $errors->has('urlTutorialInput'),
-                                    'border-slate-300 focus:border-[#5b3853] focus:ring-[#5b3853]/20 dark:border-slate-600' => !$errors->has('urlTutorialInput'),
+                                    'border-[#5b3853]/40 focus:border-[#5b3853] focus:ring-[#5b3853]/25 dark:border-[#5b3853]/50' => !$errors->has('urlTutorialInput'),
                                 ])
                                 placeholder="{{ __('archived_logs.url_tutorial.placeholder') }}"
                                 autocomplete="off"
                             />
-                            <div class="flex shrink-0 flex-wrap gap-2">
-                                <button
-                                    type="button"
-                                    wire:click="updateUrlTutorial"
-                                    wire:loading.attr="disabled"
-                                    class="inline-flex items-center justify-center rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#4a2d44] disabled:opacity-60"
+                            @error('urlTutorialInput')
+                                <p
+                                    class="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-900 dark:border-red-500 dark:bg-red-950 dark:!text-red-50"
+                                    role="alert"
                                 >
-                                    <span wire:loading.remove wire:target="updateUrlTutorial">{{ __('archived_logs.url_tutorial.save') }}</span>
-                                    <span wire:loading wire:target="updateUrlTutorial">{{ __('archived_logs.url_tutorial.save') }}…</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    wire:click="cancelEditingUrlTutorial"
-                                    wire:loading.attr="disabled"
-                                    class="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                                >
-                                    {{ __('archived_logs.url_tutorial.cancel') }}
-                                </button>
-                            </div>
+                                    {{ $message }}
+                                </p>
+                            @enderror
                         </div>
-                        @error('urlTutorialInput')
-                            <p
-                                class="mt-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-900 dark:border-red-500 dark:bg-red-950 dark:!text-red-50"
-                                role="alert"
-                            >
-                                {{ $message }}
-                            </p>
-                        @enderror
                     @else
                         @if(!blank($archivedLog->url_tutorial))
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
@@ -249,4 +315,5 @@
             </div>
         </div>
     @endif
+</div>
 </div>

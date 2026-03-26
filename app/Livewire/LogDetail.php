@@ -15,16 +15,19 @@ class LogDetail extends Component
 
     public int $recordId;
 
+    public ?string $backHref = null;
+
     public string $urlTutorialInput = '';
 
     public bool $editingUrlTutorial = false;
 
-    public function mount(string $source = 'log', int $recordId): void
+    public function mount(string $source, int $recordId, ?string $backHref = null): void
     {
-        abort_if(!in_array($source, ['log', 'archived_log'], true), 404);
+        abort_if(! in_array($source, ['log', 'archived_log'], true), 404);
 
         $this->source = $source;
         $this->recordId = $recordId;
+        $this->backHref = $backHref;
 
         if ($source === 'archived_log') {
             $archivedLog = ArchivedLog::query()->findOrFail($recordId);
@@ -131,6 +134,7 @@ class LogDetail extends Component
 
         return view('livewire.log-detail', [
             'source' => $this->source,
+            'backHref' => $this->backHref,
             'log' => $log,
             'archivedLog' => $archivedLog,
             'metadataJson' => $metadataJson,
@@ -176,5 +180,4 @@ class LogDetail extends Component
 
         return str_contains($host, '.');
     }
-
 }
