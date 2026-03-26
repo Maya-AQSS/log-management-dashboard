@@ -9,27 +9,18 @@
                         {{ __('logs.detail.archived_match') }}
                     </p>
                     <div class="shrink-0">
-                        <a
-                            href="{{ route('archived-logs.show', $archivedLogId) }}"
-                            class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#4a2d44]"
-                        >
-                            {{ __('logs.buttons.view_archived') }}
-                        </a>
+                        @if($archivedDetailUrl !== null)
+                            <a
+                                href="{{ $archivedDetailUrl }}"
+                                class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#4a2d44]"
+                            >
+                                {{ __('logs.buttons.view_archived') }}
+                            </a>
+                        @endif
                     </div>
                 </div>
             </div>
         @endif
-
-        <div class="mb-4 flex flex-wrap items-center justify-end gap-2">
-            <button
-                type="button"
-                wire:click="markSolved"
-                @disabled($log?->resolved)
-                class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#4a2d44] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-                {{ __('logs.buttons.solved') }}
-            </button>
-        </div>
 
         <div class="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
             <div>

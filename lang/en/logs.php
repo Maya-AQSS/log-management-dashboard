@@ -58,6 +58,6 @@ return [
         'reset' => 'Reset',
         'archive' => 'Save to history',
         'view_archived' => 'View archived',
-        'solved' => 'Solved',
+        'solved' => 'Resolve',
     ],
 ];

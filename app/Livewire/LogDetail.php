@@ -5,7 +5,6 @@ namespace App\Livewire;
 use App\Models\ArchivedLog;
 use App\Models\Log;
 use App\Services\Contracts\LogServiceInterface;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
@@ -27,9 +26,9 @@ class LogDetail extends Component
     {
         $metadataJson = null;
         $archivedLogId = null;
+        $archivedDetailUrl = null;
         $archivedLog = null;
         $log = null;
-
         if ($this->source === 'archived_log') {
             $archivedLog = ArchivedLog::query()
                 ->with(['application', 'errorCode'])
@@ -54,6 +53,9 @@ class LogDetail extends Component
             }
 
             $archivedLogId = app(LogServiceInterface::class)->archivedLogIdFor($log->id);
+            if ($archivedLogId !== null) {
+                $archivedDetailUrl = route('archived-logs.show', $archivedLogId);
+            }
         }
 
         return view('livewire.log-detail', [
@@ -62,15 +64,8 @@ class LogDetail extends Component
             'archivedLog' => $archivedLog,
             'metadataJson' => $metadataJson,
             'archivedLogId' => $archivedLogId,
+            'archivedDetailUrl' => $archivedDetailUrl,
         ]);
     }
 
-    public function markSolved(): void
-    {
-        if ($this->source !== 'log') {
-            return;
-        }
-
-        DB::table('logs')->whereKey($this->recordId)->update(['resolved' => true]);
-    }
 }

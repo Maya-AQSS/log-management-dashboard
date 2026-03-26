@@ -23,6 +23,8 @@ Route::middleware(['auth'])->group(function () {
     // Logs
     Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
     Route::get('/logs/{id}', [LogController::class, 'show'])->whereNumber('id')->name('logs.show');
+    Route::post('/logs/{id}/archive', [LogController::class, 'archive'])->whereNumber('id')->name('logs.archive');
+    Route::patch('/logs/{id}/resolve', [LogController::class, 'resolve'])->whereNumber('id')->name('logs.resolve');
 
     // SSE
     Route::get('/sse/logs', [LogController::class, 'stream'])->name('logs.stream');

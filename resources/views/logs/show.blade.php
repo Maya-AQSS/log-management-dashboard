@@ -1,7 +1,7 @@
 <x-layout>
     <div class="flex items-start justify-between gap-3">
         <a
-            href="{{ $source === 'archived_log' ? route('archived-logs.index') : route('logs.index') }}"
+            href="{{ $backHref }}"
             class="inline-flex items-center rounded-full bg-[#f7a736] px-4 py-2 text-sm font-semibold text-[#1e1a24] shadow-sm hover:bg-[#e28f1f] dark:bg-amber-500 dark:hover:bg-amber-400"
         >
             {{ __('logs.buttons.back') }}
@@ -42,7 +42,32 @@
                     @endcan
                 </div>
             @else
-                <livewire:log-archive-button :logId="$log->id" />
+                <div class="flex items-center gap-2">
+                    @if($archivedLogId === null)
+                        <form method="POST" action="{{ route('logs.archive', $log->id) }}">
+                            @csrf
+                            <button
+                                type="submit"
+                                class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#4a2d44]"
+                            >
+                                {{ __('logs.buttons.archive') }}
+                            </button>
+                        </form>
+                    @endif
+
+                    @if(!$log->resolved)
+                        <form method="POST" action="{{ route('logs.resolve', $log->id) }}">
+                            @csrf
+                            @method('PATCH')
+                            <button
+                                type="submit"
+                                class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#4a2d44]"
+                            >
+                                {{ __('logs.buttons.solved') }}
+                            </button>
+                        </form>
+                    @endif
+                </div>
             @endif
         </div>
     </div>

@@ -58,6 +58,6 @@ return [
         'reset' => 'Limpiar',
         'archive' => 'Guardar en Histórico',
         'view_archived' => 'Ver archivado',
-        'solved' => 'Solucionado',
+        'solved' => 'Resolver',
     ],
 ];

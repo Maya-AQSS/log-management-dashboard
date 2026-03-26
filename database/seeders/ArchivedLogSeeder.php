@@ -15,6 +15,7 @@ class ArchivedLogSeeder extends Seeder
     {
         $lorem = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
         $messageTail = str_repeat($lorem, 3);
+        $veryLongChunk = str_repeat('STACK_TRACE_CHUNK: SQLSTATE[08006] connection failure in ArchiveWorker ', 120);
 
         ArchivedLog::updateOrCreate(
             ['id' => 1],
@@ -43,6 +44,26 @@ class ArchivedLogSeeder extends Seeder
                 'metadata' => ['seed' => true, 'source' => 'ArchivedLogSeeder'],
                 'description' => 'Descripción de prueba del histórico de logs',
                 'url_tutorial' => 'https://example.com/tutorial',
+                'original_created_at' => now()->subDay(),
+                'archived_at' => now(),
+            ]
+        );
+
+        ArchivedLog::updateOrCreate(
+            ['id' => 4],
+            [
+                'application_id' => 1,
+                'archived_by_id' => 1,
+                'error_code_id' => 1,
+                'severity' => 'high',
+                'message' => 'Seed: archived long message fixture' . "\n\n" . $veryLongChunk,
+                'metadata' => [
+                    'seed' => true,
+                    'source' => 'ArchivedLogSeeder',
+                    'stack_trace' => $veryLongChunk,
+                ],
+                'description' => 'Fixture with very long content to verify scroll behavior',
+                'url_tutorial' => 'https://example.com/tutorial/long-scroll',
                 'original_created_at' => now()->subDay(),
                 'archived_at' => now(),
             ]

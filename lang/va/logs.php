@@ -58,6 +58,6 @@ return [
         'reset' => 'Netejar',
         'archive' => "Desar a l'històric",
         'view_archived' => 'Veure arxivat',
-        'solved' => 'Solucionat',
+        'solved' => 'Resoldre',
     ],
 ];
