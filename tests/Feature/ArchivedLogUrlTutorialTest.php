@@ -48,9 +48,12 @@ class ArchivedLogUrlTutorialTest extends TestCase
 
         Livewire::actingAs($user)
             ->test(LogDetail::class, ['source' => 'archived_log', 'recordId' => $archivedLog->id])
+            ->call('startEditingUrlTutorial')
+            ->assertSet('editingUrlTutorial', true)
             ->set('urlTutorialInput', $url)
             ->call('updateUrlTutorial')
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            ->assertSet('editingUrlTutorial', false);
 
         $this->assertSame($url, ArchivedLog::query()->find($archivedLog->id)->url_tutorial);
     }
@@ -86,9 +89,11 @@ class ArchivedLogUrlTutorialTest extends TestCase
 
         Livewire::actingAs($user)
             ->test(LogDetail::class, ['source' => 'archived_log', 'recordId' => $archivedLog->id])
+            ->call('startEditingUrlTutorial')
             ->set('urlTutorialInput', 'no-es-una-url')
             ->call('updateUrlTutorial')
-            ->assertHasErrors(['urlTutorialInput']);
+            ->assertHasErrors(['urlTutorialInput'])
+            ->assertSet('editingUrlTutorial', true);
 
         $this->assertNull(ArchivedLog::query()->find($archivedLog->id)->url_tutorial);
     }
@@ -124,9 +129,11 @@ class ArchivedLogUrlTutorialTest extends TestCase
 
         Livewire::actingAs($user)
             ->test(LogDetail::class, ['source' => 'archived_log', 'recordId' => $archivedLog->id])
+            ->call('startEditingUrlTutorial')
             ->set('urlTutorialInput', 'https://example')
             ->call('updateUrlTutorial')
-            ->assertHasErrors(['urlTutorialInput']);
+            ->assertHasErrors(['urlTutorialInput'])
+            ->assertSet('editingUrlTutorial', true);
 
         $this->assertNull(ArchivedLog::query()->find($archivedLog->id)->url_tutorial);
     }
@@ -164,10 +171,53 @@ class ArchivedLogUrlTutorialTest extends TestCase
 
         Livewire::actingAs($other)
             ->test(LogDetail::class, ['source' => 'archived_log', 'recordId' => $archivedLog->id])
+            ->set('editingUrlTutorial', true)
             ->set('urlTutorialInput', 'https://example.com/doc')
             ->call('updateUrlTutorial')
             ->assertForbidden();
 
         $this->assertNull(ArchivedLog::query()->find($archivedLog->id)->url_tutorial);
+    }
+
+    public function test_cancel_editing_restores_stored_url(): void
+    {
+        $user = User::factory()->create();
+        $application = Application::query()->create([
+            'name' => 'URL Tutorial Cancel',
+            'description' => 'Test',
+            'created_at' => now(),
+        ]);
+        $errorCode = ErrorCode::query()->create([
+            'code' => 'URL-C',
+            'application_id' => $application->id,
+            'name' => 'Error',
+            'description' => 'D',
+            'severity' => 'high',
+        ]);
+
+        $storedUrl = 'https://docs.original.com/page';
+
+        $archivedLog = ArchivedLog::query()->create([
+            'application_id' => $application->id,
+            'archived_by_id' => $user->id,
+            'error_code_id' => $errorCode->id,
+            'severity' => 'high',
+            'message' => 'Archived',
+            'metadata' => null,
+            'description' => null,
+            'url_tutorial' => $storedUrl,
+            'original_created_at' => now()->subMinute(),
+            'archived_at' => now(),
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(LogDetail::class, ['source' => 'archived_log', 'recordId' => $archivedLog->id])
+            ->call('startEditingUrlTutorial')
+            ->set('urlTutorialInput', 'https://other.example.com/changed')
+            ->call('cancelEditingUrlTutorial')
+            ->assertSet('editingUrlTutorial', false)
+            ->assertSet('urlTutorialInput', $storedUrl);
+
+        $this->assertSame($storedUrl, ArchivedLog::query()->find($archivedLog->id)->url_tutorial);
     }
 }

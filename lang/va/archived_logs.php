@@ -39,5 +39,8 @@ return [
     'url_tutorial' => [
         'placeholder' => 'https://…',
         'save' => 'Guardar',
+        'cancel' => 'Cancel·lar',
+        'empty' => 'Sense URL de tutorial.',
+        'edit_aria' => "Editar URL de tutorial",
     ],
 ];

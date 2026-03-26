@@ -17,6 +17,8 @@ class LogDetail extends Component
 
     public string $urlTutorialInput = '';
 
+    public bool $editingUrlTutorial = false;
+
     public function mount(string $source = 'log', int $recordId): void
     {
         abort_if(!in_array($source, ['log', 'archived_log'], true), 404);
@@ -27,7 +29,31 @@ class LogDetail extends Component
         if ($source === 'archived_log') {
             $archivedLog = ArchivedLog::query()->findOrFail($recordId);
             $this->urlTutorialInput = $archivedLog->url_tutorial ?? '';
+            $this->editingUrlTutorial = false;
         }
+    }
+
+    public function startEditingUrlTutorial(): void
+    {
+        abort_unless($this->source === 'archived_log', 403);
+
+        $archivedLog = ArchivedLog::query()->findOrFail($this->recordId);
+        $this->authorize('update', $archivedLog);
+
+        $this->urlTutorialInput = $archivedLog->url_tutorial ?? '';
+        $this->editingUrlTutorial = true;
+    }
+
+    public function cancelEditingUrlTutorial(): void
+    {
+        abort_unless($this->source === 'archived_log', 403);
+
+        $archivedLog = ArchivedLog::query()->findOrFail($this->recordId);
+        $this->authorize('update', $archivedLog);
+
+        $this->urlTutorialInput = $archivedLog->url_tutorial ?? '';
+        $this->editingUrlTutorial = false;
+        $this->resetValidation(['urlTutorialInput']);
     }
 
     public function updateUrlTutorial(): void
@@ -64,6 +90,7 @@ class LogDetail extends Component
 
         $fresh = app(ArchivedLogServiceInterface::class)->updateUrlTutorial($archivedLog, $urlForValidation);
         $this->urlTutorialInput = $fresh->url_tutorial ?? '';
+        $this->editingUrlTutorial = false;
     }
 
     public function render(): View

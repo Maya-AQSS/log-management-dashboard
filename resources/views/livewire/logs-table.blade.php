@@ -114,6 +114,7 @@
         :emptyText="__('logs.empty')"
         :hasItems="$logs->isNotEmpty()"
         :paginator="$logs"
+        table-class="min-w-[56rem]"
     >
         <x-slot:head>
             <tr>
@@ -147,7 +148,7 @@
                         @endif
                     </button>
                 </th>
-                <th class="px-3 py-2 text-left">{{ __('logs.table.message') }}</th>
+                <th class="min-w-[16rem] px-3 py-2 text-left md:min-w-[18rem]">{{ __('logs.table.message') }}</th>
                 <th class="px-3 py-2 text-left">{{ __('logs.table.error_code') }}</th>
                 <th class="px-3 py-2 text-left">
                     <button
@@ -176,10 +177,10 @@
                     <td class="px-3 py-2 whitespace-nowrap">
                         <x-severity-badge :severity="$log->severity" />
                     </td>
-                    <td class="px-3 py-2 text-slate-700 dark:text-slate-200">
+                    <td class="min-w-[16rem] max-w-md px-3 py-2 text-slate-700 dark:text-slate-200 md:min-w-[18rem]">
                         <a
                             href="{{ route('logs.show', $log->id) }}"
-                            class="hover:underline focus:outline-none focus:ring-2 focus:ring-[#5b3853]/30 rounded"
+                            class="inline-block break-words hover:underline focus:outline-none focus:ring-2 focus:ring-[#5b3853]/30 rounded"
                         >
                             {{ \Illuminate\Support\Str::limit($log->message ?? '-', 120) }}
                         </a>
