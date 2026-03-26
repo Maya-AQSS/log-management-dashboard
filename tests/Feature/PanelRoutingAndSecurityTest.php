@@ -166,8 +166,7 @@ class PanelRoutingAndSecurityTest extends TestCase
             'commentableType' => 'archived-log',
             'commentableId' => $archivedLog->id,
         ])
-            ->set('content', 'ok')
-            ->call('addComment')
+            ->call('addComment', 'ok')
             ->assertHasErrors(['content' => 'min']);
 
         $this->assertDatabaseCount('comments', 0);
@@ -176,8 +175,7 @@ class PanelRoutingAndSecurityTest extends TestCase
             'commentableType' => 'archived-log',
             'commentableId' => $archivedLog->id,
         ])
-            ->set('content', 'Comentario válido para el histórico')
-            ->call('addComment')
+            ->call('addComment', 'Comentario válido para el histórico')
             ->assertHasNoErrors();
 
         $this->assertDatabaseHas('comments', [

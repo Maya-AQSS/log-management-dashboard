@@ -49,14 +49,12 @@ class CommentThread extends Component
     {
         try {
             $validated = Validator::make([
-                'htmlContent' => $htmlContent,
+                'content' => $htmlContent,
             ], [
-                'htmlContent' => ['required', 'string', 'min:3'],
-            ], [], [
-                'htmlContent' => 'content',
+                'content' => ['required', 'string', 'min:3'],
             ])->validate();
 
-            $sanitizedContent = $this->sanitizeAndValidateContent($validated['htmlContent'], 'content');
+            $sanitizedContent = $this->sanitizeAndValidateContent($validated['content'], 'content');
 
             $this->resolveCommentableModel()
                 ->comments()
