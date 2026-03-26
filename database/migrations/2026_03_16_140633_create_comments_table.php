@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->morphs('commentable'); // archived_logs o error_codes
             $table->foreignId('user_id')->constrained('users')->restrictOnDelete();
-            $table->text('content');
+            $table->longText('content');
             $table->timestamps();
         });
     }

@@ -4,7 +4,7 @@ layout: home
 hero:
   name: "Log Management Dashboard"
   text: "Panel de gestión de logs multi-aplicación"
-  tagline: Visualiza, filtra y archiva logs de error en tiempo real. Backend Laravel 12 + Frontend React 19 conectados a PostgreSQL vía SSE.
+  tagline: Visualiza, filtra y archiva logs de error en tiempo real. Laravel 12 + Livewire 3 sobre PostgreSQL. Sin SPA. Sin login propio.
   actions:
     - theme: brand
       text: Descripción del Proyecto
@@ -19,25 +19,25 @@ hero:
 features:
   - icon: ⚡
     title: Dashboard en Tiempo Real
-    details: Cards de resumen por tipo de error (Critical, High, Medium, Low) actualizadas automáticamente mediante Server-Sent Events (SSE) sin necesidad de recargar la página.
+    details: Cards de resumen por tipo de error (Critical, High, Medium, Low, Others) actualizadas automáticamente mediante Server-Sent Events (SSE). El componente Livewire recibe el evento y re-renderiza sin recargar la página.
 
   - icon: 🔍
     title: Filtrado y Búsqueda Avanzada
-    details: Tabla paginada de logs con filtros por tipo, aplicación origen, rango de fechas y texto libre. Columnas ordenables y persistencia de filtros en URL.
+    details: Tabla paginada de logs con filtros por tipo, aplicación origen, rango de fechas y texto libre. Columnas ordenables. Filtros persistidos en URL (GET). Implementado en componente Livewire LogsTable.
 
   - icon: 📦
     title: Archivado con Rich Text
-    details: Archiva logs en el histórico con un comentario inicial obligatorio. Editor TipTap 2 con soporte de imágenes, tablas y formato enriquecido.
+    details: Guarda logs en el histórico con descripción editable, URL Tutorial y hilo de comentarios. Editor TipTap 2 integrado con Livewire via Alpine.js bridge. Solo el autor puede editar sus propios comentarios.
 
   - icon: 📚
-    title: Histórico de Logs
-    details: Vista dedicada para logs archivados con hilo de comentarios múltiples, ordenación por tipo y fecha, y los mismos filtros que la vista activa.
+    title: Catálogo de Códigos de Error
+    details: CRUD completo de error codes con clave compuesta (código + aplicación). Livewire ErrorCodesTable con búsqueda y filtros. Los comentarios del catálogo siguen la misma lógica que el histórico.
 
   - icon: 🏗️
-    title: Stack Moderno
-    details: Monorepo con Laravel 12 (API REST + SSE via StreamedResponse + Sanctum) y React 19 + Vite como SPA. PostgreSQL como base de datos compartida con n8n.
+    title: Stack Laravel + Livewire
+    details: Monolito SSR con Laravel 12, Livewire 3 y Alpine.js. Sin SPA independiente. Sin CORS. Sin build Vite separado. Componentes Livewire para UI dinámica y Blade components reutilizables para estructura.
 
   - icon: 🔒
     title: Seguro por Diseño
-    details: Análisis STRIDE completo. Autenticación con Laravel Sanctum, queries parametrizadas, credenciales en .env y usuario de DB con permisos mínimos.
+    details: Análisis STRIDE completo. Autenticación de sesión externa (mock en desarrollo), queries parametrizadas con Eloquent, sanitizado HTML en servidor (HTMLPurifier), credenciales en .env y usuario DB con permisos mínimos.
 ---
