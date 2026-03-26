@@ -23,6 +23,8 @@ class ArchivedLogService implements ArchivedLogServiceInterface
         ?int $applicationId,
         ?string $dateFrom,
         ?string $dateTo,
+        ?string $sortBy,
+        string $sortDir,
         int $perPage = 15
     ): LengthAwarePaginator {
         return $this->archivedLogRepository->searchAndFilter(
@@ -30,6 +32,8 @@ class ArchivedLogService implements ArchivedLogServiceInterface
             $applicationId,
             $dateFrom,
             $dateTo,
+            $sortBy,
+            $sortDir,
             $perPage
         );
     }
