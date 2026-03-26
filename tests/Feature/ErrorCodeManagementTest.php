@@ -13,6 +13,100 @@ class ErrorCodeManagementTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_user_can_create_error_code_and_is_redirected_to_detail_with_flash(): void
+    {
+        $user = User::factory()->create();
+
+        $application = Application::query()->create([
+            'name' => 'App Create',
+            'description' => 'App for create test',
+            'created_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user)
+            ->post('/error-codes', [
+                'application_id' => $application->id,
+                'code' => 'E-101',
+                'name' => 'Created error',
+                'description' => 'Optional description',
+                'file' => 'app/Services/Example.php',
+                'line' => 42,
+            ]);
+
+        $errorCode = ErrorCode::query()->where('code', 'E-101')->firstOrFail();
+
+        $response
+            ->assertRedirect(route('error-codes.show', $errorCode->id))
+            ->assertSessionHas('status', __('error_codes.created'));
+
+        $this->assertDatabaseHas('error_codes', [
+            'id' => $errorCode->id,
+            'application_id' => $application->id,
+            'code' => 'E-101',
+            'name' => 'Created error',
+        ]);
+    }
+
+    public function test_create_rejects_duplicate_composite_code_and_application(): void
+    {
+        $user = User::factory()->create();
+
+        $application = Application::query()->create([
+            'name' => 'App Duplicate',
+            'description' => 'App for duplicate test',
+            'created_at' => now(),
+        ]);
+
+        ErrorCode::query()->create([
+            'application_id' => $application->id,
+            'code' => 'E-777',
+            'name' => 'Original error',
+        ]);
+
+        $this->actingAs($user)
+            ->from(route('error-codes.create'))
+            ->post('/error-codes', [
+                'application_id' => $application->id,
+                'code' => 'E-777',
+                'name' => 'Duplicate error',
+            ])
+            ->assertRedirect(route('error-codes.create'))
+            ->assertSessionHasErrors([
+                'code' => __('error_codes.validation.code_unique'),
+            ]);
+
+        $this->assertSame(
+            1,
+            ErrorCode::query()->where('application_id', $application->id)->where('code', 'E-777')->count()
+        );
+    }
+
+    public function test_field_validations_match_acceptance_criteria(): void
+    {
+        $user = User::factory()->create();
+
+        $application = Application::query()->create([
+            'name' => 'App Validation',
+            'description' => 'App for validation test',
+            'created_at' => now(),
+        ]);
+
+        $this->actingAs($user)
+            ->from(route('error-codes.create'))
+            ->post('/error-codes', [
+                'application_id' => $application->id,
+                'code' => str_repeat('A', 51),
+                'name' => str_repeat('N', 201),
+                'description' => str_repeat('D', 5001),
+                'file' => str_repeat('F', 256),
+                'line' => 0,
+            ])
+            ->assertRedirect(route('error-codes.create'))
+            ->assertSessionHasErrors(['code', 'name', 'description', 'file', 'line']);
+
+        $this->assertDatabaseCount('error_codes', 0);
+    }
+
     public function test_user_can_update_error_code_from_detail_flow(): void
     {
         $user = User::factory()->create();
