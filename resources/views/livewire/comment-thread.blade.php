@@ -394,7 +394,7 @@
         </div>
         </div>
 
-    <div class="space-y-3">
+    <div class="mt-4 space-y-3">
         @forelse ($comments as $comment)
             <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
                 <div class="flex items-start justify-between gap-4">
