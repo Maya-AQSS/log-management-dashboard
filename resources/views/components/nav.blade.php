@@ -1,4 +1,16 @@
-<header x-data="{ open: false, langOpen: false }" class="bg-gradient-to-r from-[#714b67] to-[#5b3853] text-white shadow-sm">
+<header
+    x-data="{
+        open: false,
+        langOpen: false,
+        isDark: document.documentElement.classList.contains('dark'),
+        toggleDarkMode() {
+            this.isDark = !this.isDark;
+            document.documentElement.classList.toggle('dark', this.isDark);
+            localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
+        },
+    }"
+    class="bg-gradient-to-r from-[#714b67] to-[#5b3853] text-white shadow-sm"
+>
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
         {{-- Logo / título izquierda --}}
         <div class="flex items-center gap-2">
@@ -51,6 +63,18 @@
                     @endforeach
                 </div>
             </div>
+
+            <button
+                type="button"
+                class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-base font-semibold transition-colors"
+                @click="toggleDarkMode()"
+                :aria-pressed="isDark"
+                :title="isDark ? 'Desactivar modo oscuro' : 'Activar modo oscuro'"
+            >
+                <span class="sr-only" x-text="isDark ? 'Desactivar modo oscuro' : 'Activar modo oscuro'"></span>
+                <span x-show="!isDark" aria-hidden="true">☀️</span>
+                <span x-show="isDark" aria-hidden="true">🌙</span>
+            </button>
 
             <form method="POST" action="{{ route('logout') }}" class="hidden sm:block">
                 @csrf
