@@ -114,11 +114,32 @@
         <table class="min-w-full text-base">
             <thead class="bg-slate-50 text-base uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-300">
                 <tr>
-                    <th class="px-3 py-2 text-left">{{ __('logs.table.application') }}</th>
-                    <th class="px-3 py-2 text-left">{{ __('logs.table.severity') }}</th>
+                    <th class="px-3 py-2 text-left">
+                        <button type="button" wire:click="sortByColumn('application')" class="inline-flex items-center gap-1 select-none">
+                            <span>{{ __('logs.table.application') }}</span>
+                            @if($sortBy === 'application')
+                                <span aria-hidden="true">{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
+                            @endif
+                        </button>
+                    </th>
+                    <th class="px-3 py-2 text-left">
+                        <button type="button" wire:click="sortByColumn('severity')" class="inline-flex items-center gap-1 select-none">
+                            <span>{{ __('logs.table.severity') }}</span>
+                            @if($sortBy === 'severity')
+                                <span aria-hidden="true">{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
+                            @endif
+                        </button>
+                    </th>
                     <th class="px-3 py-2 text-left">{{ __('logs.table.message') }}</th>
                     <th class="px-3 py-2 text-left">{{ __('logs.table.error_code') }}</th>
-                    <th class="px-3 py-2 text-left">{{ __('logs.table.created_at') }}</th>
+                    <th class="px-3 py-2 text-left">
+                        <button type="button" wire:click="sortByColumn('created_at')" class="inline-flex items-center gap-1 select-none">
+                            <span>{{ __('logs.table.created_at') }}</span>
+                            @if($sortBy === 'created_at')
+                                <span aria-hidden="true">{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
+                            @endif
+                        </button>
+                    </th>
                     <th class="px-3 py-2 text-left">{{ __('logs.table.status') }}</th>
                 </tr>
             </thead>

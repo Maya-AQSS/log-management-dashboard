@@ -17,6 +17,9 @@ class LogsTable extends Component
 {
     use WithPagination;
 
+    private const SORTABLE_COLUMNS = ['created_at', 'severity', 'application'];
+    private const SORT_DIRECTIONS = ['asc', 'desc'];
+
     public string $searchInput = '';
 
     public array $severityInput = [];
@@ -47,6 +50,12 @@ class LogsTable extends Component
     #[Url(as: 'application', except: null)]
     public ?int $selectedApplicationId = null;
 
+    #[Url(as: 'sort_by', except: null)]
+    public ?string $sortBy = null;
+
+    #[Url(as: 'sort_dir', except: 'asc')]
+    public string $sortDir = 'asc';
+
     public function mount(): void
     {
         $this->severity = SeverityFilter::normalize($this->severity);
@@ -55,6 +64,8 @@ class LogsTable extends Component
         if ($this->resolved !== null && !in_array($this->resolved, ['resolved', 'unresolved'], true)) {
             $this->resolved = null;
         }
+
+        $this->normalizeSortState();
 
         $this->searchInput = $this->search;
         $this->severityInput = $this->severity;
@@ -126,6 +137,24 @@ class LogsTable extends Component
             ? (int) $validated['selectedApplicationIdInput']
             : null;
 
+        $this->normalizeSortState();
+
+        $this->resetPage();
+    }
+
+    public function sortByColumn(string $column): void
+    {
+        if (!in_array($column, self::SORTABLE_COLUMNS, true)) {
+            return;
+        }
+
+        if ($this->sortBy === $column) {
+            $this->sortDir = $this->sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortBy = $column;
+            $this->sortDir = 'asc';
+        }
+
         $this->resetPage();
     }
 
@@ -137,6 +166,8 @@ class LogsTable extends Component
 
     public function render(): View
     {
+        $this->normalizeSortState();
+
         $applications = Application::query()
             ->whereHas('logs')
             ->orderBy('name')
@@ -150,11 +181,24 @@ class LogsTable extends Component
             $this->resolved,
             $this->dateFrom,
             $this->dateTo,
+            $this->sortBy,
+            $this->sortDir,
         );
 
         return view('livewire.logs-table', [
             'logs' => $logs,
             'applications' => $applications,
         ]);
+    }
+
+    private function normalizeSortState(): void
+    {
+        if (!in_array($this->sortBy, self::SORTABLE_COLUMNS, true)) {
+            $this->sortBy = null;
+        }
+
+        if (!in_array($this->sortDir, self::SORT_DIRECTIONS, true)) {
+            $this->sortDir = 'asc';
+        }
     }
 }
