@@ -7,6 +7,13 @@ use Illuminate\Validation\Rule;
 
 class ErrorCodeRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'errorCodeId' => $this->input('errorCodeId', $this->route('id')),
+        ]);
+    }
+
     public function authorize(): bool
     {
         return true;
@@ -14,8 +21,6 @@ class ErrorCodeRequest extends FormRequest
 
     public function rules(): array
     {
-        $errorCodeId = $this->input('errorCodeId', $this->route('id'));
-
         return [
             'application_id' => ['required', 'integer', 'exists:applications,id'],
             'errorCodeId' => ['nullable', 'integer', 'exists:error_codes,id'],
@@ -25,7 +30,7 @@ class ErrorCodeRequest extends FormRequest
                 'max:255',
                 Rule::unique('error_codes')
                     ->where('application_id', $this->application_id)
-                    ->ignore($errorCodeId),
+                    ->ignore($this->errorCodeId),
             ],
             'name' => ['required', 'string', 'max:255'],
             'file' => ['nullable', 'string', 'max:255'],
