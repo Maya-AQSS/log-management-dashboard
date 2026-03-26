@@ -9,10 +9,13 @@ return [
 
     'archived_success' => 'Log archived successfully',
     'archived_error' => 'The log could not be archived',
+    'confirm_archive' => 'Are you sure you want to archive this log?',
 
     'detail' => [
         'title' => 'Log detail',
         'id' => 'ID',
+        'by' => 'by',
+        'archived_by' => 'Archived by',
         'file' => 'File',
         'line' => 'Line',
         'metadata' => 'Metadata (JSON)',
@@ -65,6 +68,7 @@ return [
         'back' => 'Back',
         'apply' => 'Apply',
         'reset' => 'Reset',
+        'cancel' => 'Cancel',
         'archive' => 'Save to history',
         'view_archived' => 'View archived',
         'solved' => 'Resolve',

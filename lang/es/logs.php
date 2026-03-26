@@ -9,10 +9,13 @@ return [
 
     'archived_success' => 'Log archivado correctamente',
     'archived_error' => 'No ha podido archivarse el log',
+    'confirm_archive' => '¿Seguro que quieres archivar este log?',
 
     'detail' => [
         'title' => 'Detalle del log',
         'id' => 'ID',
+        'by' => 'por',
+        'archived_by' => 'Archivado por',
         'file' => 'Archivo',
         'line' => 'Línea',
         'metadata' => 'Metadatos (JSON)',
@@ -65,6 +68,7 @@ return [
         'back' => 'Volver',
         'apply' => 'Aplicar',
         'reset' => 'Limpiar',
+        'cancel' => 'Cancelar',
         'archive' => 'Guardar en Histórico',
         'view_archived' => 'Ver archivado',
         'solved' => 'Resolver',

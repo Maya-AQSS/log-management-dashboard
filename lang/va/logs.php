@@ -9,10 +9,13 @@ return [
 
     'archived_success' => 'Log arxivat correctament',
     'archived_error' => "No s'ha pogut arxivar el log",
+    'confirm_archive' => 'Segur que vols arxivar aquest log?',
 
     'detail' => [
         'title' => 'Detall del log',
         'id' => 'ID',
+        'by' => 'per',
+        'archived_by' => 'Arxivat per',
         'file' => 'Fitxer',
         'line' => 'Línia',
         'metadata' => 'Metadades (JSON)',
@@ -65,6 +68,7 @@ return [
         'back' => 'Tornar',
         'apply' => 'Aplicar',
         'reset' => 'Netejar',
+        'cancel' => 'Cancel·lar',
         'archive' => "Desar a l'històric",
         'view_archived' => 'Veure arxivat',
         'solved' => 'Resoldre',
