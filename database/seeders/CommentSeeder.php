@@ -59,8 +59,10 @@ class CommentSeeder extends Seeder
         Resync de la secuencia PostgreSQL para evitar UniqueConstraintViolation al insertar nuevos comentarios 
         Al eliminarlo será necesario hacer "sail migrate:fresh --seed"
         */
-        DB::statement(
-            "SELECT setval(pg_get_serial_sequence('comments', 'id'), (SELECT COALESCE(MAX(id), 1) FROM comments))"
-        );
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement(
+                "SELECT setval(pg_get_serial_sequence('comments', 'id'), (SELECT COALESCE(MAX(id), 1) FROM comments))"
+            );
+        }
     }
 }

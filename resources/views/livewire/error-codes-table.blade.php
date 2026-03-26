@@ -18,6 +18,7 @@
                 :label="__('error_codes.filters.app')"
                 :placeholder="__('error_codes.filters.app_all')"
                 :applications="$applications"
+                :selected="$filterAppInput"
             />
 
             <div class="flex gap-2 md:justify-end">
