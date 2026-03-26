@@ -8,7 +8,7 @@
                     </label>
                     <input
                         type="text"
-                        wire:model.defer="searchInput"
+                        wire:model.live.debounce.400ms="searchInput"
                         class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
                         placeholder="{{ __('logs.filters.search_placeholder') }}"
                     />
@@ -112,16 +112,19 @@
             <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-900">
             @forelse($logs as $log)
                 <tr
-                    class="align-top cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
-                    data-href="{{ route('logs.show', $log->id) }}"
-                    onclick="window.location.href=this.dataset.href"
+                    class="align-top hover:bg-slate-50 dark:hover:bg-slate-800"
                 >
                     <td class="px-3 py-2 text-slate-700 dark:text-slate-200">{{ $log->application?->name ?? '-' }}</td>
                     <td class="px-3 py-2 whitespace-nowrap">
                         <x-severity-badge :severity="$log->severity" />
                     </td>
                     <td class="px-3 py-2 text-slate-700 dark:text-slate-200">
-                        {{ \Illuminate\Support\Str::limit($log->message ?? '-', 120) }}
+                        <a
+                            href="{{ route('logs.show', $log->id) }}"
+                            class="hover:underline focus:outline-none focus:ring-2 focus:ring-[#5b3853]/30 rounded"
+                        >
+                            {{ \Illuminate\Support\Str::limit($log->message ?? '-', 120) }}
+                        </a>
                     </td>
                     <td class="px-3 py-2 text-slate-700 whitespace-nowrap dark:text-slate-200">{{ $log->errorCode?->code ?? '-' }}</td>
                     <td class="px-3 py-2 text-slate-700 whitespace-nowrap dark:text-slate-200">
@@ -147,7 +150,7 @@
             </tbody>
         </table>
 
-        <div class="mt-4">
+        <div class="mt-4 flex justify-center">
             {{ $logs->links() }}
         </div>
     </div>
