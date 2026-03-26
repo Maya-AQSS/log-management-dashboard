@@ -42,7 +42,7 @@ class PanelRoutingAndSecurityTest extends TestCase
             'severity' => 'high',
             'message' => 'Archived test log',
             'metadata' => ['source' => 'test'],
-            'description' => 'Archived details',
+            'description' => null,
             'original_created_at' => now()->subMinute(),
             'archived_at' => now(),
         ]);
@@ -154,7 +154,7 @@ class PanelRoutingAndSecurityTest extends TestCase
             'severity' => (string) $log->severity,
             'message' => (string) $log->message,
             'metadata' => ['source' => 'test-match'],
-            'description' => 'Matching archived details',
+            'description' => null,
             'url_tutorial' => null,
             'original_created_at' => now()->subMinute(),
             'archived_at' => now(),
@@ -303,7 +303,7 @@ class PanelRoutingAndSecurityTest extends TestCase
             'severity' => 'high',
             'message' => 'Archived test log',
             'metadata' => ['source' => 'test'],
-            'description' => 'Archived details',
+            'description' => null,
             'original_created_at' => now()->subMinute(),
             'archived_at' => now(),
         ]);
