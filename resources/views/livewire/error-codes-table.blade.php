@@ -56,6 +56,7 @@
             <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-900">
             @forelse($errorCodes as $item)
                 <tr
+                    x-data="{ confirmDeleteOpen: false }"
                     class="align-top cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
                     data-href="{{ route('error-codes.show', $item->id) }}"
                     onclick="window.location.href=this.dataset.href"
@@ -75,21 +76,19 @@
                                 {{ __('error_codes.buttons.edit') }}
                             </a>
 
-                            <form
-                                method="POST"
-                                action="{{ route('error-codes.destroy', $item->id) }}"
+                            <button
+                                type="button"
                                 onclick="event.stopPropagation()"
-                                onsubmit="return confirm('{{ __('error_codes.messages.delete_confirm') }}')"
+                                x-on:click="confirmDeleteOpen = true"
+                                class="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-3 py-1 text-sm font-semibold text-red-700 hover:bg-red-100"
                             >
-                                @csrf
-                                @method('DELETE')
-                                <button
-                                    type="submit"
-                                    class="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-3 py-1 text-sm font-semibold text-red-700 hover:bg-red-100"
-                                >
-                                    {{ __('error_codes.buttons.delete') }}
-                                </button>
-                            </form>
+                                {{ __('error_codes.buttons.delete') }}
+                            </button>
+
+                            <x-confirm-delete-modal
+                                :action="route('error-codes.destroy', $item->id)"
+                                openVar="confirmDeleteOpen"
+                            />
                         </div>
                     </td>
                 </tr>
