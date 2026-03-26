@@ -10,10 +10,13 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 
 class LogRepository implements LogRepositoryInterface
 {
+    private const LIKE_ESCAPE_CHARACTER = '!';
+
     /**
      * Devuelve una página de logs.
      */
@@ -69,13 +72,31 @@ class LogRepository implements LogRepositoryInterface
         $archivedFlagSubquery = ArchivedLog::query()->selectRaw('1');
         $this->applyArchivedMatchForLogsQuery($archivedFlagSubquery);
 
+        $normalizedSearch = $search !== null && trim($search) !== ''
+            ? trim($search)
+            : null;
+
+        $escapedSearchPattern = $normalizedSearch !== null
+            ? '%' . $this->escapeLikePattern($normalizedSearch) . '%'
+            : null;
+
+        $driver = DB::connection()->getDriverName();
+
         return Log::query()
             ->select('logs.*')
             ->addSelect([
                 'is_archived' => $archivedFlagSubquery->limit(1),
             ])
             ->with(['application', 'errorCode'])
-            ->when($search, fn ($q) => $q->where('message', 'ilike', '%' . $search . '%'))
+            ->when($normalizedSearch !== null, function ($q) use ($driver, $normalizedSearch, $escapedSearchPattern): void {
+                if ($driver === 'pgsql') {
+                    $q->whereRaw("message ILIKE ? ESCAPE '" . self::LIKE_ESCAPE_CHARACTER . "'", [$escapedSearchPattern]);
+                    return;
+                }
+
+                // Fallback for non-PostgreSQL test environments without wildcard semantics.
+                $q->whereRaw('INSTR(LOWER(message), ?) > 0', [mb_strtolower($normalizedSearch)]);
+            })
             ->when($severity, fn ($q) => $q->whereIn('severity', $severity))
             ->when($applicationId !== null, fn ($q) => $q->where('application_id', $applicationId))
             ->when($archived, function ($q) use ($archived): void {
@@ -202,5 +223,14 @@ class LogRepository implements LogRepositoryInterface
             ->where('severity', $log->severity)
             ->where('message', $log->message)
             ->where('original_created_at', $log->created_at);
+    }
+
+    private function escapeLikePattern(string $value): string
+    {
+        return str_replace(
+            [self::LIKE_ESCAPE_CHARACTER, '%', '_'],
+            [self::LIKE_ESCAPE_CHARACTER . self::LIKE_ESCAPE_CHARACTER, self::LIKE_ESCAPE_CHARACTER . '%', self::LIKE_ESCAPE_CHARACTER . '_'],
+            $value,
+        );
     }
 }
