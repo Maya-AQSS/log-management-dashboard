@@ -35,16 +35,20 @@ class ErrorCodeRepository implements ErrorCodeRepositoryInterface
             ->with('application')
             ->withCount(['logs', 'archivedLogs', 'comments'])
             ->when($escapedSearch !== null, function ($query) use ($driver, $escapedSearch) {
-                $pattern = "%{$escapedSearch}%";
+                $pattern = '%'.$escapedSearch.'%';
+                $esc = LikeEscaper::LIKE_ESCAPE_CHARACTER;
                 if ($driver === 'pgsql') {
-                    $query->where(function ($query) use ($pattern) {
-                        $query->whereRaw("code ILIKE ? ESCAPE '" . LikeEscaper::LIKE_ESCAPE_CHARACTER . "'", [$pattern])
-                              ->orWhereRaw("name ILIKE ? ESCAPE '" . LikeEscaper::LIKE_ESCAPE_CHARACTER . "'", [$pattern]);
+                    $query->where(function ($query) use ($pattern, $esc) {
+                        $query->whereRaw("code ILIKE ? ESCAPE '".$esc."'", [$pattern])
+                            ->orWhereRaw("name ILIKE ? ESCAPE '".$esc."'", [$pattern]);
                     });
                 } else {
-                    $query->where(function ($query) use ($search) {
-                        $query->where('code', 'LIKE', "%{$search}%")
-                              ->orWhere('name', 'LIKE', "%{$search}%");
+                    /*
+                    SQLite u otros: LIKE con ESCAPE (misma semántica de comodines) y LOWER para aproximar ILIKE.
+                    */
+                    $query->where(function ($query) use ($pattern, $esc) {
+                        $query->whereRaw("LOWER(code) LIKE LOWER(?) ESCAPE '".$esc."'", [$pattern])
+                            ->orWhereRaw("LOWER(name) LIKE LOWER(?) ESCAPE '".$esc."'", [$pattern]);
                     });
                 }
             })
