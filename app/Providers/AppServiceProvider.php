@@ -14,6 +14,7 @@ use App\Services\Contracts\LogServiceInterface;
 use App\Services\ArchivedLogService;
 use App\Services\ErrorCodeService;
 use App\Services\LogService;
+use App\Support\AuthExternalUrlGuard;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -32,6 +33,9 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        //
+        AuthExternalUrlGuard::assertConfiguredForDeploy(
+            (string) $this->app->environment(),
+            (string) config('services.auth_gateway.external_url', '')
+        );
     }
 }

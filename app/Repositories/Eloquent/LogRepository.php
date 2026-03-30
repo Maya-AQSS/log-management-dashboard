@@ -6,6 +6,7 @@ use App\Enums\Severity;
 use App\Models\ArchivedLog;
 use App\Models\Log;
 use App\Repositories\Contracts\LogRepositoryInterface;
+use App\Support\LikeEscaper;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -15,7 +16,8 @@ use Illuminate\Support\Collection;
 
 class LogRepository implements LogRepositoryInterface
 {
-    private const LIKE_ESCAPE_CHARACTER = '!';
+    // Mantener la constante para compatibilidad con queries existentes
+    private const LIKE_ESCAPE_CHARACTER = LikeEscaper::LIKE_ESCAPE_CHARACTER;
     private const SORT_COLUMN_MAP = [
         'created_at' => 'logs.created_at',
         'severity' => 'logs.severity',
@@ -84,7 +86,7 @@ class LogRepository implements LogRepositoryInterface
             : null;
 
         $escapedSearchPattern = $normalizedSearch !== null
-            ? '%' . $this->escapeLikePattern($normalizedSearch) . '%'
+            ? '%' . LikeEscaper::escapeLikePattern($normalizedSearch) . '%'
             : null;
 
         $driver = DB::connection()->getDriverName();
@@ -256,13 +258,6 @@ class LogRepository implements LogRepositoryInterface
             ->where('message', $log->message);
     }
 
-    private function escapeLikePattern(string $value): string
-    {
-        return str_replace(
-            [self::LIKE_ESCAPE_CHARACTER, '%', '_'],
-            [self::LIKE_ESCAPE_CHARACTER . self::LIKE_ESCAPE_CHARACTER, self::LIKE_ESCAPE_CHARACTER . '%', self::LIKE_ESCAPE_CHARACTER . '_'],
-            $value,
-        );
-    }
+
 
 }
