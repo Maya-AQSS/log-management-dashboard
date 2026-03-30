@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use App\Services\Contracts\LogServiceInterface;
+use App\Support\BackUrlResolver;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
@@ -16,6 +16,7 @@ class LogController extends Controller
     public function __construct(
         private LogServiceInterface $logService,
         private ArchivedLogServiceInterface $archivedLogService,
+        private BackUrlResolver $backUrlResolver,
     ) {}
 
     public function index(): View
@@ -26,7 +27,7 @@ class LogController extends Controller
     public function show(Request $request, int $id): View
     {
         $log = $this->logService->findOrFail($id);
-        $backHref = $this->resolveBackUrl($request, $id);
+        $backHref = $this->backUrlResolver->resolveForLogShow($request, $id);
         $archivedLogId = $this->logService->archivedLogIdFor($id);
 
         return view('logs.show', [
@@ -70,10 +71,10 @@ class LogController extends Controller
             $payload = $this->logService->streamPayload(10);
 
             echo "event: logs\n";
-            echo 'data: ' . json_encode(
+            echo 'data: '.json_encode(
                 $payload,
                 JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-            ) . "\n\n";
+            )."\n\n";
 
             if (function_exists('ob_flush')) {
                 ob_flush();
@@ -84,27 +85,5 @@ class LogController extends Controller
             'Content-Type' => 'text/event-stream',
             'X-Accel-Buffering' => 'no',
         ]);
-    }
-
-    private function resolveBackUrl(Request $request, int $id): string
-    {
-        $fallback = route('logs.index');
-        $sessionKey = "navigation.logs.show.$id.back";
-        $referer = $request->headers->get('referer');
-
-        if (is_string($referer) && Str::startsWith($referer, url('/')) && $this->isLogsIndexUrl($referer)) {
-            $request->session()->put($sessionKey, $referer);
-        }
-
-        $stored = $request->session()->get($sessionKey);
-        return is_string($stored) && Str::startsWith($stored, url('/')) ? $stored : $fallback;
-    }
-
-    private function isLogsIndexUrl(string $url): bool
-    {
-        $indexPrefix = route('logs.index');
-        $showPrefix = route('logs.index') . '/';
-
-        return Str::startsWith($url, $indexPrefix) && !Str::startsWith($url, $showPrefix);
     }
 }

@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ErrorCodeRequest;
 use App\Models\ErrorCode;
 use App\Services\Contracts\ErrorCodeServiceInterface;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class ErrorCodeController extends Controller
 {
@@ -19,11 +19,15 @@ class ErrorCodeController extends Controller
 
     public function create(): View
     {
+        $this->authorize('create', ErrorCode::class);
+
         return view('error-codes.create');
     }
 
     public function store(ErrorCodeRequest $request): RedirectResponse
     {
+        $this->authorize('create', ErrorCode::class);
+
         /** @var ErrorCode $errorCode */
         $errorCode = $this->errorCodeService->create($request->validated());
 
@@ -35,6 +39,7 @@ class ErrorCodeController extends Controller
     public function update(ErrorCodeRequest $request, int $id): RedirectResponse
     {
         $errorCode = $this->errorCodeService->findOrFail($id);
+        $this->authorize('update', $errorCode);
 
         $this->errorCodeService->update($errorCode, $request->validated());
 
@@ -55,6 +60,7 @@ class ErrorCodeController extends Controller
     public function destroy(int $id): RedirectResponse
     {
         $errorCode = $this->errorCodeService->findOrFail($id);
+        $this->authorize('delete', $errorCode);
 
         $this->errorCodeService->delete($errorCode);
 

@@ -186,4 +186,99 @@ class ErrorCodeManagementTest extends TestCase
             'id' => $comment->id,
         ]);
     }
+
+    public function test_unauthenticated_user_cannot_store_error_code(): void
+    {
+        $application = Application::query()->create([
+            'name' => 'App Auth',
+            'description' => 'App for auth test',
+            'created_at' => now(),
+        ]);
+
+        $this->post('/error-codes', [
+                'application_id' => $application->id,
+                'code' => 'E-999',
+                'name' => 'Unauthorized error',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseCount('error_codes', 0);
+    }
+
+    public function test_unauthenticated_user_cannot_update_error_code(): void
+    {
+        $application = Application::query()->create([
+            'name' => 'App Auth Update',
+            'description' => 'App for auth update test',
+            'created_at' => now(),
+        ]);
+
+        $errorCode = ErrorCode::query()->create([
+            'application_id' => $application->id,
+            'code' => 'E-600',
+            'name' => 'Error to update',
+        ]);
+
+        $this->put('/error-codes/' . $errorCode->id, [
+                'application_id' => $application->id,
+                'code' => 'E-600',
+                'name' => 'Should not update',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('error_codes', [
+            'id' => $errorCode->id,
+            'name' => 'Error to update',
+        ]);
+    }
+
+    public function test_unauthenticated_user_cannot_delete_error_code(): void
+    {
+        $application = Application::query()->create([
+            'name' => 'App Auth Delete',
+            'description' => 'App for auth delete test',
+            'created_at' => now(),
+        ]);
+
+        $errorCode = ErrorCode::query()->create([
+            'application_id' => $application->id,
+            'code' => 'E-700',
+            'name' => 'Error to delete',
+        ]);
+
+        $this->delete('/error-codes/' . $errorCode->id)
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('error_codes', [
+            'id' => $errorCode->id,
+        ]);
+    }
+
+    public function test_any_authenticated_user_can_delete_any_error_code(): void
+    {
+        $userA = User::factory()->create();
+        $userB = User::factory()->create();
+
+        $application = Application::query()->create([
+            'name' => 'App Any Delete',
+            'description' => 'App for any-user delete test',
+            'created_at' => now(),
+        ]);
+
+        $errorCode = ErrorCode::query()->create([
+            'application_id' => $application->id,
+            'code' => 'E-800',
+            'name' => 'Error owned by user A',
+        ]);
+
+        // userB can delete an error code they did not create
+        $this->actingAs($userB)
+            ->delete(route('error-codes.destroy', $errorCode->id))
+            ->assertRedirect(route('error-codes.index'))
+            ->assertSessionHas('status', __('error_codes.deleted'));
+
+        $this->assertDatabaseMissing('error_codes', [
+            'id' => $errorCode->id,
+        ]);
+    }
 }
