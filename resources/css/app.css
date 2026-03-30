@@ -1,3 +1,11 @@
 @import 'tailwindcss';
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Oculta la flecha nativa del select en todos los navegadores modernos */
+select.appearance-none, select[appearance=none], select:not([size]):not([multiple]) {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: none !important;
+}

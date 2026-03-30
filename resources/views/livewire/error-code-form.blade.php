@@ -93,52 +93,27 @@
                 'border-2 border-[#5b3853]/45 bg-[#5b3853]/[0.06] text-slate-900 ring-2 ring-[#5b3853]/25 dark:border-[#5b3853]/50 dark:bg-[#5b3853]/20 dark:text-slate-100 dark:ring-[#5b3853]/35' => $formActive,
             ])
         >
-        <div class="grid grid-cols-1 gap-3 text-base md:grid-cols-2">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-base">
+            <!-- Fila 1: Nombre | Código de error -->
             <div>
-                <label for="application_id" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ __('error_codes.form.application') }}</label>
-                <select
-                    id="application_id"
-                    name="application_id"
+                <label for="name" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ __('error_codes.table.name') }} <span class="text-red-600">*</span></label>
+                <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    value="{{ old('name', $errorCode->name ?? null) }}"
                     @class([
                         'mt-1 w-full rounded-xl border px-3 py-2.5 text-sm shadow-inner focus:outline-none focus:ring-2 dark:text-slate-100',
-                        'border-[#5b3853]/40 bg-white text-slate-900 focus:border-[#5b3853] focus:ring-[#5b3853]/25 dark:border-slate-500 dark:bg-slate-950 dark:focus:border-[#c4a8bc] dark:focus:ring-[#5b3853]/40' => $formActive,
+                        'border-[#5b3853]/40 bg-white text-slate-900 placeholder:text-slate-400 focus:border-[#5b3853] focus:ring-[#5b3853]/25 dark:border-slate-500 dark:bg-slate-950 dark:placeholder:text-slate-500 dark:focus:border-[#c4a8bc] dark:focus:ring-[#5b3853]/40' => $formActive,
                         'cursor-not-allowed border-slate-200 bg-white text-slate-700 opacity-90 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-300' => ! $formActive,
                     ])
                     @disabled(! $isEditable)
                     required
-                >
-                    <option value="">{{ __('error_codes.filters.app_all') }}</option>
-                    @foreach($applications as $id => $name)
-                        <option value="{{ $id }}" @selected((string) old('application_id', $errorCode->application_id ?? null) === (string) $id)>{{ $name }}</option>
-                    @endforeach
-                </select>
-                @error('application_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                />
+                @error('name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
-
             <div>
-                <label for="severity" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ __('error_codes.table.severity') }}</label>
-                <select
-                    id="severity"
-                    name="severity"
-                    @class([
-                        'mt-1 w-full rounded-xl border px-3 py-2.5 text-sm shadow-inner focus:outline-none focus:ring-2 dark:text-slate-100',
-                        'border-[#5b3853]/40 bg-white text-slate-900 focus:border-[#5b3853] focus:ring-[#5b3853]/25 dark:border-slate-500 dark:bg-slate-950 dark:focus:border-[#c4a8bc] dark:focus:ring-[#5b3853]/40' => $formActive,
-                        'cursor-not-allowed border-slate-200 bg-white text-slate-700 opacity-90 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-300' => ! $formActive,
-                    ])
-                    @disabled(! $isEditable)
-                >
-                    <option value="">-</option>
-                    <option value="critical" @selected(old('severity', $errorCode->severity ?? null) === 'critical')>{{ __('severity.critical') }}</option>
-                    <option value="high" @selected(old('severity', $errorCode->severity ?? null) === 'high')>{{ __('severity.high') }}</option>
-                    <option value="medium" @selected(old('severity', $errorCode->severity ?? null) === 'medium')>{{ __('severity.medium') }}</option>
-                    <option value="low" @selected(old('severity', $errorCode->severity ?? null) === 'low')>{{ __('severity.low') }}</option>
-                    <option value="other" @selected(old('severity', $errorCode->severity ?? null) === 'other')>{{ __('severity.other') }}</option>
-                </select>
-                @error('severity')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-            </div>
-
-            <div>
-                <label for="code" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ __('error_codes.table.code') }}</label>
+                <label for="code" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ __('error_codes.table.code') }} <span class="text-red-600">*</span></label>
                 <input
                     id="code"
                     name="code"
@@ -155,24 +130,32 @@
                 @error('code')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
+            <!-- Fila 2: Aplicación | Fichero -->
             <div>
-                <label for="name" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ __('error_codes.table.name') }}</label>
-                <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    value="{{ old('name', $errorCode->name ?? null) }}"
-                    @class([
-                        'mt-1 w-full rounded-xl border px-3 py-2.5 text-sm shadow-inner focus:outline-none focus:ring-2 dark:text-slate-100',
-                        'border-[#5b3853]/40 bg-white text-slate-900 placeholder:text-slate-400 focus:border-[#5b3853] focus:ring-[#5b3853]/25 dark:border-slate-500 dark:bg-slate-950 dark:placeholder:text-slate-500 dark:focus:border-[#c4a8bc] dark:focus:ring-[#5b3853]/40' => $formActive,
-                        'cursor-not-allowed border-slate-200 bg-white text-slate-700 opacity-90 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-300' => ! $formActive,
-                    ])
-                    @disabled(! $isEditable)
-                    required
-                />
-                @error('name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                <label for="application_id" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ __('error_codes.form.application') }} <span class="text-red-600">*</span></label>
+                <div class="relative">
+                    <select
+                        id="application_id"
+                        name="application_id"
+                        @class([
+                            'mt-1 w-full rounded-xl border px-3 py-2.5 text-sm shadow-inner focus:outline-none focus:ring-2 dark:text-slate-100 pr-10',
+                            'border-[#5b3853]/40 bg-white text-slate-900 focus:border-[#5b3853] focus:ring-[#5b3853]/25 dark:border-slate-500 dark:bg-slate-950 dark:focus:border-[#c4a8bc] dark:focus:ring-[#5b3853]/40' => $formActive,
+                            'cursor-not-allowed border-slate-200 bg-white text-slate-700 opacity-90 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-300' => ! $formActive,
+                        ])
+                        @disabled(! $isEditable)
+                        required
+                    >
+                        <option value="">{{ __('error_codes.filters.app_all') }}</option>
+                        @foreach($applications as $id => $name)
+                            <option value="{{ $id }}" @selected((string) old('application_id', $errorCode->application_id ?? null) === (string) $id)>{{ $name }}</option>
+                        @endforeach
+                    </select>
+                    <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-500 dark:text-slate-300">
+                        <x-chevron-down class="h-4 w-4" />
+                    </span>
+                </div>
+                @error('application_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
-
             <div>
                 <label for="file" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ __('error_codes.table.file') }}</label>
                 <input
@@ -190,6 +173,8 @@
                 @error('file')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
+            <!-- Fila 3: Línea (izquierda vacía si no aplica) | Línea -->
+            <div></div>
             <div>
                 <label for="line" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ __('error_codes.table.line') }}</label>
                 <input
@@ -208,6 +193,7 @@
                 @error('line')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
+            <!-- Fila final: Descripción (ancho completo) -->
             <div class="md:col-span-2">
                 <label for="description" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ __('error_codes.table.description') }}</label>
                 <textarea
@@ -223,6 +209,7 @@
                 >{{ old('description', $errorCode->description ?? null) }}</textarea>
                 @error('description')<p class="mt-1 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-900 dark:border-red-500 dark:bg-red-950 dark:!text-red-50" role="alert">{{ $message }}</p>@enderror
             </div>
+        </div>
         </div>
         </div>
     </form>
