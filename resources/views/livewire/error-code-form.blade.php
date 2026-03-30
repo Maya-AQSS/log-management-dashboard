@@ -1,5 +1,7 @@
 <div x-data="{ confirmDeleteOpen: false }">
-    <div class="flex min-h-[2.5rem] items-start justify-between gap-3">
+    <!-- BEGIN: Root wrapper for Livewire single root requirement -->
+    <div>
+        <div class="flex min-h-[2.5rem] items-start justify-between gap-3">
         <a
             href="{{ route('error-codes.index') }}"
             class="inline-flex items-center rounded-full bg-[#f7a736] px-4 py-2 text-sm font-semibold text-[#1e1a24] shadow-sm hover:bg-[#e28f1f] dark:bg-amber-500 dark:hover:bg-amber-400"
@@ -68,36 +70,36 @@
                 @endif
             @endif
         </div>
-    </div>
+        </div>
 
-    @php
-        $formActive = $mode === 'create' || $isEditable;
-    @endphp
+        @php
+            $formActive = $mode === 'create' || $isEditable;
+        @endphp
 
-    <form
-        id="error-code-main-form"
-        method="POST"
-        action="{{ $mode === 'create' ? route('error-codes.store') : route('error-codes.update', $errorCode->id) }}"
-        class="mt-4"
-    >
-        @csrf
-        @if ($mode === 'edit')
-            @method('PUT')
-            <input type="hidden" name="errorCodeId" value="{{ $errorCode->id }}" />
-        @endif
-
-        <div
-            @class([
-                'rounded-xl p-4 shadow-sm transition-colors duration-150',
-                'border border-slate-200 bg-slate-50 text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100' => ! $formActive,
-                'border-2 border-[#5b3853]/45 bg-[#5b3853]/[0.06] text-slate-900 ring-2 ring-[#5b3853]/25 dark:border-[#5b3853]/50 dark:bg-[#5b3853]/20 dark:text-slate-100 dark:ring-[#5b3853]/35' => $formActive,
-            ])
+        <form
+            id="error-code-main-form"
+            method="POST"
+            action="{{ $mode === 'create' ? route('error-codes.store') : route('error-codes.update', $errorCode->id) }}"
+            class="mt-4"
         >
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-base">
-            <!-- Fila 1: Nombre | Código de error -->
-            <div>
-                <label for="name" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ __('error_codes.table.name') }} <span class="text-red-600">*</span></label>
-                <input
+            @csrf
+            @if ($mode === 'edit')
+                @method('PUT')
+                <input type="hidden" name="errorCodeId" value="{{ $errorCode->id }}" />
+            @endif
+
+            <div
+                @class([
+                    'rounded-xl p-4 shadow-sm transition-colors duration-150',
+                    'border border-slate-200 bg-slate-50 text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100' => ! $formActive,
+                    'border-2 border-[#5b3853]/45 bg-[#5b3853]/[0.06] text-slate-900 ring-2 ring-[#5b3853]/25 dark:border-[#5b3853]/50 dark:bg-[#5b3853]/20 dark:text-slate-100 dark:ring-[#5b3853]/35' => $formActive,
+                ])
+            >
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-base">
+                <!-- Fila 1: Nombre | Código de error -->
+                <div>
+                    <label for="name" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ __('error_codes.table.name') }} <span class="text-red-600">*</span></label>
+                    <input
                     id="name"
                     name="name"
                     type="text"
@@ -209,22 +211,24 @@
                 >{{ old('description', $errorCode->description ?? null) }}</textarea>
                 @error('description')<p class="mt-1 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-900 dark:border-red-500 dark:bg-red-950 dark:!text-red-50" role="alert">{{ $message }}</p>@enderror
             </div>
-        </div>
-        </div>
-        </div>
-    </form>
+            </div>
+            </div>
+            </div>
+        </form>
 
-    @if ($mode === 'edit')
-        <div class="mt-6">
-            <livewire:comment-thread
-                commentableType="error-code"
-                :commentableId="$errorCode->id"
+        @if ($mode === 'edit')
+            <div class="mt-6">
+                <livewire:comment-thread
+                    commentableType="error-code"
+                    :commentableId="$errorCode->id"
+                />
+            </div>
+
+            <x-confirm-delete-modal
+                :action="route('error-codes.destroy', $errorCode->id)"
+                openVar="confirmDeleteOpen"
             />
-        </div>
-
-        <x-confirm-delete-modal
-            :action="route('error-codes.destroy', $errorCode->id)"
-            openVar="confirmDeleteOpen"
-        />
-    @endif
+        @endif
+    </div>
+    <!-- END: Root wrapper for Livewire single root requirement -->
 </div>
