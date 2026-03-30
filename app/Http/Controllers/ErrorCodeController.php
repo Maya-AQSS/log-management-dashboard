@@ -17,14 +17,17 @@ class ErrorCodeController extends Controller
         return view('error-codes.index');
     }
 
-    public function create(): View
+    public function create(): RedirectResponse|View 
     {
+        $this->authorize('create', ErrorCode::class);
+
         return view('error-codes.create');
     }
 
     public function store(ErrorCodeRequest $request): RedirectResponse
     {
         /** @var ErrorCode $errorCode */
+        $this->authorize('create', ErrorCode::class);
         $errorCode = $this->errorCodeService->create($request->validated());
 
         return redirect()
@@ -35,6 +38,7 @@ class ErrorCodeController extends Controller
     public function update(ErrorCodeRequest $request, int $id): RedirectResponse
     {
         $errorCode = $this->errorCodeService->findOrFail($id);
+        $this->authorize('update', $errorCode);
 
         $this->errorCodeService->update($errorCode, $request->validated());
 
@@ -45,7 +49,7 @@ class ErrorCodeController extends Controller
 
     public function show(int $id): View
     {
-        $this->errorCodeService->findOrFail($id);
+        $errorCode = $this->errorCodeService->findOrFail($id);
 
         return view('error-codes.show', [
             'errorCodeId' => $id,
@@ -55,6 +59,7 @@ class ErrorCodeController extends Controller
     public function destroy(int $id): RedirectResponse
     {
         $errorCode = $this->errorCodeService->findOrFail($id);
+        $this->authorize('delete', $errorCode);
 
         $this->errorCodeService->delete($errorCode);
 
