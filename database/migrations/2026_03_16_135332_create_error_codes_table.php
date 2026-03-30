@@ -14,7 +14,6 @@ return new class extends Migration
             $table->foreignId('application_id')->constrained('applications')->cascadeOnDelete();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->enum('severity', ['critical', 'high', 'medium', 'low', 'other'])->nullable();
             $table->timestamps();
 
             $table->unique(['code', 'application_id']);
