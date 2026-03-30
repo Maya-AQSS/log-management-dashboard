@@ -12,7 +12,7 @@ class Log extends Model
 
     public $timestamps = false;
 
-    protected $guarded = [];
+    protected $guarded = ['*'];
 
     protected function casts(): array
     {
