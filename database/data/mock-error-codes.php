@@ -60,7 +60,6 @@ return [
         'file' => 'app/Http/Middleware/ThrottleRequests.php',
         'line' => 66,
         'description' => 'El cliente superó la cuota de peticiones',
-        'severity' => 'medium',
     ],
     [
         'id' => 7,
@@ -70,7 +69,6 @@ return [
         'file' => 'app/Services/WebhookVerifier.php',
         'line' => 51,
         'description' => 'Firma de webhook inválida',
-        'severity' => 'high',
     ],
     [
         'id' => 8,
@@ -80,7 +78,6 @@ return [
         'file' => 'app/Services/ExternalApiService.php',
         'line' => 134,
         'description' => 'La API externa devolvió 503',
-        'severity' => 'critical',
     ],
     [
         'id' => 9,
@@ -90,7 +87,6 @@ return [
         'file' => 'app/Services/Import/CsvImporter.php',
         'line' => 89,
         'description' => 'Fila CSV con formato incorrecto al analizar',
-        'severity' => 'medium',
     ],
     [
         'id' => 10,
@@ -100,7 +96,6 @@ return [
         'file' => 'app/Services/FileStorageService.php',
         'line' => 103,
         'description' => 'No se pudo guardar el archivo en disco',
-        'severity' => 'high',
     ],
     [
         'id' => 11,
@@ -110,7 +105,6 @@ return [
         'file' => 'app/Jobs/ProcessImport.php',
         'line' => 57,
         'description' => 'El trabajo superó el tiempo de ejecución previsto',
-        'severity' => 'low',
     ],
     [
         'id' => 12,
@@ -120,7 +114,6 @@ return [
         'file' => 'app/Notifications/SendDigest.php',
         'line' => 71,
         'description' => 'Falló el transporte SMTP',
-        'severity' => 'other',
     ],
     [
         'id' => 13,
@@ -130,7 +123,6 @@ return [
         'file' => 'app/Http/Middleware/StartSession.php',
         'line' => 39,
         'description' => 'No se pudo deserializar la carga de la sesión',
-        'severity' => 'medium',
     ],
     [
         'id' => 14,
@@ -140,7 +132,6 @@ return [
         'file' => 'app/Policies/ProjectPolicy.php',
         'line' => 27,
         'description' => 'El usuario no tiene el permiso requerido',
-        'severity' => 'low',
     ],
     [
         'id' => 15,
@@ -150,7 +141,6 @@ return [
         'file' => 'resources/views/errors/fallback.blade.php',
         'line' => 9,
         'description' => 'Excepción al renderizar la plantilla Blade',
-        'severity' => 'high',
     ],
     [
         'id' => 16,
@@ -160,7 +150,6 @@ return [
         'file' => 'app/Services/ProjectService.php',
         'line' => 112,
         'description' => 'Referencia nula en la canalización del servicio',
-        'severity' => 'critical',
     ],
     [
         'id' => 17,
@@ -170,7 +159,6 @@ return [
         'file' => 'app/Http/Controllers/LogController.php',
         'line' => 41,
         'description' => 'El flujo del cliente se cerró de forma inesperada',
-        'severity' => 'other',
     ],
     [
         'id' => 18,
@@ -180,7 +168,6 @@ return [
         'file' => 'app/Http/Requests/StoreProjectRequest.php',
         'line' => 18,
         'description' => 'Se ejecutó la ruta de validación alternativa',
-        'severity' => 'low',
         'file' => 'app/Http/Controllers/NotificationController.php',
         'line' => 56,
     ],
