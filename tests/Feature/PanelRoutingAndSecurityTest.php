@@ -84,7 +84,7 @@ class PanelRoutingAndSecurityTest extends TestCase
 
         $this->actingAs($user);
 
-        $this->get('/')->assertOk()->assertViewIs('dashboard');
+        $this->get('/')->assertRedirect(route('dashboard'));
         $this->get('/dashboard')->assertOk()->assertViewIs('dashboard');
         $this->get('/logs')->assertOk()->assertViewIs('logs.index');
         $this->get('/logs/' . $logId)->assertOk()->assertViewIs('logs.show');
