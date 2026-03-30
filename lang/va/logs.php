@@ -73,6 +73,6 @@ return [
         'cancel' => 'Cancel·lar',
         'archive' => "Desar a l'històric",
         'view_archived' => 'Veure arxivat',
-        'solved' => 'Resoldre',
+        'solved' => 'Marcar com a resolt',
     ],
 ];
