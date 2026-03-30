@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Application extends Model
 {
@@ -20,17 +21,17 @@ class Application extends Model
         ];
     }
 
-    public function logs()
+    public function logs(): HasMany
     {
         return $this->hasMany(Log::class);
     }
 
-    public function archivedLogs()
+    public function archivedLogs(): HasMany
     {
         return $this->hasMany(ArchivedLog::class);
     }
 
-    public function errorCodes()
+    public function errorCodes(): HasMany
     {
         return $this->hasMany(ErrorCode::class);
     }
