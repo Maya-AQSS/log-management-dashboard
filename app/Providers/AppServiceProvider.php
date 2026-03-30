@@ -2,16 +2,18 @@
 
 namespace App\Providers;
 
+use App\Repositories\Contracts\ApplicationRepositoryInterface;
 use App\Repositories\Contracts\ArchivedLogRepositoryInterface;
 use App\Repositories\Contracts\ErrorCodeRepositoryInterface;
 use App\Repositories\Contracts\LogRepositoryInterface;
+use App\Repositories\Eloquent\ApplicationRepository;
 use App\Repositories\Eloquent\ArchivedLogRepository;
 use App\Repositories\Eloquent\ErrorCodeRepository;
 use App\Repositories\Eloquent\LogRepository;
+use App\Services\ArchivedLogService;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use App\Services\Contracts\ErrorCodeServiceInterface;
 use App\Services\Contracts\LogServiceInterface;
-use App\Services\ArchivedLogService;
 use App\Services\ErrorCodeService;
 use App\Services\LogService;
 use App\Support\AuthExternalUrlGuard;
@@ -21,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->singleton(ApplicationRepositoryInterface::class, ApplicationRepository::class);
+
         $this->app->singleton(ArchivedLogRepositoryInterface::class, ArchivedLogRepository::class);
         $this->app->singleton(ArchivedLogServiceInterface::class, ArchivedLogService::class);
 
