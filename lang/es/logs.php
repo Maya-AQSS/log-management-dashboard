@@ -73,6 +73,6 @@ return [
         'cancel' => 'Cancelar',
         'archive' => 'Guardar en Histórico',
         'view_archived' => 'Ver archivado',
-        'solved' => 'Resolver',
+        'solved' => 'Marcar como resuelto',
     ],
 ];

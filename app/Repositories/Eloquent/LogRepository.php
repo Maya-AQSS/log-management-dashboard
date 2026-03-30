@@ -218,6 +218,16 @@ class LogRepository implements LogRepositoryInterface
     }
 
     /**
+     * Marca el log como resuelto.
+     *
+     * Se usa el query builder: el modelo {@see Log} cancela actualizaciones vía Eloquent en {@see Log::booted()}.
+     */
+    public function markResolved(int $logId): void
+    {
+        DB::table('logs')->where('id', $logId)->update(['resolved' => true]);
+    }
+
+    /**
      * Aplica a una subquery la condición de equivalencia lógica
      * archived_logs <-> logs (sin FK; misma aplicación, código de error, severidad y mensaje).
      *
@@ -254,4 +264,5 @@ class LogRepository implements LogRepositoryInterface
             $value,
         );
     }
+
 }

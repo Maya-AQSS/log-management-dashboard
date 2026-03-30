@@ -73,6 +73,6 @@ return [
         'cancel' => 'Cancel',
         'archive' => 'Save to history',
         'view_archived' => 'View archived',
-        'solved' => 'Resolve',
+        'solved' => 'Mark as resolved',
     ],
 ];
