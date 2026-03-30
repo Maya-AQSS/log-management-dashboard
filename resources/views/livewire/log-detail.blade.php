@@ -2,6 +2,7 @@
     @if($source === 'archived_log')
         <div
             class="flex min-h-[2.5rem] items-start justify-between gap-3"
+            x-data="{ confirmDeleteArchivedOpen: false }"
         >
             <a
                 href="{{ $backHref ?? '#' }}"
@@ -57,20 +58,19 @@
 
                     @can('delete', $archivedLog)
                         @if(!$editingUrlTutorial)
-                            <form
-                                method="POST"
-                                action="{{ route('archived-logs.destroy', $archivedLog->id) }}"
-                                onsubmit="return confirm('{{ addslashes(__('archived_logs.confirm_delete')) }}')"
+                            <button
+                                type="button"
+                                x-on:click="confirmDeleteArchivedOpen = true"
+                                class="rounded-full bg-red-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500"
                             >
-                                @csrf
-                                @method('DELETE')
-                                <button
-                                    type="submit"
-                                    class="rounded-full bg-red-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500"
-                                >
-                                    {{ __('archived_logs.buttons.delete') }}
-                                </button>
-                            </form>
+                                {{ __('archived_logs.buttons.delete') }}
+                            </button>
+
+                            <x-confirm-action-modal
+                                intent="delete_archived"
+                                :action="route('archived-logs.destroy', $archivedLog->id)"
+                                openVar="confirmDeleteArchivedOpen"
+                            />
                         @endif
                     @endcan
             </div>

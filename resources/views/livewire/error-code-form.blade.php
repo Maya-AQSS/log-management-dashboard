@@ -213,7 +213,6 @@
             </div>
             </div>
             </div>
-            </div>
         </form>
 
         @if ($mode === 'edit')
@@ -224,11 +223,14 @@
                 />
             </div>
 
-            <x-confirm-delete-modal
+            <x-confirm-action-modal
+                intent="delete"
                 :action="route('error-codes.destroy', $errorCode->id)"
                 openVar="confirmDeleteOpen"
             />
+
         @endif
     </div>
     <!-- END: Root wrapper for Livewire single root requirement -->
+
 </div>
