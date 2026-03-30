@@ -3,6 +3,14 @@ namespace App\Policies;
 use App\Models\ErrorCode;
 use App\Models\User;
 
+/**
+ * Authorization policy for ErrorCode CRUD operations.
+ *
+ * Decision: any authenticated user may create, update, and delete error codes.
+ * The 'auth' route middleware already ensures the user is authenticated before
+ * these policy methods are called.
+ */
+
 class ErrorCodePolicy
 {
     public function create(User $user): bool
@@ -11,11 +19,11 @@ class ErrorCodePolicy
     }
     public function update(User $user, ErrorCode $errorCode): bool
     {
-        return $user->id === (int) $errorCode->created_by_id;
+        return true;
     }
 
     public function delete(User $user, ErrorCode $errorCode): bool
     {
-        return $user->id === (int) $errorCode->created_by_id;
+        return true;
     }
 }

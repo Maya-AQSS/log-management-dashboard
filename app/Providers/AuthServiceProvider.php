@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\ArchivedLog;
 use App\Models\Comment;
 use App\Policies\ArchivedLogPolicy;
+use App\Models\ErrorCode;
 use App\Policies\CommentPolicy;
 use App\Policies\ErrorCodePolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;

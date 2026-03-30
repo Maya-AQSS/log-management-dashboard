@@ -26,8 +26,9 @@ class ErrorCodeController extends Controller
 
     public function store(ErrorCodeRequest $request): RedirectResponse
     {
-        /** @var ErrorCode $errorCode */
         $this->authorize('create', ErrorCode::class);
+
+        /** @var ErrorCode $errorCode */
         $errorCode = $this->errorCodeService->create($request->validated());
 
         return redirect()
@@ -49,7 +50,7 @@ class ErrorCodeController extends Controller
 
     public function show(int $id): View
     {
-        $errorCode = $this->errorCodeService->findOrFail($id);
+        $this->errorCodeService->findOrFail($id);
 
         return view('error-codes.show', [
             'errorCodeId' => $id,
