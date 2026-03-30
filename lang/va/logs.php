@@ -10,6 +10,7 @@ return [
     'archived_success' => 'Log arxivat correctament',
     'archived_error' => "No s'ha pogut arxivar el log",
     'confirm_archive' => 'Segur que vols arxivar aquest log?',
+    'confirm_resolve' => 'Segur que vols marcar este log com a resolt?',
 
     'detail' => [
         'title' => 'Detall del log',
@@ -39,6 +40,7 @@ return [
         'archived' => 'Arxivat',
         'resolved' => 'Resolt',
         'unresolved' => 'No resolt',
+        'resolved_success' => 'Marcat com a resolt correctament',
     ],
 
     'filters' => [

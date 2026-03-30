@@ -29,7 +29,6 @@ class ErrorCode extends Model
         'file',
         'line',
         'description',
-        'severity',
     ];
 
     protected function casts(): array

@@ -138,9 +138,11 @@ class LogService implements LogServiceInterface
     /**
      * Marca el log como resuelto.
      */
-    public function markResolved(int $logId): void
+    public function resolved(int $logId): void
     {
-        $this->logRepository->markResolved($logId);
+        $this->logRepository->findOrFail($logId);
+
+        $this->logRepository->resolved($logId);
     }
 
     /**

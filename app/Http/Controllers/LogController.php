@@ -59,9 +59,9 @@ class LogController extends Controller
 
     public function resolve(int $id): RedirectResponse
     {
-        $this->logService->markResolved($id);
+        $this->logService->resolved($id);
 
-        return redirect()->route('logs.show', $id);
+        return redirect()->route('logs.show', $id)->with('status', __('logs.status.resolved_success'));
     }
 
     public function stream(): StreamedResponse

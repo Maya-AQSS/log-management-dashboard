@@ -21,7 +21,6 @@ class ErrorCodeSeeder extends Seeder
                 'application_id' => $errorCode['application_id'],
                 'name' => $errorCode['name'],
                 'description' => $errorCode['description'] ?? null,
-                'severity' => $errorCode['severity'],
                 'file' => $errorCode['file'] ?? null,
                 'line' => $errorCode['line'] ?? null,
             ];
