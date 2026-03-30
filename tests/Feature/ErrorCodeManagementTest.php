@@ -190,4 +190,33 @@ class ErrorCodeManagementTest extends TestCase
             'id' => $comment->id,
         ]);
     }
+
+        public function test_user_cannot_delete_other_users_error_code()
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+
+        $errorCode = ErrorCode::factory()->create([
+            'created_by_id' => $otherUser->id,
+        ]);
+
+        $this->actingAs($user)
+            ->delete(route('error-codes.destroy', $errorCode->id))
+            ->assertForbidden();
+    }
+
+        public function test_user_can_delete_own_error_code()
+    {
+        $user = User::factory()->create();
+
+        $errorCode = ErrorCode::factory()->create([
+            'created_by_id' => $user->id,
+        ]);
+
+        $this->actingAs($user)
+            ->delete(route('error-codes.destroy', $errorCode->id))
+            ->assertRedirect();
+    }
+
+
 }
