@@ -5,15 +5,15 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ErrorCodeController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\LogController;
-use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {
-    // Home/Dashboard
-    Route::get('/', [DashboardController::class, 'index'])->name('home');
+    // Dashboard: contenido canónico en "/dashboard"
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // "/" redirige 301 a "/dashboard"
+    Route::permanentRedirect('/', '/dashboard')->name('home');
 
     // ArchivedLogs
     Route::get('/archived-logs', [ArchivedLogController::class, 'index'])->name('archived-logs.index');
@@ -28,9 +28,6 @@ Route::middleware(['auth'])->group(function () {
 
     // SSE
     Route::get('/sse/logs', [LogController::class, 'stream'])->name('logs.stream');
-
-    // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Error codes
     Route::get('/error-codes', [ErrorCodeController::class, 'index'])->name('error-codes.index');
@@ -47,7 +44,7 @@ Route::middleware(['auth'])->group(function () {
         $request->session()->regenerateToken();
 
         return redirect()->away(
-            rtrim((string) config('services.auth_gateway.external_url', 'http://auth.example.com'), '/') . '/login'
+            rtrim((string) config('services.auth_gateway.external_url', 'http://auth.example.com'), '/').'/login'
         );
     })->name('logout');
 
