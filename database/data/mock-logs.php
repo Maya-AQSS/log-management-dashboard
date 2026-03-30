@@ -94,4 +94,30 @@ for ($i = 1; $i <= 6; $i++) {
     ];
 }
 
+// --- BLOQUES ADICIONALES PARA BALANCEAR LOGS ENTRE TODAS LAS APPS ---
+$extraSeverities = ['critical', 'high', 'medium', 'low', 'other'];
+$extraCount = 10;
+$extraBaseDate = $baseDate->modify('+3 days');
+$validAppIds = [1, 2, 3, 4];
+$validErrorCodeIds = range(1, 22);
+foreach ($validAppIds as $appIdx => $appId) {
+    for ($i = 0; $i < $extraCount; $i++) {
+        $rows[] = [
+            'application_id' => $appId,
+            'error_code_id' => $validErrorCodeIds[($i + $appIdx) % count($validErrorCodeIds)],
+            'severity' => $extraSeverities[($i + $appIdx) % count($extraSeverities)],
+            'message' => sprintf('Extra log for app %d [%s] #%d', $appId, $extraSeverities[($i + $appIdx) % count($extraSeverities)], $i + 1),
+            'file' => sprintf('seed/extra-app%d.log', $appId),
+            'line' => 3000 + $i,
+            'metadata' => [
+                'seed' => true,
+                'source' => 'mock-logs.php',
+                'batch' => 'extra-balanced',
+            ],
+            'resolved' => $i % 2 === 0,
+            'created_at' => $extraBaseDate->modify("+{$i} minutes")->format('Y-m-d H:i:s'),
+        ];
+    }
+}
+
 return $rows;
