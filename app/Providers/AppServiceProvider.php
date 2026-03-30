@@ -10,7 +10,9 @@ use App\Repositories\Eloquent\ApplicationRepository;
 use App\Repositories\Eloquent\ArchivedLogRepository;
 use App\Repositories\Eloquent\ErrorCodeRepository;
 use App\Repositories\Eloquent\LogRepository;
+use App\Services\ApplicationService;
 use App\Services\ArchivedLogService;
+use App\Services\Contracts\ApplicationServiceInterface;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use App\Services\Contracts\ErrorCodeServiceInterface;
 use App\Services\Contracts\LogServiceInterface;
@@ -24,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(ApplicationRepositoryInterface::class, ApplicationRepository::class);
+        $this->app->singleton(ApplicationServiceInterface::class, ApplicationService::class);
 
         $this->app->singleton(ArchivedLogRepositoryInterface::class, ArchivedLogRepository::class);
         $this->app->singleton(ArchivedLogServiceInterface::class, ArchivedLogService::class);
