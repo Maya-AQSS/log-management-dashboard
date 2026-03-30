@@ -136,6 +136,14 @@ class LogService implements LogServiceInterface
     }
 
     /**
+     * Marca el log como resuelto.
+     */
+    public function markResolved(int $logId): void
+    {
+        $this->logRepository->markResolved($logId);
+    }
+
+    /**
      * Construye una card del dashboard con estado resolved/unresolved.
      * 
      * @return array{key:string,totalCount:int,resolvedCount:int,unresolvedCount:int}

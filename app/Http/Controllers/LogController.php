@@ -8,7 +8,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
@@ -60,7 +59,7 @@ class LogController extends Controller
 
     public function resolve(int $id): RedirectResponse
     {
-        DB::table('logs')->where('id', $id)->update(['resolved' => true]);
+        $this->logService->markResolved($id);
 
         return redirect()->route('logs.show', $id);
     }

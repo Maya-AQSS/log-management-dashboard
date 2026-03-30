@@ -50,4 +50,9 @@ interface LogServiceInterface
      * Devuelve el id de ArchivedLog equivalente al log o null si no está archivado.
      */
     public function archivedLogIdFor(int $logId): ?int;
+
+    /**
+     * Marca el log como resuelto.
+     */
+    public function markResolved(int $logId): void;
 }
