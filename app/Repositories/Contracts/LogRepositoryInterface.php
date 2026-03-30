@@ -53,5 +53,5 @@ interface LogRepositoryInterface
     /**
      * Marca el log como resuelto (resolved = true).
      */
-    public function markResolved(int $logId): void;
+    public function resolved(int $logId): void;
 }

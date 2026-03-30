@@ -54,5 +54,5 @@ interface LogServiceInterface
     /**
      * Marca el log como resuelto.
      */
-    public function markResolved(int $logId): void;
+    public function resolved(int $logId): void;
 }

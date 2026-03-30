@@ -222,7 +222,7 @@ class LogRepository implements LogRepositoryInterface
      *
      * Se usa el query builder: el modelo {@see Log} cancela actualizaciones vía Eloquent en {@see Log::booted()}.
      */
-    public function markResolved(int $logId): void
+    public function resolved(int $logId): void
     {
         DB::table('logs')->where('id', $logId)->update(['resolved' => true]);
     }
