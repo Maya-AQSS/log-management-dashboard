@@ -1,5 +1,5 @@
 <x-layout>
-    <div class="flex items-start justify-between gap-3">
+    <div class="flex items-start justify-between gap-3" x-data="{ confirmDeleteArchivedOpen: false }">
         <a
             href="{{ route('archived-logs.index') }}"
             class="inline-flex items-center px-4 py-2 rounded-full bg-[#f7a736] hover:bg-[#e28f1f] text-[#1e1a24] text-sm font-semibold shadow-sm"
@@ -22,20 +22,19 @@
                 {{ __('archived_logs.buttons.edit') }}
             </a>
             @can('delete', $archivedLog)
-                <form
-                    method="POST"
-                    action="{{ route('archived-logs.destroy', $archivedLog->id) }}"
-                    onsubmit="return confirm('{{ addslashes(__('archived_logs.confirm_delete')) }}')"
+                <button
+                    type="button"
+                    x-on:click="confirmDeleteArchivedOpen = true"
+                    class="px-3 py-1.5 rounded-full bg-red-600 hover:bg-red-500 text-base font-semibold text-white shadow-sm"
                 >
-                    @csrf
-                    @method('DELETE')
-                    <button
-                        type="submit"
-                        class="px-3 py-1.5 rounded-full bg-red-600 hover:bg-red-500 text-base font-semibold text-white shadow-sm"
-                    >
-                        {{ __('archived_logs.buttons.delete') }}
-                    </button>
-                </form>
+                    {{ __('archived_logs.buttons.delete') }}
+                </button>
+
+                <x-confirm-action-modal
+                    intent="delete_archived"
+                    :action="route('archived-logs.destroy', $archivedLog->id)"
+                    openVar="confirmDeleteArchivedOpen"
+                />
             @endcan
         </div>
     </div>
