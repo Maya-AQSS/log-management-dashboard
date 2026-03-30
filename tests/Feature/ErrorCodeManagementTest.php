@@ -122,7 +122,6 @@ class ErrorCodeManagementTest extends TestCase
             'code' => 'E-400',
             'name' => 'Original name',
             'description' => 'Original description',
-            'severity' => 'high',
             'file' => 'app/File.php',
             'line' => 10,
         ]);
@@ -134,7 +133,6 @@ class ErrorCodeManagementTest extends TestCase
                 'code' => 'E-400',
                 'name' => 'Updated name',
                 'description' => 'Updated description',
-                'severity' => 'critical',
                 'file' => 'app/UpdatedFile.php',
                 'line' => 20,
             ])
@@ -147,7 +145,6 @@ class ErrorCodeManagementTest extends TestCase
             'code' => 'E-400',
             'name' => 'Updated name',
             'description' => 'Updated description',
-            'severity' => 'critical',
             'file' => 'app/UpdatedFile.php',
             'line' => 20,
         ]);
@@ -167,7 +164,6 @@ class ErrorCodeManagementTest extends TestCase
             'application_id' => $application->id,
             'code' => 'E-500',
             'name' => 'Delete me',
-            'severity' => 'medium',
         ]);
 
         $comment = Comment::query()->create([
