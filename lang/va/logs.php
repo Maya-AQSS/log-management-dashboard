@@ -39,6 +39,7 @@ return [
         'archived' => 'Arxivat',
         'resolved' => 'Resolt',
         'unresolved' => 'No resolt',
+        'resolved_success' => 'Marcat com a resolt correctament',
     ],
 
     'filters' => [

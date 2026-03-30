@@ -39,6 +39,7 @@ return [
         'archived' => 'Archived',
         'resolved' => 'Resolved',
         'unresolved' => 'Unresolved',
+        'resolved_success' => 'Marked as resolved successfully',
     ],
 
     'filters' => [
