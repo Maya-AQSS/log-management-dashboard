@@ -8,12 +8,13 @@ use App\Repositories\Contracts\LogRepositoryInterface;
 use App\Repositories\Eloquent\ArchivedLogRepository;
 use App\Repositories\Eloquent\ErrorCodeRepository;
 use App\Repositories\Eloquent\LogRepository;
+use App\Services\ArchivedLogService;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use App\Services\Contracts\ErrorCodeServiceInterface;
 use App\Services\Contracts\LogServiceInterface;
-use App\Services\ArchivedLogService;
 use App\Services\ErrorCodeService;
 use App\Services\LogService;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -32,6 +33,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        //
+        if ($this->app->environment(['production', 'staging'])) {
+            URL::forceScheme('https');
+        }
     }
 }
