@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ErrorCodeRequest;
 use App\Models\ErrorCode;
 use App\Services\Contracts\ErrorCodeServiceInterface;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class ErrorCodeController extends Controller
 {
@@ -17,7 +17,7 @@ class ErrorCodeController extends Controller
         return view('error-codes.index');
     }
 
-    public function create(): RedirectResponse|View 
+    public function create(): View
     {
         $this->authorize('create', ErrorCode::class);
 
