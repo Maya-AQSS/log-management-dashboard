@@ -2,13 +2,21 @@
 
 namespace App\Livewire;
 
-use App\Models\Application;
+use App\Enums\ApplicationPluckScope;
+use App\Services\Contracts\ApplicationServiceInterface;
 use App\Services\Contracts\ErrorCodeServiceInterface;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class ErrorCodeForm extends Component
 {
+    private ApplicationServiceInterface $applicationService;
+
+    public function boot(ApplicationServiceInterface $applicationService): void
+    {
+        $this->applicationService = $applicationService;
+    }
+
     public string $mode = 'create';
 
     public ?int $errorCodeId = null;
@@ -17,7 +25,7 @@ class ErrorCodeForm extends Component
 
     public function mount(string $mode = 'create', ?int $errorCodeId = null): void
     {
-        if (!in_array($mode, ['create', 'edit'], true)) {
+        if (! in_array($mode, ['create', 'edit'], true)) {
             abort(404);
         }
 
@@ -49,9 +57,7 @@ class ErrorCodeForm extends Component
 
     public function render(): View
     {
-        $applications = Application::query()
-            ->orderBy('name')
-            ->pluck('name', 'id');
+        $applications = $this->applicationService->pluckForFilter(ApplicationPluckScope::All);
 
         $errorCode = null;
 

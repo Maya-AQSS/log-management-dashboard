@@ -2,11 +2,11 @@
 
 namespace App\Livewire;
 
+use App\Enums\ApplicationPluckScope;
 use App\Filters\DateRangeFilter;
-use App\Enums\Severity;
 use App\Filters\SeverityFilter;
 use App\Http\Requests\DateRangeFilterRequest;
-use App\Models\Application;
+use App\Services\Contracts\ApplicationServiceInterface;
 use App\Services\Contracts\LogServiceInterface;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Url;
@@ -17,15 +17,25 @@ class LogsTable extends Component
 {
     use WithPagination;
 
+    private ApplicationServiceInterface $applicationService;
+
+    public function boot(ApplicationServiceInterface $applicationService): void
+    {
+        $this->applicationService = $applicationService;
+    }
+
     private const SORTABLE_COLUMNS = ['created_at', 'severity', 'application'];
+
     private const SORT_DIRECTIONS = ['asc', 'desc'];
 
     public string $searchInput = '';
 
     public array $severityInput = [];
+
     public ?string $resolvedInput = null;
 
     public ?string $dateFromInput = null;
+
     public ?string $dateToInput = null;
 
     public ?string $selectedApplicationIdInput = null;
@@ -34,7 +44,6 @@ class LogsTable extends Component
     #[Url(as: 'search', except: '')]
     public string $search = '';
 
-   
     #[Url(as: 'severity', except: [])]
     public $severity = [];
 
@@ -61,7 +70,7 @@ class LogsTable extends Component
         $this->severity = SeverityFilter::normalize($this->severity);
         [$this->dateFrom, $this->dateTo] = DateRangeFilter::normalize($this->dateFrom, $this->dateTo, 'date_from', 'date_to');
 
-        if ($this->resolved !== null && !in_array($this->resolved, ['resolved', 'unresolved'], true)) {
+        if ($this->resolved !== null && ! in_array($this->resolved, ['resolved', 'unresolved'], true)) {
             $this->resolved = null;
         }
 
@@ -132,7 +141,7 @@ class LogsTable extends Component
             'dateFromInput',
             'dateToInput'
         );
-        
+
         $this->selectedApplicationId = $validated['selectedApplicationIdInput'] !== null
             ? (int) $validated['selectedApplicationIdInput']
             : null;
@@ -144,7 +153,7 @@ class LogsTable extends Component
 
     public function sortByColumn(string $column): void
     {
-        if (!in_array($column, self::SORTABLE_COLUMNS, true)) {
+        if (! in_array($column, self::SORTABLE_COLUMNS, true)) {
             return;
         }
 
@@ -168,10 +177,7 @@ class LogsTable extends Component
     {
         $this->normalizeSortState();
 
-        $applications = Application::query()
-            ->whereHas('logs')
-            ->orderBy('name')
-            ->pluck('name', 'id');
+        $applications = $this->applicationService->pluckForFilter(ApplicationPluckScope::WithLogs);
 
         $logs = app(LogServiceInterface::class)->searchAndFilter(
             $this->search !== '' ? $this->search : null,
@@ -193,11 +199,11 @@ class LogsTable extends Component
 
     private function normalizeSortState(): void
     {
-        if (!in_array($this->sortBy, self::SORTABLE_COLUMNS, true)) {
+        if (! in_array($this->sortBy, self::SORTABLE_COLUMNS, true)) {
             $this->sortBy = null;
         }
 
-        if (!in_array($this->sortDir, self::SORT_DIRECTIONS, true)) {
+        if (! in_array($this->sortDir, self::SORT_DIRECTIONS, true)) {
             $this->sortDir = 'asc';
         }
     }

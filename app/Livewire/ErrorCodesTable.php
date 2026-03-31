@@ -2,7 +2,8 @@
 
 namespace App\Livewire;
 
-use App\Models\Application;
+use App\Enums\ApplicationPluckScope;
+use App\Services\Contracts\ApplicationServiceInterface;
 use App\Services\Contracts\ErrorCodeServiceInterface;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Url;
@@ -13,7 +14,15 @@ class ErrorCodesTable extends Component
 {
     use WithPagination;
 
+    private ApplicationServiceInterface $applicationService;
+
+    public function boot(ApplicationServiceInterface $applicationService): void
+    {
+        $this->applicationService = $applicationService;
+    }
+
     public string $searchInput = '';
+
     public ?string $filterAppInput = null;
 
     #[Url(as: 'search', except: '')]
@@ -75,9 +84,7 @@ class ErrorCodesTable extends Component
 
     public function render(): View
     {
-        $applications = Application::query()
-            ->orderBy('name')
-            ->pluck('name', 'id');
+        $applications = $this->applicationService->pluckForFilter(ApplicationPluckScope::All);
 
         $errorCodes = app(ErrorCodeServiceInterface::class)->searchAndFilter(
             $this->search !== '' ? $this->search : null,

@@ -2,10 +2,11 @@
 
 namespace App\Livewire;
 
+use App\Enums\ApplicationPluckScope;
 use App\Filters\DateRangeFilter;
 use App\Filters\SeverityFilter;
 use App\Http\Requests\DateRangeFilterRequest;
-use App\Models\Application;
+use App\Services\Contracts\ApplicationServiceInterface;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Url;
@@ -16,13 +17,23 @@ class ArchivedLogsTable extends Component
 {
     use WithPagination;
 
+    private ApplicationServiceInterface $applicationService;
+
+    public function boot(ApplicationServiceInterface $applicationService): void
+    {
+        $this->applicationService = $applicationService;
+    }
+
     private const SORTABLE_COLUMNS = ['archived_at', 'severity'];
 
     private const SORT_DIRECTIONS = ['asc', 'desc'];
 
     public array $severityInput = [];
+
     public ?string $dateFromInput = null;
+
     public ?string $dateToInput = null;
+
     public ?string $selectedApplicationIdInput = null;
 
     #[Url(as: 'severity', except: [])]
@@ -88,7 +99,7 @@ class ArchivedLogsTable extends Component
 
     public function sortByColumn(string $column): void
     {
-        if (!in_array($column, self::SORTABLE_COLUMNS, true)) {
+        if (! in_array($column, self::SORTABLE_COLUMNS, true)) {
             return;
         }
 
@@ -122,10 +133,7 @@ class ArchivedLogsTable extends Component
     {
         $this->normalizeSortState();
 
-        $applications = Application::query()
-            ->whereHas('archivedLogs')
-            ->orderBy('name')
-            ->pluck('name', 'id');
+        $applications = $this->applicationService->pluckForFilter(ApplicationPluckScope::WithArchivedLogs);
 
         $archivedLogs = app(ArchivedLogServiceInterface::class)->searchAndFilter(
             $this->severity !== [] ? $this->severity : null,
@@ -145,11 +153,11 @@ class ArchivedLogsTable extends Component
 
     private function normalizeSortState(): void
     {
-        if (!in_array($this->sortBy, self::SORTABLE_COLUMNS, true)) {
+        if (! in_array($this->sortBy, self::SORTABLE_COLUMNS, true)) {
             $this->sortBy = null;
         }
 
-        if (!in_array($this->sortDir, self::SORT_DIRECTIONS, true)) {
+        if (! in_array($this->sortDir, self::SORT_DIRECTIONS, true)) {
             $this->sortDir = 'asc';
         }
     }
