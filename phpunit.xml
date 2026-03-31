@@ -4,6 +4,7 @@
          bootstrap="vendor/autoload.php"
          colors="true"
 >
+
     <testsuites>
         <testsuite name="Unit">
             <directory>tests/Unit</directory>
@@ -23,6 +24,7 @@
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
+        <!-- BD: SQLite en memoria para desarrollo local. Ver phpunit-pgsql.xml para PostgreSQL. -->
         <env name="DB_CONNECTION" value="sqlite"/>
         <env name="DB_DATABASE" value=":memory:"/>
         <env name="AUTH_EXTERNAL_URL" value="http://auth.example.com"/>
@@ -33,4 +35,14 @@
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
     </php>
+
+    <!--
+
+        Motor de BD para desarrollo local: SQLite :memory: (rápido, sin servidor).
+        Motor de BD para CI y tests de Feature completos: PostgreSQL 18.
+        Para ejecutar contra PostgreSQL usa: phpunit-pgsql.xml
+        Comando CI: php artisan test --configuration=phpunit-pgsql.xml
+
+    -->
+
 </phpunit>
