@@ -12,9 +12,19 @@ class ErrorCodeForm extends Component
 {
     private ApplicationServiceInterface $applicationService;
 
-    public function boot(ApplicationServiceInterface $applicationService): void
-    {
+    private ErrorCodeServiceInterface $errorCodeService;
+
+    /**
+     * Livewire 4: el contenedor inyecta dependencias en hooks como boot(); no usar el constructor.
+     *
+     * @see https://livewire.laravel.com/docs/4.x/lifecycle-hooks
+     */
+    public function boot(
+        ApplicationServiceInterface $applicationService,
+        ErrorCodeServiceInterface $errorCodeService,
+    ): void {
         $this->applicationService = $applicationService;
+        $this->errorCodeService = $errorCodeService;
     }
 
     public string $mode = 'create';
@@ -62,7 +72,7 @@ class ErrorCodeForm extends Component
         $errorCode = null;
 
         if ($this->mode === 'edit' && $this->errorCodeId !== null) {
-            $errorCode = app(ErrorCodeServiceInterface::class)->findOrFail($this->errorCodeId);
+            $errorCode = $this->errorCodeService->findOrFail($this->errorCodeId);
         }
 
         return view('livewire.error-code-form', [
