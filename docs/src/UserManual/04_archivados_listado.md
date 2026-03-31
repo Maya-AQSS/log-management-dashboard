@@ -35,7 +35,7 @@ Concentrar el historico de incidencias tratadas y facilitar su consulta posterio
 
 ---
 
-![Pantalla de inicio de sesión](img/archived-logs-movil.png)
+![Pantalla de inicio de sesión](img/archived-log-movil.png)
  
 *Figura 2. Pantalla histórico de logs para móvil*
 

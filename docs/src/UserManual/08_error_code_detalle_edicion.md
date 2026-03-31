@@ -31,12 +31,12 @@ Revisar un error code existente, actualizar sus datos y dejar trazabilidad media
 
 ## CAPTURA
 
-![Pantalla de inicio de sesión](img/errores-detalles.jpeg)
+![Pantalla de inicio de sesión](img/error-codes-detalle.png)
  
 *Figura 1. Pantalla de detalles de Errores*
 
 ---
 
-![Pantalla de inicio de sesión](img/error-codes-detalles-movil.png)
+![Pantalla de inicio de sesión](img/error-code-detalle-movil.png)
  
 *Figura 2. Pantalla de detalles Errores*

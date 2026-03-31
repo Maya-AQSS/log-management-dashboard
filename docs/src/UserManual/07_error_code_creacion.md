@@ -34,6 +34,6 @@ Dar de alta nuevos codigos estandarizados y mantener el catalogo actualizado.
 
 ---
 
-![Pantalla de inicio de sesión](img/crear-error-code-movil.png)
+![Pantalla de inicio de sesión](img/error-code-crear-movil.png)
  
 *Figura 2. Pantalla de crear Errores para móvil*

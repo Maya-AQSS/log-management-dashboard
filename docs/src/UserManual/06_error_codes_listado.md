@@ -31,12 +31,12 @@ Mantener un catalogo centralizado de codigos de error reutilizable en el analisi
 
 ## CAPTURA
 
-![Pantalla de inicio de sesión](img/errores.jpeg)
+![Pantalla de inicio de sesión](img/error-codes.png)
  
 *Figura 1. Pantalla de Errores*
 
 ---
 
-![Pantalla de inicio de sesión](img/error-codes-movil.png)
+![Pantalla de inicio de sesión](img/error-code-movil.png)
  
 *Figura 2. Pantalla de Errores para móvil*
