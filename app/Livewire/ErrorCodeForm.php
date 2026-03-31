@@ -47,7 +47,7 @@ class ErrorCodeForm extends Component
         }
 
         if ($this->mode === 'edit') {
-            app(ErrorCodeServiceInterface::class)->findOrFail($this->errorCodeId);
+            $this->errorCodeService->findOrFail($this->errorCodeId);
         }
     }
 
