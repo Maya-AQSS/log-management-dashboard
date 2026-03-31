@@ -12,10 +12,9 @@ class ErrorCode extends Model
 {
     use HasFactory;
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
+        // booted() es el hook recomendado desde Laravel 8+.
         // Cascade delete comments when error code is deleted
         static::deleting(function (self $errorCode) {
             $errorCode->comments()->delete();
