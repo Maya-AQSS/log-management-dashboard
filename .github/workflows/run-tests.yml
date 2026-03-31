@@ -62,8 +62,10 @@ jobs:
       # incluyendo enable_pg_trgm_for_logs_message_search que instala
       # la extensión pg_trgm y crea el índice GIN.
       # No hace falta un paso explícito de migrate aquí.
+      # Usamos el binario de Pest directamente para evitar que artisan test
+      # pase --configuration implícitamente y colisione con el nuestro.
       - name: Run tests against PostgreSQL 18
-        run: php artisan test --configuration=phpunit-pgsql.xml
+        run: ./vendor/bin/pest --configuration=phpunit-pgsql.xml
         env:
           # Estas variables de entorno son redundantes con phpunit-pgsql.xml
           # pero las exponemos explícitamente para que sean visibles en los logs de CI.
