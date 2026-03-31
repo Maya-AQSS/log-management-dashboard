@@ -42,7 +42,6 @@
         Motor de BD para desarrollo local: SQLite :memory: (rápido, sin servidor).
         Motor de BD para CI y tests de Feature completos: PostgreSQL 18.
         Para ejecutar contra PostgreSQL usa: phpunit-pgsql.xml
-        Comando CI: php artisan test --configuration=phpunit-pgsql.xml
+        Comando CI: php artisan test -c phpunit-pgsql.xml
 
     -->
-    

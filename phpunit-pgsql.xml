@@ -41,11 +41,13 @@
 
 </phpunit>
     <!--
+
     Configuración de PHPUnit para CI contra PostgreSQL 18.
-    Uso local:  php artisan test --configuration=phpunit-pgsql.xml
+    Uso local:  php artisan test -c phpunit-pgsql.xml
     Uso en CI:  ver .github/workflows/run-tests.yml
 
     Requiere un servidor PostgreSQL accesible con:
-      host=127.0.0.1  port=5432  db=testing  user=postgres  password=password
+    host=127.0.0.1  port=5432  db=testing  user=postgres  password=password
+    
     -->
 
