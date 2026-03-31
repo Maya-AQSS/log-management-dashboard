@@ -12,10 +12,11 @@
         <div class="flex flex-1 flex-col items-center gap-1 text-center md:gap-2">
             @if ($mode === 'create')
                 <h1 class="text-xl font-semibold leading-tight text-slate-900 md:text-2xl dark:text-slate-100">{{ __('error_codes.create_title') }}</h1>
-                <p class="text-sm leading-snug text-slate-600 dark:text-slate-400">{{ __('error_codes.create_subtitle') }}</p>
+                <p class="hidden md:block text-sm leading-snug text-slate-600 dark:text-slate-400">{{ __('error_codes.create_subtitle') }}</p>
+
             @else
-                <h1 class="text-xl font-semibold leading-tight text-slate-900 md:text-2xl dark:text-slate-100">{{ __('error_codes.title') }}</h1>
-                <p class="text-sm leading-snug text-slate-600 dark:text-slate-400">
+                <h1 class="text-xl font-semibold leading-tight text-slate-900 md:text-2xl dark:text-slate-100">{{ __('error_codes.detail_title') }}</h1>
+                <p class="hidden md:block text-sm leading-snug text-slate-600 dark:text-slate-400">
                     {{ $isEditable ? __('error_codes.edit_subtitle') : __('error_codes.detail_subtitle') }}
                 </p>
             @endif

@@ -3,6 +3,7 @@
 return [
     'menu' => 'Error Codes',
     'title' => 'Error Codes',
+    'detail_title' => 'Error Code Details',
     'welcome' => 'Welcome to the error codes',
     'create_title' => 'Create Error Code',
     'create_subtitle' => 'Complete the fields to register a new error code',
