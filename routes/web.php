@@ -5,8 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ErrorCodeController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\LogController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\LogoutController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {
@@ -38,15 +37,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/error-codes/{id}', [ErrorCodeController::class, 'destroy'])->whereNumber('id')->name('error-codes.destroy');
 
     // Logout
-    Route::post('/logout', function (Request $request) {
-        Auth::guard('web')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect()->away(
-            rtrim((string) config('services.auth_gateway.external_url', 'http://auth.example.com'), '/').'/login'
-        );
-    })->name('logout');
+    Route::post('/logout', LogoutController::class)->name('logout');
 
     // Idiomas
     Route::post('/lang/{locale}', [LanguageController::class, 'switch'])
