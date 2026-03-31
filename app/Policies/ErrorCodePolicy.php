@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Policies;
+
 use App\Models\ErrorCode;
 use App\Models\User;
 
@@ -10,13 +12,13 @@ use App\Models\User;
  * The 'auth' route middleware already ensures the user is authenticated before
  * these policy methods are called.
  */
-
 class ErrorCodePolicy
 {
     public function create(User $user): bool
     {
         return true;
     }
+
     public function update(User $user, ErrorCode $errorCode): bool
     {
         return true;

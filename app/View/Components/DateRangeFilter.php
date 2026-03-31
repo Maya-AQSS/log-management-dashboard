@@ -20,4 +20,3 @@ class DateRangeFilter extends Component
         return view('components.date-range-filter');
     }
 }
-

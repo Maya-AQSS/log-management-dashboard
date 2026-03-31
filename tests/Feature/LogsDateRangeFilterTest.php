@@ -134,4 +134,3 @@ class LogsDateRangeFilterTest extends TestCase
         ]);
     }
 }
-

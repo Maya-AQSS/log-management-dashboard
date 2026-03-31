@@ -51,7 +51,7 @@ class LogService implements LogServiceInterface
     }
 
     /**
-     * Busca y filtra logs por diferentes criterios: 
+     * Busca y filtra logs por diferentes criterios:
      * - texto libre en el mensaje
      * - tipo de severidad de error
      * - si está archivado o no
@@ -69,8 +69,7 @@ class LogService implements LogServiceInterface
         ?string $sortBy,
         ?string $sortDir,
         int $perPage = 25
-    ): LengthAwarePaginator
-    {
+    ): LengthAwarePaginator {
         return $this->logRepository->searchAndFilter(
             $search,
             $severity,
@@ -147,7 +146,7 @@ class LogService implements LogServiceInterface
 
     /**
      * Construye una card del dashboard con estado resolved/unresolved.
-     * 
+     *
      * @return array{key:string,totalCount:int,resolvedCount:int,unresolvedCount:int}
      */
     private function buildDashboardCard(

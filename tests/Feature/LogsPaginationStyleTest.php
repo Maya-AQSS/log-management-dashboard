@@ -115,4 +115,3 @@ class LogsPaginationStyleTest extends TestCase
         }
     }
 }
-

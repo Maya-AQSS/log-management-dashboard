@@ -38,4 +38,3 @@ return [
         'invalid_link' => "L'enllaç ha de començar per http:// o https://",
     ],
 ];
-

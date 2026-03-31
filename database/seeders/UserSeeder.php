@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
 {
@@ -15,8 +15,8 @@ class UserSeeder extends Seeder
         User::updateOrCreate(
             ['id' => 1],
             [
-                'name'        => 'Admin',
-                'email'       => 'admin@example.com',
+                'name' => 'Admin',
+                'email' => 'admin@example.com',
                 'external_id' => 'admin-mock',
             ]
         );
@@ -24,8 +24,8 @@ class UserSeeder extends Seeder
         User::updateOrCreate(
             ['id' => 2],
             [
-                'name'        => 'User 2',
-                'email'       => 'user2@example.com',
+                'name' => 'User 2',
+                'email' => 'user2@example.com',
                 'external_id' => 'user-mock',
             ]
         );
