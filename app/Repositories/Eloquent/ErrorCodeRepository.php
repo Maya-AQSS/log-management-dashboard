@@ -4,8 +4,8 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\ErrorCode;
 use App\Repositories\Contracts\ErrorCodeRepositoryInterface;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use App\Support\LikeEscaper;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class ErrorCodeRepository implements ErrorCodeRepositoryInterface

@@ -48,10 +48,10 @@ return [
     ],
 
     'description' => [
-        'section_title' => 'Descripció de l’històric',
+        'section_title' => "Descripció de l'històric",
         'field_label' => 'descripció',
         'empty' => 'Sense descripció.',
-        'placeholder' => 'Context de l’error, causa arrel o passos de resolució…',
+        'placeholder' => "Context de l'error, causa arrel o passos de resolució…",
         'save' => 'Guardar',
         'cancel' => 'Cancel·lar',
         'edit_aria' => 'Editar descripció',

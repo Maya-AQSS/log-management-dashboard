@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
 class DatabaseConnectionTest extends TestCase
@@ -21,10 +23,10 @@ class DatabaseConnectionTest extends TestCase
      * Escenario 2: El usuario del panel no puede hacer DELETE en archived_logs.
      * Requiere que el usuario 'panel_user' esté creado en la BD.
      */
-    #[\PHPUnit\Framework\Attributes\Group('integration')]
+    #[Group('integration')]
     public function test_panel_user_cannot_delete_archived_logs(): void
     {
-        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->expectException(QueryException::class);
 
         DB::connection('panel')->statement('DELETE FROM archived_logs WHERE id = 0');
     }

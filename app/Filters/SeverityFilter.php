@@ -15,7 +15,7 @@ class SeverityFilter
      *
      * Si hay valores fuera del enum, responde con 422.
      *
-     * @param array<int,string>|string|null $value
+     * @param  array<int,string>|string|null  $value
      * @return array<int,string>
      */
     public static function normalize(array|string|null $value): array
@@ -41,4 +41,3 @@ class SeverityFilter
         return array_values(array_unique($values));
     }
 }
-

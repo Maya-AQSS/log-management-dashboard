@@ -99,7 +99,7 @@ class LogsMessageSearchTest extends TestCase
     }
 
     /**
-     * @param array<int,string> $messages
+     * @param  array<int,string>  $messages
      */
     private function seedLogs(int $applicationId, int $errorCodeId, array $messages): void
     {

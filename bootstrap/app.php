@@ -1,12 +1,11 @@
 <?php
 
 use App\Http\Middleware\AuthGateway;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use App\Http\Middleware\SetLocale;
 use Illuminate\Http\Request;
-
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -30,7 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 abort(401, 'Unauthenticated.');
             }
 
-            return rtrim((string) config('services.auth_gateway.external_url', 'http://auth.example.com'), '/') . '/login';
+            return rtrim((string) config('services.auth_gateway.external_url', 'http://auth.example.com'), '/').'/login';
         });
 
     })

@@ -26,7 +26,6 @@ class Log extends Model
 
     /**
      * Disable all CRUD operations on the model
-     * @return void
      */
     protected static function booted(): void
     {
@@ -45,5 +44,4 @@ class Log extends Model
     {
         return $this->belongsTo(ErrorCode::class);
     }
-
 }

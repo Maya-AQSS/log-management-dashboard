@@ -63,18 +63,18 @@ class PanelRoutingAndSecurityTest extends TestCase
             '/',
             '/dashboard',
             '/logs',
-            '/logs/' . $logId,
+            '/logs/'.$logId,
             '/archived-logs',
-            '/archived-logs/' . $archivedLog->id,
+            '/archived-logs/'.$archivedLog->id,
             '/error-codes',
-            '/error-codes/' . $errorCode->id,
+            '/error-codes/'.$errorCode->id,
         ] as $uri) {
             $this->get($uri)->assertRedirect('http://auth.example.com/login');
         }
 
         $this->get('/sse/logs')->assertUnauthorized();
 
-        $this->delete('/archived-logs/' . $archivedLog->id)
+        $this->delete('/archived-logs/'.$archivedLog->id)
             ->assertRedirect('http://auth.example.com/login');
     }
 
@@ -87,11 +87,11 @@ class PanelRoutingAndSecurityTest extends TestCase
         $this->get('/')->assertRedirect(route('dashboard'));
         $this->get('/dashboard')->assertOk()->assertViewIs('dashboard');
         $this->get('/logs')->assertOk()->assertViewIs('logs.index');
-        $this->get('/logs/' . $logId)->assertOk()->assertViewIs('logs.show');
+        $this->get('/logs/'.$logId)->assertOk()->assertViewIs('logs.show');
         $this->get('/archived-logs')->assertOk()->assertViewIs('archived-logs.index');
-        $this->get('/archived-logs/' . $archivedLog->id)->assertOk()->assertViewIs('logs.show');
+        $this->get('/archived-logs/'.$archivedLog->id)->assertOk()->assertViewIs('logs.show');
         $this->get('/error-codes')->assertOk()->assertViewIs('error-codes.index');
-        $this->get('/error-codes/' . $errorCode->id)->assertOk()->assertViewIs('error-codes.show');
+        $this->get('/error-codes/'.$errorCode->id)->assertOk()->assertViewIs('error-codes.show');
 
         $this->get('/sse/logs')
             ->assertOk()
@@ -104,23 +104,23 @@ class PanelRoutingAndSecurityTest extends TestCase
         $this->actingAs($user);
 
         $logsListUrl = url('/logs?search=seed&resolved=unresolved');
-        $logDetailUrl = url('/logs/' . $logId);
-        $archivedDetailUrl = url('/archived-logs/' . $archivedLog->id);
+        $logDetailUrl = url('/logs/'.$logId);
+        $archivedDetailUrl = url('/archived-logs/'.$archivedLog->id);
 
         $this->withHeader('referer', $logsListUrl)
-            ->get('/logs/' . $logId)
+            ->get('/logs/'.$logId)
             ->assertOk()
             ->assertViewHas('backHref', $logsListUrl)
             ->assertDontSee('back=');
 
         $this->withHeader('referer', $logDetailUrl)
-            ->get('/archived-logs/' . $archivedLog->id)
+            ->get('/archived-logs/'.$archivedLog->id)
             ->assertOk()
             ->assertViewHas('backHref', $logDetailUrl)
             ->assertDontSee('back=');
 
         $this->withHeader('referer', $archivedDetailUrl)
-            ->get('/logs/' . $logId)
+            ->get('/logs/'.$logId)
             ->assertOk()
             ->assertViewHas('backHref', $logsListUrl)
             ->assertDontSee('back=');
@@ -131,14 +131,14 @@ class PanelRoutingAndSecurityTest extends TestCase
         [$user, $errorCode, $archivedLog, $logId] = $this->seedPanelRecords();
         $this->actingAs($user);
 
-        $this->get('/logs/' . $logId)
+        $this->get('/logs/'.$logId)
             ->assertOk()
             ->assertSee(__('logs.buttons.archive'))
             ->assertSee(__('logs.buttons.solved'));
 
         DB::table('logs')->where('id', $logId)->update(['resolved' => true]);
 
-        $this->get('/logs/' . $logId)
+        $this->get('/logs/'.$logId)
             ->assertOk()
             ->assertSee(__('logs.buttons.archive'))
             ->assertDontSee(__('logs.buttons.solved'));
@@ -160,7 +160,7 @@ class PanelRoutingAndSecurityTest extends TestCase
             'archived_at' => now(),
         ]);
 
-        $this->get('/logs/' . $logId)
+        $this->get('/logs/'.$logId)
             ->assertOk()
             ->assertDontSee(__('logs.buttons.archive'))
             ->assertSee(__('logs.buttons.view_archived'))
@@ -174,18 +174,18 @@ class PanelRoutingAndSecurityTest extends TestCase
         $intruder = User::factory()->create();
 
         $this->actingAs($intruder)
-            ->delete('/archived-logs/' . $archivedLog->id)
+            ->delete('/archived-logs/'.$archivedLog->id)
             ->assertForbidden();
 
         $this->actingAs($owner)
-            ->delete('/archived-logs/' . $archivedLog->id)
+            ->delete('/archived-logs/'.$archivedLog->id)
             ->assertRedirect(route('archived-logs.index'));
 
         $this->assertSoftDeleted('archived_logs', [
             'id' => $archivedLog->id,
         ]);
 
-        $this->get('/archived-logs/' . $archivedLog->id)
+        $this->get('/archived-logs/'.$archivedLog->id)
             ->assertNotFound();
     }
 
@@ -213,7 +213,7 @@ class PanelRoutingAndSecurityTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->get('/archived-logs/' . $archivedLog->id)
+            ->get('/archived-logs/'.$archivedLog->id)
             ->assertOk()
             ->assertSee('Archived test log');
 
@@ -283,13 +283,13 @@ class PanelRoutingAndSecurityTest extends TestCase
         $user = User::factory()->create();
 
         $application = Application::query()->create([
-            'name' => 'Panel App ' . $user->id,
+            'name' => 'Panel App '.$user->id,
             'description' => 'Test app',
             'created_at' => now(),
         ]);
 
         $errorCode = ErrorCode::query()->create([
-            'code' => 'E-' . $user->id,
+            'code' => 'E-'.$user->id,
             'application_id' => $application->id,
             'name' => 'Primary error',
             'description' => 'Test description',

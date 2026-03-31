@@ -127,7 +127,7 @@ class ErrorCodeManagementTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->put('/error-codes/' . $errorCode->id, [
+            ->put('/error-codes/'.$errorCode->id, [
                 'errorCodeId' => $errorCode->id,
                 'application_id' => $application->id,
                 'code' => 'E-400',
@@ -174,7 +174,7 @@ class ErrorCodeManagementTest extends TestCase
         ]);
 
         $this->actingAs($owner)
-            ->delete('/error-codes/' . $errorCode->id)
+            ->delete('/error-codes/'.$errorCode->id)
             ->assertRedirect(route('error-codes.index'))
             ->assertSessionHas('status', __('error_codes.deleted'));
 
@@ -196,10 +196,10 @@ class ErrorCodeManagementTest extends TestCase
         ]);
 
         $this->post('/error-codes', [
-                'application_id' => $application->id,
-                'code' => 'E-999',
-                'name' => 'Unauthorized error',
-            ])
+            'application_id' => $application->id,
+            'code' => 'E-999',
+            'name' => 'Unauthorized error',
+        ])
             ->assertRedirect();
 
         $this->assertDatabaseCount('error_codes', 0);
@@ -219,11 +219,11 @@ class ErrorCodeManagementTest extends TestCase
             'name' => 'Error to update',
         ]);
 
-        $this->put('/error-codes/' . $errorCode->id, [
-                'application_id' => $application->id,
-                'code' => 'E-600',
-                'name' => 'Should not update',
-            ])
+        $this->put('/error-codes/'.$errorCode->id, [
+            'application_id' => $application->id,
+            'code' => 'E-600',
+            'name' => 'Should not update',
+        ])
             ->assertRedirect();
 
         $this->assertDatabaseHas('error_codes', [
@@ -246,7 +246,7 @@ class ErrorCodeManagementTest extends TestCase
             'name' => 'Error to delete',
         ]);
 
-        $this->delete('/error-codes/' . $errorCode->id)
+        $this->delete('/error-codes/'.$errorCode->id)
             ->assertRedirect();
 
         $this->assertDatabaseHas('error_codes', [
