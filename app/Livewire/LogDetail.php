@@ -14,6 +14,23 @@ class LogDetail extends Component
 {
     use AuthorizesRequests;
 
+    private ArchivedLogServiceInterface $archivedLogService;
+
+    private LogServiceInterface $logService;
+
+    /**
+     * Livewire 4: el contenedor inyecta dependencias en hooks como boot(); no usar el constructor.
+     *
+     * @see https://livewire.laravel.com/docs/4.x/lifecycle-hooks
+     */
+    public function boot(
+        ArchivedLogServiceInterface $archivedLogService,
+        LogServiceInterface $logService,
+    ): void {
+        $this->archivedLogService = $archivedLogService;
+        $this->logService = $logService;
+    }
+
     public string $source = 'log';
 
     public int $recordId;
@@ -126,8 +143,8 @@ class LogDetail extends Component
         $urlForValidation = trim($this->urlTutorialInput);
         $urlForValidation = $urlForValidation === '' ? null : $urlForValidation;
 
-        $archivedLog = app(ArchivedLogServiceInterface::class)->updateDescription($archivedLog, $text);
-        $archivedLog = app(ArchivedLogServiceInterface::class)->updateUrlTutorial($archivedLog, $urlForValidation);
+        $archivedLog = $this->archivedLogService->updateDescription($archivedLog, $text);
+        $archivedLog = $this->archivedLogService->updateUrlTutorial($archivedLog, $urlForValidation);
 
         $this->descriptionInput = $archivedLog->description ?? '';
         $this->urlTutorialInput = $archivedLog->url_tutorial ?? '';
@@ -158,7 +175,7 @@ class LogDetail extends Component
         $text = trim($this->descriptionInput);
         $text = $text === '' ? null : $text;
 
-        $fresh = app(ArchivedLogServiceInterface::class)->updateDescription($archivedLog, $text);
+        $fresh = $this->archivedLogService->updateDescription($archivedLog, $text);
         $this->descriptionInput = $fresh->description ?? '';
         $this->descriptionPanelMode = 'closed';
         $this->editingUrlTutorial = false;
@@ -206,7 +223,7 @@ class LogDetail extends Component
         $urlForValidation = trim($this->urlTutorialInput);
         $urlForValidation = $urlForValidation === '' ? null : $urlForValidation;
 
-        $fresh = app(ArchivedLogServiceInterface::class)->updateUrlTutorial($archivedLog, $urlForValidation);
+        $fresh = $this->archivedLogService->updateUrlTutorial($archivedLog, $urlForValidation);
         $this->urlTutorialInput = $fresh->url_tutorial ?? '';
         $this->editingUrlTutorial = false;
         $this->descriptionPanelMode = 'closed';
@@ -242,7 +259,7 @@ class LogDetail extends Component
                 );
             }
 
-            $archivedLogId = app(LogServiceInterface::class)->archivedLogIdFor($log->id);
+            $archivedLogId = $this->logService->archivedLogIdFor($log->id);
             if ($archivedLogId !== null) {
                 $archivedDetailUrl = route('archived-logs.show', $archivedLogId);
             }

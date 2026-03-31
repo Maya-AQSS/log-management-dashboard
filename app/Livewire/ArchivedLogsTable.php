@@ -19,9 +19,19 @@ class ArchivedLogsTable extends Component
 
     private ApplicationServiceInterface $applicationService;
 
-    public function boot(ApplicationServiceInterface $applicationService): void
-    {
+    private ArchivedLogServiceInterface $archivedLogService;
+
+    /**
+     * Livewire 4: el contenedor inyecta dependencias en hooks como boot(); no usar el constructor.
+     *
+     * @see https://livewire.laravel.com/docs/4.x/lifecycle-hooks
+     */
+    public function boot(
+        ApplicationServiceInterface $applicationService,
+        ArchivedLogServiceInterface $archivedLogService,
+    ): void {
         $this->applicationService = $applicationService;
+        $this->archivedLogService = $archivedLogService;
     }
 
     private const SORTABLE_COLUMNS = ['archived_at', 'severity'];
@@ -135,7 +145,7 @@ class ArchivedLogsTable extends Component
 
         $applications = $this->applicationService->pluckForFilter(ApplicationPluckScope::WithArchivedLogs);
 
-        $archivedLogs = app(ArchivedLogServiceInterface::class)->searchAndFilter(
+        $archivedLogs = $this->archivedLogService->searchAndFilter(
             $this->severity !== [] ? $this->severity : null,
             $this->selectedApplicationId,
             $this->dateFrom,

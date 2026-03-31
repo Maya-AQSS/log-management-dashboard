@@ -19,9 +19,19 @@ class LogsTable extends Component
 
     private ApplicationServiceInterface $applicationService;
 
-    public function boot(ApplicationServiceInterface $applicationService): void
-    {
+    private LogServiceInterface $logService;
+
+    /**
+     * Livewire 4: el contenedor inyecta dependencias en hooks como boot(); no usar el constructor.
+     *
+     * @see https://livewire.laravel.com/docs/4.x/lifecycle-hooks
+     */
+    public function boot(
+        ApplicationServiceInterface $applicationService,
+        LogServiceInterface $logService,
+    ): void {
         $this->applicationService = $applicationService;
+        $this->logService = $logService;
     }
 
     private const SORTABLE_COLUMNS = ['created_at', 'severity', 'application'];
@@ -179,7 +189,7 @@ class LogsTable extends Component
 
         $applications = $this->applicationService->pluckForFilter(ApplicationPluckScope::WithLogs);
 
-        $logs = app(LogServiceInterface::class)->searchAndFilter(
+        $logs = $this->logService->searchAndFilter(
             $this->search !== '' ? $this->search : null,
             $this->severity !== [] ? $this->severity : null,
             $this->selectedApplicationId,

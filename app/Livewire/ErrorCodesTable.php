@@ -16,9 +16,19 @@ class ErrorCodesTable extends Component
 
     private ApplicationServiceInterface $applicationService;
 
-    public function boot(ApplicationServiceInterface $applicationService): void
-    {
+    private ErrorCodeServiceInterface $errorCodeService;
+
+    /**
+     * Livewire 4: el contenedor inyecta dependencias en hooks como boot(); no usar el constructor.
+     *
+     * @see https://livewire.laravel.com/docs/4.x/lifecycle-hooks
+     */
+    public function boot(
+        ApplicationServiceInterface $applicationService,
+        ErrorCodeServiceInterface $errorCodeService,
+    ): void {
         $this->applicationService = $applicationService;
+        $this->errorCodeService = $errorCodeService;
     }
 
     public string $searchInput = '';
@@ -86,7 +96,7 @@ class ErrorCodesTable extends Component
     {
         $applications = $this->applicationService->pluckForFilter(ApplicationPluckScope::All);
 
-        $errorCodes = app(ErrorCodeServiceInterface::class)->searchAndFilter(
+        $errorCodes = $this->errorCodeService->searchAndFilter(
             $this->search !== '' ? $this->search : null,
             $this->filterApp,
             null,
