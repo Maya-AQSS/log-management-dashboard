@@ -47,6 +47,13 @@ interface LogServiceInterface
     public function dashboardSeverityCards(): array;
 
     /**
+     * Conteos de logs por aplicación (misma caché de agregados que las cards de severidad).
+     *
+     * @return array<int, array{application_id: int, name: string, total: int}>
+     */
+    public function dashboardApplicationTotals(): array;
+
+    /**
      * Devuelve el id de ArchivedLog equivalente al log o null si no está archivado.
      */
     public function archivedLogIdFor(int $logId): ?int;
