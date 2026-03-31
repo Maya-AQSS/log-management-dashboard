@@ -17,15 +17,23 @@ class DashboardController extends Controller
         $cards = collect($this->logService->dashboardSeverityCards())
             ->map(fn (array $card): array => [
                 ...$card,
-                'title' => __('severity.' . $card['key']),
+                'title' => __('severity.'.$card['key']),
                 'href' => route('logs.index', $card['key'] === 'all'
                     ? []
                     : ['severity' => $card['key']]),
             ])
             ->all();
 
+        $applicationTotals = collect($this->logService->dashboardApplicationTotals())
+            ->map(fn (array $row): array => [
+                ...$row,
+                'href' => route('logs.index', ['application' => $row['application_id']]),
+            ])
+            ->all();
+
         return view('dashboard', [
             'cards' => $cards,
+            'applicationTotals' => $applicationTotals,
             'unresolvedLabel' => __('logs.filters.resolved_unresolved'),
             'resolvedLabel' => __('logs.filters.resolved_resolved'),
         ]);

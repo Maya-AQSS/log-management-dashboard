@@ -46,6 +46,13 @@ interface LogRepositoryInterface
     public function logsCount(bool $includeArchived = false): int;
 
     /**
+     * Conteos de logs agrupados por aplicación (nombre desde join con applications).
+     *
+     * @return array<int, array{application_id: int, name: string, total: int}>
+     */
+    public function applicationTotals(bool $includeArchived = true): array;
+
+    /**
      * Devuelve el id de ArchivedLog equivalente al log o null si no está archivado.
      */
     public function archivedLogIdFor(int $logId): ?int;

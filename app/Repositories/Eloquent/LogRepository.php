@@ -8,21 +8,23 @@ use App\Models\Log;
 use App\Repositories\Contracts\LogRepositoryInterface;
 use App\Support\LikeEscaper;
 use Carbon\CarbonImmutable;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class LogRepository implements LogRepositoryInterface
 {
     // Mantener la constante para compatibilidad con queries existentes
     private const LIKE_ESCAPE_CHARACTER = LikeEscaper::LIKE_ESCAPE_CHARACTER;
+
     private const SORT_COLUMN_MAP = [
         'created_at' => 'logs.created_at',
         'severity' => 'logs.severity',
         'application' => 'applications.name',
     ];
+
     private const SORT_DIRECTIONS = ['asc', 'desc'];
 
     /**
@@ -86,7 +88,7 @@ class LogRepository implements LogRepositoryInterface
             : null;
 
         $escapedSearchPattern = $normalizedSearch !== null
-            ? '%' . LikeEscaper::escapeLikePattern($normalizedSearch) . '%'
+            ? '%'.LikeEscaper::escapeLikePattern($normalizedSearch).'%'
             : null;
 
         $driver = DB::connection()->getDriverName();
@@ -108,7 +110,8 @@ class LogRepository implements LogRepositoryInterface
         return $query
             ->when($normalizedSearch !== null, function ($q) use ($driver, $normalizedSearch, $escapedSearchPattern): void {
                 if ($driver === 'pgsql') {
-                    $q->whereRaw("message ILIKE ? ESCAPE '" . self::LIKE_ESCAPE_CHARACTER . "'", [$escapedSearchPattern]);
+                    $q->whereRaw("message ILIKE ? ESCAPE '".self::LIKE_ESCAPE_CHARACTER."'", [$escapedSearchPattern]);
+
                     return;
                 }
 
@@ -133,7 +136,7 @@ class LogRepository implements LogRepositoryInterface
             })
             ->when($dateFrom, fn ($q) => $q->where('logs.created_at', '>=', CarbonImmutable::parse($dateFrom)->utc()->toDateTimeString()))
             ->when($dateTo, fn ($q) => $q->where('logs.created_at', '<=', CarbonImmutable::parse($dateTo)->utc()->toDateTimeString()))
-            ->when($dateFrom && !$dateTo, fn ($q) => $q->where('logs.created_at', '<=', now()->utc()->toDateTimeString()))
+            ->when($dateFrom && ! $dateTo, fn ($q) => $q->where('logs.created_at', '<=', now()->utc()->toDateTimeString()))
             ->when(
                 $sortColumn !== null,
                 fn ($q) => $q->orderBy($sortColumn, $validatedSortDirection),
@@ -197,6 +200,26 @@ class LogRepository implements LogRepositoryInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function applicationTotals(bool $includeArchived = true): array
+    {
+        $rows = Log::query()
+            ->when(! $includeArchived, fn ($q) => $q->whereNotExists(fn ($subQuery) => $this->applyArchivedMatchForLogsQuery($subQuery)))
+            ->join('applications', 'applications.id', '=', 'logs.application_id')
+            ->select('logs.application_id', 'applications.name as application_name', DB::raw('COUNT(*) as total'))
+            ->groupBy('logs.application_id', 'applications.name')
+            ->orderByDesc('total')
+            ->get();
+
+        return $rows->map(fn ($row): array => [
+            'application_id' => (int) $row->application_id,
+            'name' => (string) $row->application_name,
+            'total' => (int) $row->total,
+        ])->all();
+    }
+
+    /**
      * Devuelve el id de ArchivedLog equivalente al log o null si no está archivado.
      */
     public function archivedLogIdFor(int $logId): ?int
@@ -257,7 +280,4 @@ class LogRepository implements LogRepositoryInterface
             ->where('severity', $log->severity)
             ->where('message', $log->message);
     }
-
-
-
 }

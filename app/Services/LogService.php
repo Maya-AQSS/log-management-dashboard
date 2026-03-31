@@ -51,7 +51,7 @@ class LogService implements LogServiceInterface
     }
 
     /**
-     * Busca y filtra logs por diferentes criterios: 
+     * Busca y filtra logs por diferentes criterios:
      * - texto libre en el mensaje
      * - tipo de severidad de error
      * - si está archivado o no
@@ -69,8 +69,7 @@ class LogService implements LogServiceInterface
         ?string $sortBy,
         ?string $sortDir,
         int $perPage = 25
-    ): LengthAwarePaginator
-    {
+    ): LengthAwarePaginator {
         return $this->logRepository->searchAndFilter(
             $search,
             $severity,
@@ -86,16 +85,13 @@ class LogService implements LogServiceInterface
     }
 
     /**
-     * Devuelve los datos de las cards del dashboard con estado resolved/unresolved.
-     * Incluye todas las severidades y la card "all" usando el total de logs.
+     * Agregados del dashboard (severidad + por aplicación) con la misma entrada de caché.
      *
-     * @return array<int,array{key:string,totalCount:int,resolvedCount:int,unresolvedCount:int}>
+     * @return array{severity_cards: array<int, array{key:string,totalCount:int,resolvedCount:int,unresolvedCount:int}>, application_totals: array<int, array{application_id: int, name: string, total: int}>}
      */
-    public function dashboardSeverityCards(): array
+    private function getDashboardAggregates(): array
     {
-        $cacheKey = 'dashboard:severity-cards:all';
-
-        return Cache::remember($cacheKey, now()->addSeconds(10), function (): array {
+        return Cache::remember('dashboard:aggregates', now()->addSeconds(10), function (): array {
             $severityKeys = Severity::values();
             $bySeverity = $this->logRepository->severityResolvedCounts(true);
             $totalLogsCount = $this->logRepository->logsCount(true);
@@ -123,8 +119,32 @@ class LogService implements LogServiceInterface
                 totalCount: $totalLogsCount,
             ));
 
-            return $cards->all();
+            return [
+                'severity_cards' => $cards->all(),
+                'application_totals' => $this->logRepository->applicationTotals(true),
+            ];
         });
+    }
+
+    /**
+     * Devuelve los datos de las cards del dashboard con estado resolved/unresolved.
+     * Incluye todas las severidades y la card "all" usando el total de logs.
+     *
+     * @return array<int,array{key:string,totalCount:int,resolvedCount:int,unresolvedCount:int}>
+     */
+    public function dashboardSeverityCards(): array
+    {
+        return $this->getDashboardAggregates()['severity_cards'];
+    }
+
+    /**
+     * Conteos por aplicación (logs activos en `logs`, mismo criterio que las cards de severidad).
+     *
+     * @return array<int, array{application_id: int, name: string, total: int}>
+     */
+    public function dashboardApplicationTotals(): array
+    {
+        return $this->getDashboardAggregates()['application_totals'];
     }
 
     /**
@@ -147,7 +167,7 @@ class LogService implements LogServiceInterface
 
     /**
      * Construye una card del dashboard con estado resolved/unresolved.
-     * 
+     *
      * @return array{key:string,totalCount:int,resolvedCount:int,unresolvedCount:int}
      */
     private function buildDashboardCard(
