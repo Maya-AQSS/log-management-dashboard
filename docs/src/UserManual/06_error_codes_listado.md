@@ -6,7 +6,7 @@ Catalogo de error codes registrados en el sistema.
 
 ## Descripcion funcional
 
-Esta pantalla muestra el inventario de error codes conocidos para cada aplicacion. Permite localizar rapidamente codigos existentes y acceder a su detalle para editar o eliminar informacion.
+Esta pantalla muestra el inventario de error codes conocidos para cada aplicacion. Permite localizar rapidamente codigos existentes y acceder a su detalle para más informacion.
 
 ## Objetivo para el usuario
 
@@ -18,8 +18,7 @@ Mantener un catalogo centralizado de codigos de error reutilizable en el analisi
 - Campo de busqueda por texto.
 - Filtro por aplicacion.
 - Botones para aplicar filtros y restablecerlos.
-- Tabla con columnas de codigo, aplicacion, nombre, fichero, linea y acciones.
-- Acciones directas de editar y borrar desde cada fila.
+- Tabla con columnas de codigo, aplicacion, nombre, fichero y linea.
 
 ## Acciones disponibles
 
@@ -27,7 +26,6 @@ Mantener un catalogo centralizado de codigos de error reutilizable en el analisi
 - Filtrar el catalogo por aplicacion.
 - Acceder al detalle de un error code pulsando sobre la fila.
 - Crear un nuevo registro desde el boton superior.
-- Eliminar un registro desde la tabla mediante confirmacion.
 
 ## CAPTURA
 

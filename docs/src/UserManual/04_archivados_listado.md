@@ -31,12 +31,12 @@ Concentrar el historico de incidencias tratadas y facilitar su consulta posterio
 
 ![Pantalla de inicio de sesión](img/archived-log.png)
  
-*Figura 1. Pantalla histórico de logs*
+*Figura 1. Pantalla de Logs Archivados*
 
 ---
 
 ![Pantalla de inicio de sesión](img/archived-log-movil.png)
  
-*Figura 2. Pantalla histórico de logs para móvil*
+*Figura 2. Pantalla de Logs Archivados para móvil*
 
 ---

@@ -34,12 +34,12 @@ Facilitar la revision operativa de los errores registrados sin necesidad de entr
 
 ![Pantalla de inicio de sesión](img/log.png)
  
-*Figura 1. Pantalla de Logs*
+*Figura 1. Pantalla de Listado de Logs*
 
 ---
 
 
 ![Pantalla de inicio de sesión](img/log-movil.png)
  
-*Figura 2. Pantalla de Logs para móvil*
+*Figura 2. Pantalla de Listado de Logs para móvil*
 

@@ -17,7 +17,7 @@ Revisar un error code existente, actualizar sus datos y dejar trazabilidad media
 - Boton para volver al listado.
 - Cabecera con titulo general del modulo.
 - Formulario en modo lectura o edicion segun el estado de la pantalla.
-- Campos de aplicacion, severidad, codigo, nombre, fichero, linea y descripcion.
+- Campos de aplicacion, codigo, nombre, fichero, linea y descripcion.
 - Botones de editar, cancelar, guardar y borrar segun el contexto.
 - Hilo de comentarios asociado al error code.
 

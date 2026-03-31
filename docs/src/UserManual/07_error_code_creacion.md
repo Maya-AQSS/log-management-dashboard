@@ -16,7 +16,7 @@ Dar de alta nuevos codigos estandarizados y mantener el catalogo actualizado.
 
 - Boton de vuelta al listado.
 - Cabecera con titulo y subtitulo de alta.
-- Formulario con los campos: aplicacion, severidad, codigo, nombre, fichero, linea y descripcion.
+- Formulario con los campos: aplicacion, codigo, nombre, fichero, linea y descripcion.
 - Mensajes de validacion por campo cuando existen errores.
 - Botones de cancelar y guardar.
 

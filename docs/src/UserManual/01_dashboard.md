@@ -21,22 +21,22 @@ Permitir una lectura rapida del estado general del sistema y servir como punto d
 - Acceder al listado de logs pulsando sobre una tarjeta.
 - Navegar a otras secciones desde la barra superior compartida.
 
-## CAPTURAs MÓVIL Y ORDENADOR
+## CAPTURAS MÓVIL Y ORDENADOR
 
-![Pantalla de inicio de sesión](img/dashboard1.png)
+![Pantalla de inicio de sesión](img/dashboard.png)
  
-*Figura 1. Pantalla de inicio de sesión para ordenador*
+*Figura 1. Pantalla del Dashboard para ordenador*
 
 ---
 
-![Pantalla de inicio de sesión](img/dashboard1MOVIL.png)
+![Pantalla de inicio de sesión](img/dashboard-movil.png)
  
-*Figura 2. Pantalla de inicio de sesión para móvil*
+*Figura 2. Pantalla del Dashboard para móvil*
 
 ---
 
-![Pantalla de inicio de sesión](img/dashboard1MOVIL-MENU.png)
+![Pantalla de inicio de sesión](img/dashboard-menu-movil.png)
  
-*Figura 3. Pantalla de inicio de sesión para móvil menú*
+*Figura 3. Pantalla del Dashboard para móvil — menú*
 
 
