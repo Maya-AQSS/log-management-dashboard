@@ -35,6 +35,7 @@
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
     </php>
+</phpunit>
 
     <!--
 
@@ -44,5 +45,4 @@
         Comando CI: php artisan test --configuration=phpunit-pgsql.xml
 
     -->
-
-</phpunit>
+    
