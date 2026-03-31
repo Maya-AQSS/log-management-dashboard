@@ -33,10 +33,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup PHP 8.2 with pgsql extension
+      - name: Setup PHP 8.4 with pgsql extension
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.2"
+          php-version: "8.4"
           # pdo_pgsql es la extensión PDO para PostgreSQL.
           # opcache acelera la carga de PHP en CI.
           extensions: pdo_pgsql, opcache
