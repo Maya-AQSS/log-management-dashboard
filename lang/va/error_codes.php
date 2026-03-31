@@ -3,6 +3,7 @@
 return [
     'menu' => 'Errors',
     'title' => 'Errors',
+    'detail_title' => 'Detalls Del Codi d\'Error',
     'welcome' => 'Benvingut als errors',
     'create_title' => 'Crear Error Code',
     'create_subtitle' => 'Completa els camps per registrar un nou error code',

@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'app_name' => 'Log Management Panel',
+    'app_name' => 'Log Management Dashboard',
 
     /* Navegación */
     'nav_user' => 'User',
