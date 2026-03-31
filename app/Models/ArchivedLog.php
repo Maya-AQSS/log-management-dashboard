@@ -16,6 +16,18 @@ class ArchivedLog extends Model
     const CREATED_AT = null;
     const UPDATED_AT = 'updated_at';
 
+    protected static function booted(): void
+    {
+        // En hard delete (forceDelete) el registro desaparece para siempre,
+        // por lo que los comentarios huérfanos deben eliminarse.
+        // La transacción que garantiza atomicidad debe ponerse en el Service
+        // que llame a forceDelete(), igual que en ErrorCodeService::delete().
+        
+        static::forceDeleting(function (self $archivedLog) {
+            $archivedLog->comments()->delete();
+        });
+    }
+
     protected $fillable = [
         'application_id',
         'archived_by_id',
