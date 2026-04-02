@@ -1,6 +1,6 @@
 <x-layout>
     <div class="w-full mt-6">
-        <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100">{{ __('dashboard.title') }}</h1>
+        <h1 class="text-3xl md:text-3xl font-bold text-text-primary dark:text-text-dark-primary">{{ __('dashboard.title') }}</h1>
     </div>
 
     <div class="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" style="column-gap: 2rem; row-gap: 2rem;">

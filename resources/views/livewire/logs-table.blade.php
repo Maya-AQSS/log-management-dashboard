@@ -1,15 +1,15 @@
 <div x-data="{}">
-    <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
+    <div class="mt-4 rounded-2xl border border-ui-border bg-ui-body p-4 dark:border-ui-dark-border dark:bg-ui-dark-bg">
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div class="space-y-4">
                 <div>
-                    <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+                    <label class="mb-1 block text-sm font-medium text-text-primary dark:text-text-dark-primary">
                         {{ __('logs.filters.search') }}
                     </label>
                     <input
                         type="text"
                         wire:model.live.debounce.400ms="searchInput"
-                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
+                        class="w-full rounded-xl border border-ui-border bg-ui-card px-3 py-2 text-base shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-primary focus:border-odoo-purple focus:outline-none focus:ring-2 focus:ring-odoo-purple/20"
                         placeholder="{{ __('logs.filters.search_placeholder') }}"
                     />
                 </div>
@@ -48,41 +48,41 @@
                 @endphp
                 <details
                     @if($hasResolvedSelected) open @endif
-                    class="group rounded-xl border border-slate-300 bg-white px-3 py-2 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+                    class="group rounded-xl border border-ui-border bg-ui-card px-3 py-2 shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card"
                 >
-                    <summary class="list-none cursor-pointer select-none flex items-center justify-between gap-3 text-sm font-medium text-slate-700 dark:text-slate-200">
+                    <summary class="list-none cursor-pointer select-none flex items-center justify-between gap-3 text-sm font-medium text-text-primary dark:text-text-dark-primary">
                         <span>{{ __('logs.filters.resolved_group') }}</span>
                         <x-chevron-down class="transition-transform group-open:rotate-180" />
                     </summary>
 
                     <div class="mt-2 grid grid-cols-1 gap-2">
-                        <label class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                        <label class="flex items-center gap-2 text-sm font-medium text-text-primary dark:text-text-dark-primary">
                             <input
                                 type="radio"
                                 name="resolved-filter"
                                 value=""
                                 wire:model.defer="resolvedInput"
-                                class="h-4 w-4 border-slate-300 bg-white text-[#5b3853] shadow-sm focus:ring-[#5b3853]/30 dark:border-slate-700 dark:bg-slate-800"
+                                class="h-4 w-4 border-ui-border bg-ui-card text-odoo-purple shadow-sm focus:ring-odoo-purple/30 dark:border-ui-dark-border dark:bg-ui-dark-card"
                             />
                             {{ __('logs.filters.resolved_all') }}
                         </label>
-                        <label class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                        <label class="flex items-center gap-2 text-sm font-medium text-text-primary dark:text-text-dark-primary">
                             <input
                                 type="radio"
                                 name="resolved-filter"
                                 value="resolved"
                                 wire:model.defer="resolvedInput"
-                                class="h-4 w-4 border-slate-300 bg-white text-[#5b3853] shadow-sm focus:ring-[#5b3853]/30 dark:border-slate-700 dark:bg-slate-800"
+                                class="h-4 w-4 border-ui-border bg-ui-card text-odoo-purple shadow-sm focus:ring-odoo-purple/30 dark:border-ui-dark-border dark:bg-ui-dark-card"
                             />
                             {{ __('logs.filters.resolved_resolved') }}
                         </label>
-                        <label class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                        <label class="flex items-center gap-2 text-sm font-medium text-text-primary dark:text-text-dark-primary">
                             <input
                                 type="radio"
                                 name="resolved-filter"
                                 value="unresolved"
                                 wire:model.defer="resolvedInput"
-                                class="h-4 w-4 border-slate-300 bg-white text-[#5b3853] shadow-sm focus:ring-[#5b3853]/30 dark:border-slate-700 dark:bg-slate-800"
+                                class="h-4 w-4 border-ui-border bg-ui-card text-odoo-purple shadow-sm focus:ring-odoo-purple/30 dark:border-ui-dark-border dark:bg-ui-dark-card"
                             />
                             {{ __('logs.filters.resolved_unresolved') }}
                         </label>
@@ -95,7 +95,7 @@
             <button
                 type="button"
                 x-on:click="$dispatch('logs-apply-requested')"
-                class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-base font-semibold text-white hover:bg-[#4a2d44]"
+                class="inline-flex items-center rounded-full bg-odoo-purple px-4 py-2 text-base font-semibold text-white hover:bg-odoo-dark-purple"
             >
                 {{ __('logs.buttons.apply') }}
             </button>
@@ -103,7 +103,7 @@
             <button
                 type="button"
                 wire:click="resetFilters"
-                class="inline-flex items-center rounded-full border border-slate-300 bg-white px-4 py-2 text-base font-semibold text-slate-800 hover:bg-slate-50"
+                class="inline-flex items-center rounded-full border border-ui-border bg-ui-card px-4 py-2 text-base font-semibold text-text-primary hover:bg-ui-body"
             >
                 {{ __('logs.buttons.reset') }}
             </button>
@@ -123,13 +123,13 @@
                         type="button"
                         wire:click="sortByColumn('application')"
                         title="{{ __('logs.table.sortable_hint') }}"
-                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-bold text-inherit cursor-pointer rounded-sm hover:bg-slate-100/70 dark:hover:bg-slate-700/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b3853]/40"
+                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-bold text-inherit cursor-pointer rounded-sm hover:bg-ui-body dark:hover:bg-ui-dark-border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-odoo-purple/40"
                     >
                         <span class="truncate">{{ __('logs.table.application') }}</span>
                         @if($sortBy === 'application')
-                            <span class="shrink-0 pl-1 text-slate-600 dark:text-slate-300" aria-hidden="true">{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
+                            <span class="shrink-0 pl-1 text-text-secondary dark:text-text-dark-secondary" aria-hidden="true">{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
                         @else
-                            <span class="shrink-0 pl-1 text-xs text-slate-400 dark:text-slate-500" aria-hidden="true">↕</span>
+                            <span class="shrink-0 pl-1 text-xs text-text-muted dark:text-text-dark-muted" aria-hidden="true">↕</span>
                         @endif
                     </button>
                 </th>
@@ -138,13 +138,13 @@
                         type="button"
                         wire:click="sortByColumn('severity')"
                         title="{{ __('logs.table.sortable_hint') }}"
-                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-bold text-inherit cursor-pointer rounded-sm hover:bg-slate-100/70 dark:hover:bg-slate-700/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b3853]/40"
+                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-bold text-inherit cursor-pointer rounded-sm hover:bg-ui-body dark:hover:bg-ui-dark-border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-odoo-purple/40"
                     >
                         <span class="truncate">{{ __('logs.table.severity') }}</span>
                         @if($sortBy === 'severity')
-                            <span class="shrink-0 pl-1 text-slate-600 dark:text-slate-300" aria-hidden="true">{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
+                            <span class="shrink-0 pl-1 text-text-secondary dark:text-text-dark-secondary" aria-hidden="true">{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
                         @else
-                            <span class="shrink-0 pl-1 text-xs text-slate-400 dark:text-slate-500" aria-hidden="true">↕</span>
+                            <span class="shrink-0 pl-1 text-xs text-text-muted dark:text-text-dark-muted" aria-hidden="true">↕</span>
                         @endif
                     </button>
                 </th>
@@ -155,13 +155,13 @@
                         type="button"
                         wire:click="sortByColumn('created_at')"
                         title="{{ __('logs.table.sortable_hint') }}"
-                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-bold text-inherit cursor-pointer rounded-sm hover:bg-slate-100/70 dark:hover:bg-slate-700/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b3853]/40"
+                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-bold text-inherit cursor-pointer rounded-sm hover:bg-ui-body dark:hover:bg-ui-dark-border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-odoo-purple/40"
                     >
                         <span class="truncate">{{ __('logs.table.created_at') }}</span>
                         @if($sortBy === 'created_at')
-                            <span class="shrink-0 pl-1 text-slate-600 dark:text-slate-300" aria-hidden="true">{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
+                            <span class="shrink-0 pl-1 text-text-secondary dark:text-text-dark-secondary" aria-hidden="true">{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
                         @else
-                            <span class="shrink-0 pl-1 text-xs text-slate-400 dark:text-slate-500" aria-hidden="true">↕</span>
+                            <span class="shrink-0 pl-1 text-xs text-text-muted dark:text-text-dark-muted" aria-hidden="true">↕</span>
                         @endif
                     </button>
                 </th>
@@ -171,25 +171,25 @@
 
         @foreach($logs as $log)
                 <tr
-                    class="align-top hover:bg-slate-50 dark:hover:bg-slate-800"
+                    class="align-top hover:bg-ui-body dark:hover:bg-ui-dark-card border-b border-ui-border-l dark:border-ui-dark-border-l"
                 >
-                    <td class="px-3 py-2 text-slate-700 dark:text-slate-200">{{ $log->application?->name ?? '-' }}</td>
+                    <td class="px-3 py-2 text-text-primary dark:text-text-dark-primary">{{ $log->application?->name ?? '-' }}</td>
                     <td class="px-3 py-2 whitespace-nowrap">
                         <x-severity-badge :severity="$log->severity" />
                     </td>
-                    <td class="min-w-[16rem] max-w-md px-3 py-2 text-slate-700 dark:text-slate-200 md:min-w-[18rem]">
+                    <td class="min-w-[16rem] max-w-md px-3 py-2 text-text-primary dark:text-text-dark-primary md:min-w-[18rem]">
                         <a
                             href="{{ route('logs.show', $log->id) }}"
-                            class="inline-block break-words hover:underline focus:outline-none focus:ring-2 focus:ring-[#5b3853]/30 rounded"
+                            class="inline-block break-words text-text-link hover:underline focus:outline-none focus:ring-2 focus:ring-odoo-purple/30 rounded"
                         >
                             {{ \Illuminate\Support\Str::limit($log->message ?? '-', 120) }}
                         </a>
                     </td>
-                    <td class="px-3 py-2 text-slate-700 whitespace-nowrap dark:text-slate-200">{{ $log->errorCode?->code ?? '-' }}</td>
-                    <td class="px-3 py-2 text-slate-700 whitespace-nowrap dark:text-slate-200">
+                    <td class="px-3 py-2 text-text-primary whitespace-nowrap dark:text-text-dark-primary">{{ $log->errorCode?->code ?? '-' }}</td>
+                    <td class="px-3 py-2 text-text-primary whitespace-nowrap dark:text-text-dark-primary">
                         {{ optional($log->created_at)->locale(app()->getLocale())->translatedFormat('d F Y H:i:s') ?? '-' }}
                     </td>
-                    <td class="px-3 py-2 text-slate-700 whitespace-nowrap dark:text-slate-200">
+                    <td class="px-3 py-2 text-text-primary whitespace-nowrap dark:text-text-dark-primary">
                         <div class="flex flex-wrap gap-2">
                             @if($log->resolved)
                                 <span class="inline-flex items-center rounded-full bg-cyan-100 px-2 py-0.5 text-xs font-semibold text-cyan-800">
