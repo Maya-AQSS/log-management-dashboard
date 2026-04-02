@@ -171,7 +171,9 @@
 
         @foreach($logs as $log)
                 <tr
-                    class="align-top hover:bg-slate-50 dark:hover:bg-slate-800"
+                    class="align-top cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
+                    data-href="{{ route('logs.show', $log->id) }}"
+                    onclick="window.location.href=this.dataset.href"
                 >
                     <td class="px-3 py-2 text-slate-700 dark:text-slate-200">{{ $log->application?->name ?? '-' }}</td>
                     <td class="px-3 py-2 whitespace-nowrap">
