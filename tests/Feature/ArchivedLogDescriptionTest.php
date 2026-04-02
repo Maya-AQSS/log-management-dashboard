@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\LogDetail;
+use App\Livewire\ArchivedLogDetail;
 use App\Models\Application;
 use App\Models\ArchivedLog;
 use App\Models\ErrorCode;
@@ -37,7 +37,7 @@ class ArchivedLogDescriptionTest extends TestCase
         $text = 'Contexto y pasos de resolución resumidos.';
 
         Livewire::actingAs($user)
-            ->test(LogDetail::class, ['source' => 'archived_log', 'recordId' => $archivedLog->id])
+            ->test(ArchivedLogDetail::class, ['archivedLogId' => $archivedLog->id])
             ->call('startEditingDescription')
             ->assertSet('descriptionPanelMode', 'editing')
             ->set('descriptionInput', $text)
@@ -69,7 +69,7 @@ class ArchivedLogDescriptionTest extends TestCase
         $updated = 'Texto actualizado con causa raíz.';
 
         Livewire::actingAs($user)
-            ->test(LogDetail::class, ['source' => 'archived_log', 'recordId' => $archivedLog->id])
+            ->test(ArchivedLogDetail::class, ['archivedLogId' => $archivedLog->id])
             ->call('startEditingDescription')
             ->set('descriptionInput', $updated)
             ->call('updateDescription')
@@ -98,7 +98,7 @@ class ArchivedLogDescriptionTest extends TestCase
         ]);
 
         Livewire::actingAs($other)
-            ->test(LogDetail::class, ['source' => 'archived_log', 'recordId' => $archivedLog->id])
+            ->test(ArchivedLogDetail::class, ['archivedLogId' => $archivedLog->id])
             ->set('descriptionInput', 'Intento no autorizado')
             ->set('descriptionPanelMode', 'editing')
             ->call('updateDescription')
@@ -126,7 +126,7 @@ class ArchivedLogDescriptionTest extends TestCase
         ]);
 
         Livewire::actingAs($user)
-            ->test(LogDetail::class, ['source' => 'archived_log', 'recordId' => $archivedLog->id])
+            ->test(ArchivedLogDetail::class, ['archivedLogId' => $archivedLog->id])
             ->call('startEditingDescription')
             ->set('descriptionInput', str_repeat('a', 5001))
             ->call('updateDescription')
