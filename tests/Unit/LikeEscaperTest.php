@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use App\Support\LikeEscaper;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class LikeEscaperTest extends TestCase
 {
-    /**
-     * @dataProvider patternProvider
-     */
+    #[DataProvider('patternProvider')]
     public function test_escape_like_pattern(string $input, string $expected): void
     {
         $this->assertSame($expected, LikeEscaper::escapeLikePattern($input));

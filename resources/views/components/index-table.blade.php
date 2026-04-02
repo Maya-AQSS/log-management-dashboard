@@ -1,7 +1,7 @@
 @if($hasItems)
     <div class="mt-4 overflow-x-auto">
         <table class="min-w-full text-base {{ $tableClass }}">
-            <thead class="bg-slate-50 text-base uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-300">
+            <thead class="bg-ui-body text-xs uppercase tracking-wide text-text-secondary dark:bg-ui-dark-card dark:text-text-dark-secondary">
                 @isset($head)
                     {{ $head }}
                 @else
@@ -13,7 +13,7 @@
                 @endisset
             </thead>
 
-            <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-900">
+            <tbody class="divide-y divide-ui-border-l bg-ui-card dark:divide-ui-dark-border-l dark:bg-ui-dark-card">
                 {{ $slot }}
             </tbody>
         </table>
@@ -25,5 +25,5 @@
         </div>
     @endif
 @else
-    <div class="mt-4 text-base text-slate-500 dark:text-slate-400">{{ $emptyText }}</div>
+    <div class="mt-4 text-sm text-text-secondary dark:text-text-dark-secondary">{{ $emptyText }}</div>
 @endif

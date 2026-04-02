@@ -6,6 +6,7 @@
 
     <title>{{ __('app.app_name') }}</title>
 
+    {{-- Dark mode: aplicar antes de que el navegador pinte --}}
     <script>
         (function () {
             const savedTheme = localStorage.getItem('theme');
@@ -18,17 +19,17 @@
     @vite(['resources/css/app.css', 'resources/js/tiptap-editor.js'])
     @livewireStyles
 </head>
-<body class="min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+<body class="min-h-screen bg-ui-body text-text-primary font-sans dark:bg-ui-dark-bg dark:text-text-dark-primary">
     <x-nav />
 
-    <div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="mx-auto max-w-7xl px-4 py-6">
         @if (session('status'))
-            <div class="mb-4 rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200 px-4 py-2 shadow-sm">
+            <div class="mb-4 rounded-lg bg-success-light text-success-dark dark:bg-success-dark/30 dark:text-success-light px-4 py-2 shadow-card text-sm">
                 {{ session('status') }}
             </div>
         @endif
 
-        <main class="rounded-2xl border border-[#e2d8eb] bg-white p-4 shadow-md md:p-6 dark:border-slate-700 dark:bg-slate-950 dark:shadow-none">
+        <main class="rounded-lg border border-ui-border bg-ui-card p-4 shadow-card md:p-6 dark:border-ui-dark-border dark:bg-ui-dark-card">
             {{ $slot }}
         </main>
     </div>

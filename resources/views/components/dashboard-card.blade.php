@@ -12,8 +12,8 @@
             <div class="text-2xl font-bold leading-none {{ $accentTextClass }}">{{ $unresolvedCount }}</div>
         </div>
         <div class="text-right">
-            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-200/80">{{ $resolvedLabel }}</div>
-            <div class="text-2xl font-bold leading-none text-slate-600 dark:text-slate-100">{{ $resolvedCount }}</div>
+            <div class="text-xs uppercase tracking-wide text-text-secondary dark:text-text-dark-secondary">{{ $resolvedLabel }}</div>
+            <div class="text-2xl font-bold leading-none text-text-primary dark:text-text-dark-primary">{{ $resolvedCount }}</div>
         </div>
     </div>
 </a>
