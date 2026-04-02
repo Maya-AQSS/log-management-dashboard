@@ -2,8 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Models\ArchivedLog;
-use App\Models\Log;
 use App\Rules\AcceptableTutorialUrl;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use App\Services\Contracts\LogServiceInterface;
@@ -56,7 +54,7 @@ class LogDetail extends Component
         $this->backHref = $backHref;
 
         if ($source === 'archived_log') {
-            $archivedLog = ArchivedLog::query()->findOrFail($recordId);
+            $archivedLog = $this->archivedLogService->findOrFail($recordId);
             $this->urlTutorialInput = $archivedLog->url_tutorial ?? '';
             $this->editingUrlTutorial = false;
             $this->descriptionInput = $archivedLog->description ?? '';
@@ -71,7 +69,7 @@ class LogDetail extends Component
     {
         abort_unless($this->source === 'archived_log', 403);
 
-        $archivedLog = ArchivedLog::query()->findOrFail($this->recordId);
+        $archivedLog = $this->archivedLogService->findOrFail($this->recordId);
         $this->authorize('update', $archivedLog);
 
         $this->descriptionInput = $archivedLog->description ?? '';
@@ -94,7 +92,7 @@ class LogDetail extends Component
     {
         abort_unless($this->source === 'archived_log', 403);
 
-        $archivedLog = ArchivedLog::query()->findOrFail($this->recordId);
+        $archivedLog = $this->archivedLogService->findOrFail($this->recordId);
         $this->authorize('update', $archivedLog);
 
         $this->descriptionInput = $archivedLog->description ?? '';
@@ -108,7 +106,7 @@ class LogDetail extends Component
     {
         abort_unless($this->source === 'archived_log', 403);
 
-        $archivedLog = ArchivedLog::query()->findOrFail($this->recordId);
+        $archivedLog = $this->archivedLogService->findOrFail($this->recordId);
         $this->authorize('update', $archivedLog);
 
         $this->validate(
@@ -150,7 +148,7 @@ class LogDetail extends Component
     {
         abort_unless($this->source === 'archived_log', 403);
 
-        $archivedLog = ArchivedLog::query()->findOrFail($this->recordId);
+        $archivedLog = $this->archivedLogService->findOrFail($this->recordId);
         $this->authorize('update', $archivedLog);
 
         $this->validate(
@@ -188,7 +186,7 @@ class LogDetail extends Component
     {
         abort_unless($this->source === 'archived_log', 403);
 
-        $archivedLog = ArchivedLog::query()->findOrFail($this->recordId);
+        $archivedLog = $this->archivedLogService->findOrFail($this->recordId);
         $this->authorize('update', $archivedLog);
 
         $this->validate(
@@ -222,9 +220,7 @@ class LogDetail extends Component
         $archivedLog = null;
         $log = null;
         if ($this->source === 'archived_log') {
-            $archivedLog = ArchivedLog::query()
-                ->with(['application', 'errorCode', 'archivedBy'])
-                ->findOrFail($this->recordId);
+            $archivedLog = $this->archivedLogService->findOrFail($this->recordId);
 
             if (is_array($archivedLog->metadata) && $archivedLog->metadata !== []) {
                 $metadataJson = json_encode(
@@ -233,9 +229,7 @@ class LogDetail extends Component
                 );
             }
         } else {
-            $log = Log::query()
-                ->with(['application', 'errorCode'])
-                ->findOrFail($this->recordId);
+            $log = $this->logService->findOrFail($this->recordId);
 
             if (is_array($log->metadata) && $log->metadata !== []) {
                 $metadataJson = json_encode(
