@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\ArchivedLog;
 use App\Models\Log;
+use App\Rules\AcceptableTutorialUrl;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use App\Services\Contracts\LogServiceInterface;
 use Illuminate\Contracts\View\View;
@@ -117,15 +118,7 @@ class LogDetail extends Component
                     'nullable',
                     'string',
                     'max:500',
-                    function (string $attribute, mixed $value, \Closure $fail): void {
-                        $v = trim((string) $value);
-                        if ($v === '') {
-                            return;
-                        }
-                        if (! $this->isAcceptableTutorialUrl($v)) {
-                            $fail(__('archived_logs.validation.url_tutorial'));
-                        }
-                    },
+                    new AcceptableTutorialUrl(),
                 ],
             ],
             [
@@ -204,15 +197,7 @@ class LogDetail extends Component
                     'nullable',
                     'string',
                     'max:500',
-                    function (string $attribute, mixed $value, \Closure $fail): void {
-                        $v = trim((string) $value);
-                        if ($v === '') {
-                            return;
-                        }
-                        if (! $this->isAcceptableTutorialUrl($v)) {
-                            $fail(__('archived_logs.validation.url_tutorial'));
-                        }
-                    },
+                    new AcceptableTutorialUrl(),
                 ],
             ],
             [
@@ -282,41 +267,4 @@ class LogDetail extends Component
         ]);
     }
 
-    /**
-     * filter_var acepta hosts de una sola etiqueta (p. ej. https://example).
-     * Para documentación externa exigimos http(s) con host "usable": dominio con punto,
-     * localhost, IPv4 o IPv6 entre corchetes.
-     */
-    private function isAcceptableTutorialUrl(string $url): bool
-    {
-        if (filter_var($url, FILTER_VALIDATE_URL) === false) {
-            return false;
-        }
-
-        $parts = parse_url($url);
-        $scheme = strtolower((string) ($parts['scheme'] ?? ''));
-        if (! in_array($scheme, ['http', 'https'], true)) {
-            return false;
-        }
-
-        $host = (string) ($parts['host'] ?? '');
-        if ($host === '') {
-            return false;
-        }
-
-        $hostLower = strtolower($host);
-        if ($hostLower === 'localhost') {
-            return true;
-        }
-
-        if (preg_match('/^\d{1,3}(\.\d{1,3}){3}$/', $host) === 1) {
-            return true;
-        }
-
-        if (str_starts_with($host, '[') && str_contains($host, ':')) {
-            return true;
-        }
-
-        return str_contains($host, '.');
-    }
 }
