@@ -1,4 +1,16 @@
-<div x-data="{}">
+<div x-data="{
+    visited: JSON.parse(localStorage.getItem('visited_logs') ?? '[]'),
+    visit(id, url) {
+        if (!this.visited.includes(id)) {
+            this.visited.push(id);
+            if (this.visited.length > 500) {
+                this.visited = this.visited.slice(-500);
+            }
+            localStorage.setItem('visited_logs', JSON.stringify(this.visited));
+        }
+        window.location.href = url;
+    }
+}">
     <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div class="space-y-4">
@@ -171,9 +183,11 @@
 
         @foreach($logs as $log)
                 <tr
-                    class="align-top cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
-                    data-href="{{ route('logs.show', $log->id) }}"
-                    onclick="window.location.href=this.dataset.href"
+                    class="align-top cursor-pointer"
+                    :class="visited.includes({{ $log->id }})
+                        ? 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700'
+                        : 'hover:bg-slate-50 dark:hover:bg-slate-800'"
+                    @click="visit({{ $log->id }}, '{{ route('logs.show', $log->id) }}')"
                 >
                     <td class="px-3 py-2 text-slate-700 dark:text-slate-200">{{ $log->application?->name ?? '-' }}</td>
                     <td class="px-3 py-2 whitespace-nowrap">
@@ -182,7 +196,8 @@
                     <td class="min-w-[16rem] max-w-md px-3 py-2 text-slate-700 dark:text-slate-200 md:min-w-[18rem]">
                         <a
                             href="{{ route('logs.show', $log->id) }}"
-                            class="inline-block break-words hover:underline focus:outline-none focus:ring-2 focus:ring-[#5b3853]/30 rounded"
+                            class="inline-block break-words focus:outline-none focus:ring-2 focus:ring-[#5b3853]/30 rounded"
+                            @click.stop.prevent="visit({{ $log->id }}, '{{ route('logs.show', $log->id) }}')"
                         >
                             {{ \Illuminate\Support\Str::limit($log->message ?? '-', 120) }}
                         </a>
