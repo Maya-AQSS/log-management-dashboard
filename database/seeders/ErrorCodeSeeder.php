@@ -15,10 +15,28 @@ class ErrorCodeSeeder extends Seeder
     {
         $errorCodes = require database_path('data/mock-error-codes.php');
 
+        // Cache application name → id lookups
+        $appCache = [];
+
         foreach ($errorCodes as $errorCode) {
+            $appId = $errorCode['application_id'] ?? null;
+
+            // If no application_id, resolve from application name
+            if ($appId === null && isset($errorCode['application'])) {
+                $appName = $errorCode['application'];
+                if (!isset($appCache[$appName])) {
+                    $app = \App\Models\Application::firstOrCreate(
+                        ['name' => $appName],
+                        ['description' => $appName . ' application']
+                    );
+                    $appCache[$appName] = $app->id;
+                }
+                $appId = $appCache[$appName];
+            }
+
             $attributes = [
                 'code' => $errorCode['code'],
-                'application_id' => $errorCode['application_id'],
+                'application_id' => $appId,
                 'name' => $errorCode['name'],
                 'description' => $errorCode['description'] ?? null,
                 'file' => $errorCode['file'] ?? null,
@@ -28,7 +46,7 @@ class ErrorCodeSeeder extends Seeder
             ErrorCode::updateOrCreate(
                 [
                     'code' => $errorCode['code'],
-                    'application_id' => $errorCode['application_id'],
+                    'application_id' => $appId,
                 ],
                 $attributes
             );

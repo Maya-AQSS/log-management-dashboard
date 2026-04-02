@@ -1,0 +1,77 @@
+name: Run Tests (PostgreSQL)
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  tests:
+    name: Feature & Unit tests — PostgreSQL 18
+    runs-on: ubuntu-latest
+
+    services:
+      # Contenedor PostgreSQL 18 que levanta GitHub Actions automáticamente.
+      # Los health-checks garantizan que el contenedor esté listo antes de
+      # que los pasos siguientes intenten conectarse.
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: testing
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.4 with pgsql extension
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          # pdo_pgsql es la extensión PDO para PostgreSQL.
+          # opcache acelera la carga de PHP en CI.
+          extensions: pdo_pgsql, opcache
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Copy .env for CI
+        run: cp .env.example .env
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      # RefreshDatabase ejecuta las migraciones antes de cada test,
+      # incluyendo enable_pg_trgm_for_logs_message_search que instala
+      # la extensión pg_trgm y crea el índice GIN.
+      # No hace falta un paso explícito de migrate aquí.
+      # Usamos el binario de Pest directamente para evitar que artisan test
+      # pase --configuration implícitamente y colisione con el nuestro.
+      - name: Run tests against PostgreSQL 18
+        run: ./vendor/bin/pest --configuration=phpunit-pgsql.xml
+        env:
+          # Estas variables de entorno son redundantes con phpunit-pgsql.xml
+          # pero las exponemos explícitamente para que sean visibles en los logs de CI.
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: testing
+          DB_USERNAME: postgres
+          DB_PASSWORD: password
