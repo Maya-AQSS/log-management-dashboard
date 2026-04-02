@@ -9,7 +9,9 @@ use Illuminate\View\Component;
 class DashboardCard extends Component
 {
     public string $backgroundClass;
+
     public string $accentTextClass;
+
     public string $borderClass;
 
     public function __construct(

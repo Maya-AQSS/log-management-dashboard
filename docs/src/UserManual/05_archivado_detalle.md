@@ -34,12 +34,12 @@ Centralizar el conocimiento operativo generado alrededor de una incidencia ya ar
 
 ## CAPTURA
 
-![Pantalla de inicio de sesión](img/archived-logs-detalles.png)
+![Pantalla de inicio de sesión](img/archived-log-detalle.png)
  
-*Figura 1. Pantalla de detalles de log archivado*
+*Figura 1. Pantalla de Detalle de Log Archivado*
 
 ---
 
 ![Pantalla de inicio de sesión](img/archived-log-detalle-movil.png)
  
-*Figura 2. Pantalla de detalles de log archivado para móvil*
+*Figura 2. Pantalla de Detalle de Log Archivado para móvil*

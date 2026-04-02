@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -14,7 +13,20 @@ class ArchivedLog extends Model
     use HasFactory, SoftDeletes;
 
     const CREATED_AT = null;
+
     const UPDATED_AT = 'updated_at';
+
+    protected static function booted(): void
+    {
+        // En hard delete (forceDelete) el registro desaparece para siempre,
+        // por lo que los comentarios huérfanos deben eliminarse.
+        // La transacción que garantiza atomicidad debe ponerse en el Service
+        // que llame a forceDelete(), igual que en ErrorCodeService::delete().
+
+        static::forceDeleting(function (self $archivedLog) {
+            $archivedLog->comments()->delete();
+        });
+    }
 
     protected $fillable = [
         'application_id',

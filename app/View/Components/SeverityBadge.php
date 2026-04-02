@@ -64,6 +64,7 @@ class SeverityBadge extends Component
     ];
 
     public string $label;
+
     public string $classes;
 
     public function __construct(?string $severity = null)

@@ -6,6 +6,7 @@ use App\Models\ErrorCode;
 use App\Repositories\Contracts\ErrorCodeRepositoryInterface;
 use App\Services\Contracts\ErrorCodeServiceInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class ErrorCodeService implements ErrorCodeServiceInterface
 {
@@ -44,6 +45,9 @@ class ErrorCodeService implements ErrorCodeServiceInterface
 
     public function delete(ErrorCode $errorCode): void
     {
-        $this->errorCodeRepository->delete($errorCode);
+        // Use transaction to ensure data integrity
+        DB::transaction(function () use ($errorCode) {
+            $this->errorCodeRepository->delete($errorCode);
+        });
     }
 }

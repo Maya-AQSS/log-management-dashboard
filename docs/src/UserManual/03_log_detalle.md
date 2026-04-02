@@ -36,13 +36,13 @@ Ofrecer el contexto completo de la incidencia para decidir la accion operativa a
 ## CAPTURA
 
 
-![Pantalla de inicio de sesión](img/detalle-log.jpeg)
+![Pantalla de inicio de sesión](img/detalle-log.png)
  
-*Figura 1. Pantalla de detalles de log*
+*Figura 1. Pantalla de Detalle de Log*
 
 ---
 
 
-![Pantalla de inicio de sesión](img/log-detalles-movil.png)
+![Pantalla de inicio de sesión](img/log-detalle-movil.png)
  
-*Figura 2. Pantalla de detalles de log para movil*
+*Figura 2. Pantalla de Detalle de Log para móvil*

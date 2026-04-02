@@ -28,8 +28,7 @@ class DateRangeFilterRequest extends FormRequest
     {
         return [
             $fromField => ['nullable', 'date'],
-            $toField => ['nullable', 'date', 'after_or_equal:' . $fromField],
+            $toField => ['nullable', 'date', 'after_or_equal:'.$fromField],
         ];
     }
 }
-

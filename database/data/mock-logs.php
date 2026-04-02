@@ -13,8 +13,8 @@ $severityCounts = [
     'other' => 20,
 ];
 
-$applications = require __DIR__ . '/mock-applications.php';
-$errorCodes = require __DIR__ . '/mock-error-codes.php';
+$applications = require __DIR__.'/mock-applications.php';
+$errorCodes = require __DIR__.'/mock-error-codes.php';
 
 $applicationIds = array_values(array_map(
     static fn (array $application): int => (int) $application['id'],
@@ -32,9 +32,8 @@ $messageBody = trim(implode(' ', array_fill(0, 36, $longSegment)));
 foreach ($severityCounts as $severity => $count) {
     for ($i = 1; $i <= $count; $i++) {
         $createdAt = $baseDate
-            ->modify('-' . (($id - 1) * 3) . ' minutes')
+            ->modify('-'.(($id - 1) * 3).' minutes')
             ->format('Y-m-d H:i:s');
-
 
         $message = sprintf('Seed: %s log #%03d - %s', $severity, $i, $messageBody);
 
@@ -72,7 +71,7 @@ foreach ($severityCounts as $severity => $count) {
 $duplicateBaseDate = $baseDate->modify('+1 day');
 $duplicateApplicationId = 1; // api-gateway
 $duplicateErrorCodeId = $errorCodeByApplication[$duplicateApplicationId] ?? null;
-$duplicateMessage = 'Seed duplicate: repeated message for archived matching checks - ' . $messageBody;
+$duplicateMessage = 'Seed duplicate: repeated message for archived matching checks - '.$messageBody;
 
 for ($i = 1; $i <= 6; $i++) {
     $rows[] = [
@@ -89,7 +88,7 @@ for ($i = 1; $i <= 6; $i++) {
         ],
         'resolved' => $i % 2 === 0,
         'created_at' => $duplicateBaseDate
-            ->modify('+' . (($i - 1) * 2) . ' minutes')
+            ->modify('+'.(($i - 1) * 2).' minutes')
             ->format('Y-m-d H:i:s'),
     ];
 }

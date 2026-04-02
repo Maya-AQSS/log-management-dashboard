@@ -1,10 +1,10 @@
 <?php
 
 return [
-    'encoding'      => 'UTF-8',
-    'finalize'      => true,
+    'encoding' => 'UTF-8',
+    'finalize' => true,
     'ignoreNonStrings' => false,
-    'cachePath'     => storage_path('app/purifier'),
+    'cachePath' => storage_path('app/purifier'),
     'cacheFileMode' => 0755,
 
     'settings' => [
@@ -16,37 +16,35 @@ return [
          * (STRIDE E-RTE-01).
          */
         'default' => [
-            'HTML.Doctype'    => 'HTML 4.01 Transitional',
-            'HTML.Allowed'    =>
-                'p,br,b,strong,i,em,s,ul,ol,li,' .
-                'h1,h2,h3,h4,h5,h6,' .
-                'blockquote,code,pre,hr,' .
-                'a[href|rel|target],' .
+            'HTML.Doctype' => 'HTML 4.01 Transitional',
+            'HTML.Allowed' => 'p,br,b,strong,i,em,s,ul,ol,li,'.
+                'h1,h2,h3,h4,h5,h6,'.
+                'blockquote,code,pre,hr,'.
+                'a[href|rel|target],'.
                 'img[src|alt|width|height]',
-            'CSS.AllowedProperties'  => '',
+            'CSS.AllowedProperties' => '',
             'AutoFormat.AutoParagraph' => false,
-            'AutoFormat.RemoveEmpty'   => false,
+            'AutoFormat.RemoveEmpty' => false,
             // Permite data: URIs para imágenes base64 embebidas
             'URI.AllowedSchemes' => ['http' => true, 'https' => true, 'data' => true],
             'Attr.AllowedFrameTargets' => ['_blank'],
         ],
         'rich_comment' => [
-            'HTML.Doctype'    => 'HTML 4.01 Transitional',
-            'HTML.Allowed'    =>
-                'p[style],br,b,strong,i,em,s,u,' .
-                'ul[data-type],ol,' .
-                'li[data-type|data-checked],' .
-                'h1[style],h2[style],h3[style],h4[style],h5[style],h6[style],' .
-                'blockquote,code,pre,hr,' .
-                'a[href|rel|target],' .
-                'img[src|alt|width|height],' .
-                'mark[style|data-color],' .
-                'span[style],' .
-                'sup,sub,' .
+            'HTML.Doctype' => 'HTML 4.01 Transitional',
+            'HTML.Allowed' => 'p[style],br,b,strong,i,em,s,u,'.
+                'ul[data-type],ol,'.
+                'li[data-type|data-checked],'.
+                'h1[style],h2[style],h3[style],h4[style],h5[style],h6[style],'.
+                'blockquote,code,pre,hr,'.
+                'a[href|rel|target],'.
+                'img[src|alt|width|height],'.
+                'mark[style|data-color],'.
+                'span[style],'.
+                'sup,sub,'.
                 'div',
-            'CSS.AllowedProperties'  => 'text-align,color,background-color',
+            'CSS.AllowedProperties' => 'text-align,color,background-color',
             'AutoFormat.AutoParagraph' => false,
-            'AutoFormat.RemoveEmpty'   => false,
+            'AutoFormat.RemoveEmpty' => false,
             'URI.AllowedSchemes' => ['http' => true, 'https' => true, 'data' => true],
             'Attr.AllowedFrameTargets' => ['_blank'],
         ],
@@ -57,8 +55,8 @@ return [
          * Se aplica a todos los perfiles. Rev debe incrementarse si se añaden atributos.
          */
         'custom_definition' => [
-            'id'    => 'tiptap-tasklist',
-            'rev'   => 4,
+            'id' => 'tiptap-tasklist',
+            'rev' => 4,
             'debug' => false,
             'elements' => [
                 // <mark> es HTML5 — no existe en HTML 4.01 Transitional.

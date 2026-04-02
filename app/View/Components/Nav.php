@@ -21,7 +21,7 @@ class Nav extends Component
         $base = 'px-3 py-2 rounded-full text-base font-medium transition-colors';
         $active = 'bg-white/15 text-white';
         $inactive = 'text-white/80 hover:bg-white/10';
-        
+
         return request()->routeIs($pattern) ? "$base $active" : "$base $inactive";
     }
 

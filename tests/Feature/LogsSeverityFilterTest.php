@@ -215,4 +215,3 @@ class LogsSeverityFilterTest extends TestCase
         DB::table('logs')->insert($rows);
     }
 }
-

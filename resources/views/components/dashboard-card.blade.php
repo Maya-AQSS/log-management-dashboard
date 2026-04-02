@@ -1,6 +1,6 @@
 <a
     href="{{ $href }}"
-    class="block rounded-xl border {{ $borderClass }} {{ $backgroundClass }} p-6 min-h-44 shadow-card hover:shadow-card-md transition ring-1 ring-black/5 dark:ring-white/10"
+    class="block rounded-2xl border {{ $borderClass }} {{ $backgroundClass }} min-h-44 p-6 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b3853] dark:ring-white/10"
 >
     <div class="text-2xl font-extrabold uppercase tracking-wide {{ $accentTextClass }}">
         {{ $title }}

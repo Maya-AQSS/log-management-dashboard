@@ -12,9 +12,9 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Livewire\Component;
 use Mews\Purifier\Facades\Purifier;
 use Throwable;
-use Livewire\Component;
 
 class CommentThread extends Component
 {
@@ -70,8 +70,7 @@ class CommentThread extends Component
             session()->flash('status', __('comments.flash.created'));
             $this->newCommentKey++;
             $this->content = '';
-        }
-        catch (ValidationException $e) {
+        } catch (ValidationException $e) {
             throw $e;
         } catch (Throwable $e) {
             report($e);
@@ -230,8 +229,8 @@ class CommentThread extends Component
             abort(404);
         }
 
-        $allowedTypes = (new Comment())->allowedTypes();
-        if (!in_array($class, $allowedTypes, true)) {
+        $allowedTypes = (new Comment)->allowedTypes();
+        if (! in_array($class, $allowedTypes, true)) {
             abort(404);
         }
 
@@ -296,7 +295,7 @@ class CommentThread extends Component
                 ]);
             }
 
-            if (!$this->isAllowedImageByMagicBytes($decoded)) {
+            if (! $this->isAllowedImageByMagicBytes($decoded)) {
                 throw ValidationException::withMessages([
                     $field => __('comments.editor.image_invalid_type'),
                 ]);
@@ -338,7 +337,7 @@ class CommentThread extends Component
 
     private function errorStatus(Throwable $e): string
     {
-        if (!config('app.debug')) {
+        if (! config('app.debug')) {
             return __('comments.flash.error');
         }
 

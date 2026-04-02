@@ -2,13 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-
+use App\Models\ArchivedLog;
 use App\Models\Comment;
 use App\Models\ErrorCode;
-use App\Models\ArchivedLog;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class CommentSeeder extends Seeder
 {
@@ -54,9 +52,9 @@ class CommentSeeder extends Seeder
             ]
         );
 
-        /* 
-        TODO: Necesario mientras exista el seeder porque sino el id autoincremental de la BD se desincroniza con el id de la tabla. 
-        Resync de la secuencia PostgreSQL para evitar UniqueConstraintViolation al insertar nuevos comentarios 
+        /*
+        TODO: Necesario mientras exista el seeder porque sino el id autoincremental de la BD se desincroniza con el id de la tabla.
+        Resync de la secuencia PostgreSQL para evitar UniqueConstraintViolation al insertar nuevos comentarios
         Al eliminarlo será necesario hacer "sail migrate:fresh --seed"
         */
         if (DB::getDriverName() === 'pgsql') {

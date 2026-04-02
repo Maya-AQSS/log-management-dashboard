@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (DB::connection()->getDriverName() !== 'pgsql' || !Schema::hasTable('logs')) {
+        if (DB::connection()->getDriverName() !== 'pgsql' || ! Schema::hasTable('logs')) {
             return;
         }
 

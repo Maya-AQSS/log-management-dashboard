@@ -15,9 +15,10 @@ class LogSeeder extends Seeder
             if (isset($row['metadata']) && is_array($row['metadata'])) {
                 $row['metadata'] = json_encode($row['metadata'], JSON_UNESCAPED_UNICODE);
             }
+
             return $row;
         }, $mockLogs);
-        
+
         DB::table('logs')->insert($rows);
 
         if (DB::getDriverName() === 'pgsql') {
