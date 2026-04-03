@@ -35,7 +35,6 @@ class ErrorCodeRequest extends FormRequest
             'name' => ['required', 'string', 'max:200'],
             'file' => ['nullable', 'string', 'max:255'],
             'line' => ['nullable', 'integer', 'min:1'],
-            'severity' => ['nullable', Rule::in(['critical', 'high', 'medium', 'low', 'other'])],
             'description' => ['nullable', 'string', 'max:5000'],
         ];
     }
@@ -54,7 +53,6 @@ class ErrorCodeRequest extends FormRequest
             'file.max' => __('error_codes.validation.file_max'),
             'line.integer' => __('error_codes.validation.line_integer'),
             'line.min' => __('error_codes.validation.line_min'),
-            'severity.in' => __('error_codes.validation.severity_invalid'),
         ];
     }
 }
