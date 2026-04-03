@@ -11,7 +11,13 @@ class LogSeeder extends Seeder
     {
         $mockLogs = require database_path('data/mock-logs.php');
 
-        $rows = array_map(function (array $row) {
+        $errorCodeIdByCode = DB::table('error_codes')->pluck('id', 'code')->toArray();
+
+        $rows = array_map(function (array $row) use ($errorCodeIdByCode) {
+            if (isset($row['error_code_id']) && is_string($row['error_code_id'])) {
+                $row['error_code_id'] = $errorCodeIdByCode[$row['error_code_id']] ?? null;
+            }
+
             if (isset($row['metadata']) && is_array($row['metadata'])) {
                 $row['metadata'] = json_encode($row['metadata'], JSON_UNESCAPED_UNICODE);
             }
