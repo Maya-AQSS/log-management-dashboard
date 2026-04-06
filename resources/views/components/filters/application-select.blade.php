@@ -7,7 +7,7 @@
 
     <div class="relative">
         <select
-            {{ $attributes->class('w-full appearance-none rounded-xl border border-slate-300 bg-white px-3 py-2 pr-10 text-base shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-primary focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20') }}
+            {{ $attributes->class('w-full appearance-none rounded-xl border border-slate-300 bg-white px-3 py-2 pr-10 text-base shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-primary focus:border-odoo-purple focus:outline-none focus:ring-2 focus:ring-odoo-purple/20') }}
         >
             <option value="">{{ $placeholder }}</option>
             @foreach($applications as $id => $name)

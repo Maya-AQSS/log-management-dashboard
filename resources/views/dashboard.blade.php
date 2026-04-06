@@ -28,7 +28,7 @@
                 class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-slate-50/90 via-white to-[#faf8fc] p-6 shadow-inner shadow-slate-900/[0.03] dark:border-slate-700 dark:from-slate-900/80 dark:via-slate-950 dark:to-slate-900/60"
             >
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-                    <div class="min-w-0 border-l-4 border-[#5b3853] pl-4">
+                    <div class="min-w-0 border-l-4 border-odoo-purple pl-4">
                         <h2
                             id="dashboard-by-app-heading"
                             class="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-2xl"

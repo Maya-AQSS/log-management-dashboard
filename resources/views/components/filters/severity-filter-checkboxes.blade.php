@@ -20,7 +20,7 @@
                     type="checkbox"
                     value="{{ $severity }}"
                     wire:model.defer="{{ $wireModel }}"
-                    class="h-4 w-4 rounded border-slate-300 bg-white text-[#5b3853] shadow-sm focus:ring-[#5b3853]/30 dark:border-ui-dark-border dark:bg-ui-dark-card"
+                    class="h-4 w-4 rounded border-slate-300 bg-white text-odoo-purple shadow-sm focus:ring-odoo-purple/30 dark:border-ui-dark-border dark:bg-ui-dark-card"
                 />
                 {{ __('severity.' . $severity) }}
             </label>

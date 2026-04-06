@@ -46,7 +46,7 @@
                 x-model="localFrom"
                 x-on:change="$wire.set('{{ $wireModelFrom }}', toIsoStart(localFrom), false); validateRange()"
                 aria-label="{{ $fromLabel }}"
-                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-primary focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
+                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-primary focus:border-odoo-purple focus:outline-none focus:ring-2 focus:ring-odoo-purple/20"
             />
         </div>
 
@@ -59,7 +59,7 @@
                 x-model="localTo"
                 x-on:change="$wire.set('{{ $wireModelTo }}', toIsoEnd(localTo), false); validateRange()"
                 aria-label="{{ $toLabel }}"
-                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-primary focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
+                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-primary focus:border-odoo-purple focus:outline-none focus:ring-2 focus:ring-odoo-purple/20"
             />
         </div>
     </div>

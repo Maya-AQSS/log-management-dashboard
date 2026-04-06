@@ -31,7 +31,7 @@
                         @class([
                             'inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold shadow-sm',
                             'border border-red-200 bg-red-50 text-red-700 hover:bg-red-100' => $confirmVariant === 'danger',
-                            'bg-[#5b3853] text-white hover:bg-[#4a2d44]' => $confirmVariant === 'primary',
+                            'bg-odoo-purple text-white hover:bg-odoo-purple-d' => $confirmVariant === 'primary',
                         ])
                     >
                         {{ $resolvedConfirmLabel }}
