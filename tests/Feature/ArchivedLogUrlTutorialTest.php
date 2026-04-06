@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\LogDetail;
+use App\Livewire\ArchivedLogDetail;
 use App\Models\Application;
 use App\Models\ArchivedLog;
 use App\Models\ErrorCode;
@@ -47,7 +47,7 @@ class ArchivedLogUrlTutorialTest extends TestCase
         $url = 'https://docs.example.com/how-to-fix';
 
         Livewire::actingAs($user)
-            ->test(LogDetail::class, ['source' => 'archived_log', 'recordId' => $archivedLog->id])
+            ->test(ArchivedLogDetail::class, ['archivedLogId' => $archivedLog->id])
             ->call('startEditingUrlTutorial')
             ->assertSet('editingUrlTutorial', true)
             ->set('urlTutorialInput', $url)
@@ -88,7 +88,7 @@ class ArchivedLogUrlTutorialTest extends TestCase
         ]);
 
         Livewire::actingAs($user)
-            ->test(LogDetail::class, ['source' => 'archived_log', 'recordId' => $archivedLog->id])
+            ->test(ArchivedLogDetail::class, ['archivedLogId' => $archivedLog->id])
             ->call('startEditingUrlTutorial')
             ->set('urlTutorialInput', 'no-es-una-url')
             ->call('updateUrlTutorial')
@@ -128,7 +128,7 @@ class ArchivedLogUrlTutorialTest extends TestCase
         ]);
 
         Livewire::actingAs($user)
-            ->test(LogDetail::class, ['source' => 'archived_log', 'recordId' => $archivedLog->id])
+            ->test(ArchivedLogDetail::class, ['archivedLogId' => $archivedLog->id])
             ->call('startEditingUrlTutorial')
             ->set('urlTutorialInput', 'https://example')
             ->call('updateUrlTutorial')
@@ -170,7 +170,7 @@ class ArchivedLogUrlTutorialTest extends TestCase
         ]);
 
         Livewire::actingAs($other)
-            ->test(LogDetail::class, ['source' => 'archived_log', 'recordId' => $archivedLog->id])
+            ->test(ArchivedLogDetail::class, ['archivedLogId' => $archivedLog->id])
             ->set('editingUrlTutorial', true)
             ->set('urlTutorialInput', 'https://example.com/doc')
             ->call('updateUrlTutorial')
@@ -211,7 +211,7 @@ class ArchivedLogUrlTutorialTest extends TestCase
         ]);
 
         Livewire::actingAs($user)
-            ->test(LogDetail::class, ['source' => 'archived_log', 'recordId' => $archivedLog->id])
+            ->test(ArchivedLogDetail::class, ['archivedLogId' => $archivedLog->id])
             ->call('startEditingUrlTutorial')
             ->set('urlTutorialInput', 'https://other.example.com/changed')
             ->call('cancelEditingUrlTutorial')
