@@ -1,5 +1,5 @@
 <div x-data="{}">
-    <div class="mt-4 rounded-2xl border border-ui-border bg-ui-body p-4 dark:border-ui-dark-border dark:bg-ui-dark-bg">
+    <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div class="space-y-4">
                 <div>
@@ -171,7 +171,7 @@
 
         @foreach($logs as $log)
                 <tr
-                    class="align-top hover:bg-ui-body dark:hover:bg-ui-dark-card border-b border-ui-border-l dark:border-ui-dark-border-l"
+                    class="align-top hover:bg-slate-50 dark:hover:bg-slate-800"
                 >
                     <td class="px-3 py-2 text-text-primary dark:text-text-dark-primary">{{ $log->application?->name ?? '-' }}</td>
                     <td class="px-3 py-2 whitespace-nowrap">
@@ -180,7 +180,7 @@
                     <td class="min-w-[16rem] max-w-md px-3 py-2 text-text-primary dark:text-text-dark-primary md:min-w-[18rem]">
                         <a
                             href="{{ route('logs.show', $log->id) }}"
-                            class="inline-block break-words text-text-link hover:underline focus:outline-none focus:ring-2 focus:ring-odoo-purple/30 rounded"
+                            class="inline-block break-words hover:underline focus:outline-none focus:ring-2 focus:ring-[#5b3853]/30 rounded"
                         >
                             {{ \Illuminate\Support\Str::limit($log->message ?? '-', 120) }}
                         </a>
