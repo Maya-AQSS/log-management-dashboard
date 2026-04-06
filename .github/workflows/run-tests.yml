@@ -46,8 +46,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: vendor
-          key: composer-${{ hashFiles('composer.lock') }}
-          restore-keys: composer-
+          key: composer-v2-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-v2-
 
       - name: Copy .env for CI
         run: cp .env.example .env
