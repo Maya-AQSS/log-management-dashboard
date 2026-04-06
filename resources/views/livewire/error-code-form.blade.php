@@ -141,7 +141,7 @@
                         id="application_id"
                         name="application_id"
                         @class([
-                            'mt-1 w-full rounded-xl border px-3 py-2.5 text-sm shadow-inner focus:outline-none focus:ring-2 dark:text-slate-100 pr-10',
+                            'mt-1 w-full appearance-none rounded-xl border px-3 py-2.5 text-sm shadow-inner focus:outline-none focus:ring-2 dark:text-slate-100 pr-10',
                             'border-odoo-purple/40 bg-white text-slate-900 focus:border-odoo-purple focus:ring-odoo-purple/25 dark:border-slate-500 dark:bg-slate-950 dark:focus:border-odoo-purple-l dark:focus:ring-odoo-purple/40' => $formActive,
                             'cursor-not-allowed border-slate-200 bg-white text-slate-700 opacity-90 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-300' => ! $formActive,
                         ])
