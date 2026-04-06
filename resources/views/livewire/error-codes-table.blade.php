@@ -9,7 +9,7 @@
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="searchInput"
-                    class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-primary focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/20"
+                    class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-primary focus:border-odoo-purple focus:outline-none focus:ring-2 focus:ring-odoo-purple/20"
                     placeholder="{{ __('error_codes.filters.search_placeholder') }}"
                 />
             </div>
@@ -27,7 +27,7 @@
                 <button
                     type="button"
                     wire:click="applyFilters"
-                    class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-base font-semibold text-white hover:bg-[#4a2d44]"
+                    class="inline-flex items-center rounded-full bg-odoo-purple px-4 py-2 text-base font-semibold text-white hover:bg-odoo-purple-d"
                 >
                     {{ __('error_codes.buttons.apply') }}
                 </button>
