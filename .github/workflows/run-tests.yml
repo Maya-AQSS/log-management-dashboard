@@ -58,12 +58,6 @@ jobs:
       - name: Generate application key
         run: php artisan key:generate
 
-        # --- Tests ---
-      - name: List vendor bin for debugging
-        run: |
-          ls -F vendor/bin 
-          pwd
-
       # RefreshDatabase ejecuta las migraciones antes de cada test,
       # incluyendo enable_pg_trgm_for_logs_message_search que instala
       # la extensión pg_trgm y crea el índice GIN.
