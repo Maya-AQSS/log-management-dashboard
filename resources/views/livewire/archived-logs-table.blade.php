@@ -1,5 +1,5 @@
 <div x-data="{}">
-    <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
+    <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-ui-dark-border dark:bg-ui-dark-card">
         <div class="grid grid-cols-1 gap-3 md:grid-cols-5 md:items-end">
             <div class="md:col-span-2">
                 <x-date-range-filter
