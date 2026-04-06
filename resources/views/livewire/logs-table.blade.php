@@ -171,19 +171,16 @@
 
         @foreach($logs as $log)
                 <tr
-                    class="align-top hover:bg-slate-50 dark:hover:bg-slate-800"
+                    class="align-top cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
+                    data-href="{{ route('logs.show', $log->id) }}"
+                    onclick="window.location.href=this.dataset.href"
                 >
                     <td class="px-3 py-2 text-text-primary dark:text-text-dark-primary">{{ $log->application?->name ?? '-' }}</td>
                     <td class="px-3 py-2 whitespace-nowrap">
                         <x-severity-badge :severity="$log->severity" />
                     </td>
                     <td class="min-w-[16rem] max-w-md px-3 py-2 text-text-primary dark:text-text-dark-primary md:min-w-[18rem]">
-                        <a
-                            href="{{ route('logs.show', $log->id) }}"
-                            class="inline-block break-words hover:underline focus:outline-none focus:ring-2 focus:ring-[#5b3853]/30 rounded"
-                        >
-                            {{ \Illuminate\Support\Str::limit($log->message ?? '-', 120) }}
-                        </a>
+                        <span class="break-words">{{ \Illuminate\Support\Str::limit($log->message ?? '-', 120) }}</span>
                     </td>
                     <td class="px-3 py-2 text-text-primary whitespace-nowrap dark:text-text-dark-primary">{{ $log->errorCode?->code ?? '-' }}</td>
                     <td class="px-3 py-2 text-text-primary whitespace-nowrap dark:text-text-dark-primary">
