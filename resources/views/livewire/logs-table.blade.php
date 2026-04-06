@@ -103,7 +103,7 @@
             <button
                 type="button"
                 wire:click="resetFilters"
-                class="inline-flex items-center rounded-full border border-ui-border bg-ui-card px-4 py-2 text-base font-semibold text-text-primary hover:bg-ui-body"
+                class="inline-flex items-center rounded-full border border-slate-300 bg-white px-4 py-2 text-base font-semibold text-slate-800 hover:bg-slate-50"
             >
                 {{ __('logs.buttons.reset') }}
             </button>
