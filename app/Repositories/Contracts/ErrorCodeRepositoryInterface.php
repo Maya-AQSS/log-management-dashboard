@@ -12,7 +12,6 @@ interface ErrorCodeRepositoryInterface
     public function searchAndFilter(
         ?string $search,
         ?int $filterApp,
-        ?string $severity,
         int $perPage = 15
     ): LengthAwarePaginator;
 

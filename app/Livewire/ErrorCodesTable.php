@@ -99,7 +99,6 @@ class ErrorCodesTable extends Component
         $errorCodes = $this->errorCodeService->searchAndFilter(
             $this->search !== '' ? $this->search : null,
             $this->filterApp,
-            null,
             15
         );
 
