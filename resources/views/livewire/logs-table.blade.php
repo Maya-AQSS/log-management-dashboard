@@ -1,9 +1,9 @@
 <div x-data="{}">
-    <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
+    <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-ui-dark-border dark:bg-ui-dark-card">
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div class="space-y-4">
                 <div>
-                    <label class="mb-1 block text-sm font-medium text-text-primary dark:text-text-dark-primary">
+                    <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
                         {{ __('logs.filters.search') }}
                     </label>
                     <input
@@ -50,13 +50,13 @@
                     @if($hasResolvedSelected) open @endif
                     class="group rounded-xl border border-ui-border bg-ui-card px-3 py-2 shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card"
                 >
-                    <summary class="list-none cursor-pointer select-none flex items-center justify-between gap-3 text-sm font-medium text-text-primary dark:text-text-dark-primary">
+                    <summary class="list-none cursor-pointer select-none flex items-center justify-between gap-3 text-sm font-medium text-slate-700 dark:text-slate-200">
                         <span>{{ __('logs.filters.resolved_group') }}</span>
                         <x-chevron-down class="transition-transform group-open:rotate-180" />
                     </summary>
 
                     <div class="mt-2 grid grid-cols-1 gap-2">
-                        <label class="flex items-center gap-2 text-sm font-medium text-text-primary dark:text-text-dark-primary">
+                        <label class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
                             <input
                                 type="radio"
                                 name="resolved-filter"
@@ -66,7 +66,7 @@
                             />
                             {{ __('logs.filters.resolved_all') }}
                         </label>
-                        <label class="flex items-center gap-2 text-sm font-medium text-text-primary dark:text-text-dark-primary">
+                        <label class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
                             <input
                                 type="radio"
                                 name="resolved-filter"
@@ -76,7 +76,7 @@
                             />
                             {{ __('logs.filters.resolved_resolved') }}
                         </label>
-                        <label class="flex items-center gap-2 text-sm font-medium text-text-primary dark:text-text-dark-primary">
+                        <label class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
                             <input
                                 type="radio"
                                 name="resolved-filter"
@@ -95,7 +95,7 @@
             <button
                 type="button"
                 x-on:click="$dispatch('logs-apply-requested')"
-                class="inline-flex items-center rounded-full bg-odoo-purple px-4 py-2 text-base font-semibold text-white hover:bg-odoo-dark-purple"
+                class="inline-flex items-center rounded-full bg-odoo-purple px-4 py-2 text-base font-semibold text-white hover:bg-odoo-purple-d"
             >
                 {{ __('logs.buttons.apply') }}
             </button>
@@ -103,7 +103,7 @@
             <button
                 type="button"
                 wire:click="resetFilters"
-                class="inline-flex items-center rounded-full border border-ui-border bg-ui-card px-4 py-2 text-base font-semibold text-text-primary hover:bg-ui-body"
+                class="inline-flex items-center rounded-full border border-slate-300 bg-white px-4 py-2 text-base font-semibold text-slate-800 hover:bg-slate-50"
             >
                 {{ __('logs.buttons.reset') }}
             </button>
@@ -171,25 +171,22 @@
 
         @foreach($logs as $log)
                 <tr
-                    class="align-top hover:bg-slate-50 dark:hover:bg-slate-800"
+                    class="align-top cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
+                    data-href="{{ route('logs.show', $log->id) }}"
+                    onclick="window.location.href=this.dataset.href"
                 >
-                    <td class="px-3 py-2 text-text-primary dark:text-text-dark-primary">{{ $log->application?->name ?? '-' }}</td>
+                    <td class="px-3 py-2 text-slate-700 dark:text-slate-200">{{ $log->application?->name ?? '-' }}</td>
                     <td class="px-3 py-2 whitespace-nowrap">
                         <x-severity-badge :severity="$log->severity" />
                     </td>
-                    <td class="min-w-[16rem] max-w-md px-3 py-2 text-text-primary dark:text-text-dark-primary md:min-w-[18rem]">
-                        <a
-                            href="{{ route('logs.show', $log->id) }}"
-                            class="inline-block break-words hover:underline focus:outline-none focus:ring-2 focus:ring-[#5b3853]/30 rounded"
-                        >
-                            {{ \Illuminate\Support\Str::limit($log->message ?? '-', 120) }}
-                        </a>
+                    <td class="min-w-[16rem] max-w-md px-3 py-2 text-slate-700 dark:text-slate-200 md:min-w-[18rem]">
+                        <span class="break-words">{{ \Illuminate\Support\Str::limit($log->message ?? '-', 120) }}</span>
                     </td>
-                    <td class="px-3 py-2 text-text-primary whitespace-nowrap dark:text-text-dark-primary">{{ $log->errorCode?->code ?? '-' }}</td>
-                    <td class="px-3 py-2 text-text-primary whitespace-nowrap dark:text-text-dark-primary">
+                    <td class="px-3 py-2 text-slate-700 whitespace-nowrap dark:text-slate-200">{{ $log->errorCode?->code ?? '-' }}</td>
+                    <td class="px-3 py-2 text-slate-700 whitespace-nowrap dark:text-slate-200">
                         {{ optional($log->created_at)->locale(app()->getLocale())->translatedFormat('d F Y H:i:s') ?? '-' }}
                     </td>
-                    <td class="px-3 py-2 text-text-primary whitespace-nowrap dark:text-text-dark-primary">
+                    <td class="px-3 py-2 text-slate-700 whitespace-nowrap dark:text-slate-200">
                         <div class="flex flex-wrap gap-2">
                             @if($log->resolved)
                                 <span class="inline-flex items-center rounded-full bg-cyan-100 px-2 py-0.5 text-xs font-semibold text-cyan-800">

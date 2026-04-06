@@ -19,7 +19,7 @@
                 <button
                     type="button"
                     wire:click="previousPage('{{ $paginator->getPageName() }}')"
-                    class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-[#5b3853] border border-[#5b3853] leading-5 hover:bg-[#4a2d44] hover:border-[#4a2d44] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/30 active:bg-[#3f243c] dark:bg-[#5b3853] dark:border-[#5b3853] dark:hover:bg-[#4a2d44] rounded-l-md transition-colors duration-150"
+                    class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-odoo-purple border border-odoo-purple leading-5 hover:bg-odoo-purple-d hover:border-odoo-purple-d focus:outline-none focus:ring-2 focus:ring-odoo-purple/30 active:bg-[#3f243c] dark:bg-odoo-purple dark:border-odoo-purple dark:hover:bg-odoo-purple-d rounded-l-md transition-colors duration-150"
                     aria-label="{{ __('pagination.previous') }}"
                 >
                     {!! __('pagination.previous') !!}
@@ -56,7 +56,7 @@
                         <button
                             type="button"
                             wire:click="gotoPage({{ $page }}, '{{ $paginator->getPageName() }}')"
-                            class="inline-flex items-center justify-center min-w-[2.25rem] px-3 py-2 text-sm font-medium text-slate-700 bg-transparent border border-transparent rounded-md hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5b3853]/30 dark:hover:bg-slate-700 dark:text-slate-200"
+                            class="inline-flex items-center justify-center min-w-[2.25rem] px-3 py-2 text-sm font-medium text-slate-700 bg-transparent border border-transparent rounded-md hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-odoo-purple/30 dark:hover:bg-slate-700 dark:text-slate-200"
                             aria-label="{{ __('Go to page :page', ['page' => $page]) }}"
                         >
                             {{ $page }}
@@ -76,7 +76,7 @@
                 <button
                     type="button"
                     wire:click="nextPage('{{ $paginator->getPageName() }}')"
-                    class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-[#5b3853] border border-[#5b3853] leading-5 hover:bg-[#4a2d44] hover:border-[#4a2d44] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/30 active:bg-[#3f243c] dark:bg-[#5b3853] dark:border-[#5b3853] dark:hover:bg-[#4a2d44] rounded-r-md transition-colors duration-150"
+                    class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-odoo-purple border border-odoo-purple leading-5 hover:bg-odoo-purple-d hover:border-odoo-purple-d focus:outline-none focus:ring-2 focus:ring-odoo-purple/30 active:bg-[#3f243c] dark:bg-odoo-purple dark:border-odoo-purple dark:hover:bg-odoo-purple-d rounded-r-md transition-colors duration-150"
                     aria-label="{{ __('pagination.next') }}"
                 >
                     {!! __('pagination.next') !!}

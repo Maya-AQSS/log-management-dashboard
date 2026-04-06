@@ -36,7 +36,7 @@
                         <button
                             type="button"
                             x-on:click="confirmArchiveOpen = true"
-                            class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#4a2d44]"
+                            class="inline-flex items-center rounded-full bg-odoo-purple px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-odoo-purple-d"
                         >
                             {{ __('logs.buttons.archive') }}
                         </button>
@@ -52,7 +52,7 @@
                         <button
                             type="button"
                             x-on:click="confirmResolveOpen = true"
-                            class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#4a2d44]"
+                            class="inline-flex items-center rounded-full bg-odoo-purple px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-odoo-purple-d"
                         >
                             {{ __('logs.buttons.solved') }}
                         </button>

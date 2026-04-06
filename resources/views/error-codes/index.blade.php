@@ -9,7 +9,7 @@
         <div class="flex justify-center md:justify-end">
             <a
                 href="{{ route('error-codes.create') }}"
-                class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-base font-semibold text-white hover:bg-[#4a2d44]"
+                class="inline-flex items-center rounded-full bg-odoo-purple px-4 py-2 text-base font-semibold text-white hover:bg-odoo-purple-d"
             >
                 {{ __('error_codes.buttons.create') }}
             </a>
