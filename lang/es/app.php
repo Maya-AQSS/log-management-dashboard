@@ -2,7 +2,7 @@
 
 return [
 
-    'app_name' => 'Panel de gestión de logs',
+    'app_name' => 'Maya Logs',
 
     /* Navegación */
     'nav_user' => 'Usuario',

@@ -1,14 +1,5 @@
 <x-layout>
-    <div class="w-full pb-2">
-        <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50 md:text-4xl">
-            {{ __('dashboard.title') }}
-        </h1>
-        <p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-            {{ __('dashboard.subtitle') }}
-        </p>
-    </div>
-
-    <div class="mt-8 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 lg:gap-x-10 lg:gap-y-8">
+    <div class="py-3 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
         @foreach($cards as $card)
             <x-dashboard-card
                 :title="$card['title']"
@@ -23,19 +14,19 @@
     </div>
 
     @if($applicationTotals !== [])
-        <section class="mt-20 w-full md:mt-28" aria-labelledby="dashboard-by-app-heading">
+        <section class="py-3 w-full" aria-labelledby="dashboard-by-app-heading">
             <div
-                class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-slate-50/90 via-white to-[#faf8fc] p-6 shadow-inner shadow-slate-900/[0.03] dark:border-slate-700 dark:from-slate-900/80 dark:via-slate-950 dark:to-slate-900/60"
+                class="rounded-lg border border-ui-border bg-ui-card p-6 shadow-card dark:border-ui-dark-border dark:bg-ui-dark-card"
             >
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                     <div class="min-w-0 border-l-4 border-odoo-purple pl-4">
                         <h2
                             id="dashboard-by-app-heading"
-                            class="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-2xl"
+                            class="text-xl font-bold tracking-tight text-text-primary dark:text-text-dark-primary sm:text-2xl"
                         >
                             {{ __('dashboard.by_application') }}
                         </h2>
-                        <p class="mt-1.5 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                        <p class="mt-1.5 max-w-xl text-sm leading-relaxed text-text-secondary dark:text-text-dark-secondary">
                             {{ __('dashboard.by_application_hint') }}
                         </p>
                     </div>

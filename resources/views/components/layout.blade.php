@@ -19,17 +19,20 @@
     @vite(['resources/css/app.css', 'resources/js/tiptap-editor.js'])
     @livewireStyles
 </head>
-<body class="min-h-screen bg-ui-body text-text-primary font-sans dark:bg-ui-dark-bg dark:text-text-dark-primary">
-    <x-nav />
+<body class="min-h-screen bg-ui-body text-text-primary font-sans antialiased dark:bg-ui-dark-bg dark:text-text-dark-primary">
 
-    <div class="mx-auto max-w-7xl px-4 py-6">
-        @if (session('status'))
-            <div class="mb-4 rounded-lg bg-success-light text-success-dark dark:bg-success-dark/30 dark:text-success-light px-4 py-2 shadow-card text-sm">
-                {{ session('status') }}
-            </div>
-        @endif
+    <x-sidebar />
 
-        <main class="rounded-lg border border-ui-border bg-ui-card p-4 shadow-card md:p-6 dark:border-ui-dark-border dark:bg-ui-dark-card">
+    <div class="ml-64 flex flex-col min-h-screen">
+        <x-topbar />
+
+        <main class="flex-1 px-6 py-3">
+            @if (session('status'))
+                <div class="mb-4 rounded-lg bg-success-light text-success-dark dark:bg-success-dark/30 dark:text-success-light px-4 py-2 shadow-card text-sm">
+                    {{ session('status') }}
+                </div>
+            @endif
+
             {{ $slot }}
         </main>
     </div>
