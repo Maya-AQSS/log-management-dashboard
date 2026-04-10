@@ -1,5 +1,5 @@
 <div x-data="{}">
-    <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
+    <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-ui-dark-border dark:bg-ui-dark-card">
         <div class="grid grid-cols-1 gap-3 md:grid-cols-5 md:items-end">
             <div class="md:col-span-2">
                 <x-date-range-filter
@@ -36,7 +36,7 @@
                 <button
                     type="button"
                     x-on:click="$dispatch('logs-apply-requested')"
-                    class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-base font-semibold text-white hover:bg-[#4a2d44]"
+                    class="inline-flex items-center rounded-full bg-odoo-purple px-4 py-2 text-base font-semibold text-white hover:bg-odoo-purple-d"
                 >
                     {{ __('archived_logs.buttons.apply') }}
                 </button>
@@ -65,13 +65,13 @@
                         type="button"
                         wire:click="sortByColumn('severity')"
                         title="{{ __('logs.table.sortable_hint') }}"
-                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-bold text-inherit cursor-pointer rounded-sm hover:bg-slate-100/70 dark:hover:bg-slate-700/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b3853]/40"
+                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-bold text-inherit cursor-pointer rounded-sm hover:bg-ui-body dark:hover:bg-ui-dark-border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-odoo-purple/40"
                     >
                         <span class="truncate">{{ __('archived_logs.table.severity') }}</span>
                         @if($sortBy === 'severity')
-                            <span class="shrink-0 pl-1 text-slate-600 dark:text-slate-300" aria-hidden="true">{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
+                            <span class="shrink-0 pl-1 text-text-secondary dark:text-text-dark-secondary" aria-hidden="true">{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
                         @else
-                            <span class="shrink-0 pl-1 text-xs text-slate-400 dark:text-slate-500" aria-hidden="true">↕</span>
+                            <span class="shrink-0 pl-1 text-xs text-text-muted dark:text-text-dark-muted" aria-hidden="true">↕</span>
                         @endif
                     </button>
                 </th>
@@ -81,13 +81,13 @@
                         type="button"
                         wire:click="sortByColumn('archived_at')"
                         title="{{ __('logs.table.sortable_hint') }}"
-                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-bold text-inherit cursor-pointer rounded-sm hover:bg-slate-100/70 dark:hover:bg-slate-700/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b3853]/40"
+                        class="inline-flex w-full min-w-0 items-center gap-2.5 select-none uppercase tracking-wide text-left font-bold text-inherit cursor-pointer rounded-sm hover:bg-ui-body dark:hover:bg-ui-dark-border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-odoo-purple/40"
                     >
                         <span class="truncate">{{ __('archived_logs.table.archived_at') }}</span>
                         @if($sortBy === 'archived_at')
-                            <span class="shrink-0 pl-1 text-slate-600 dark:text-slate-300" aria-hidden="true">{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
+                            <span class="shrink-0 pl-1 text-text-secondary dark:text-text-dark-secondary" aria-hidden="true">{{ $sortDir === 'asc' ? '↑' : '↓' }}</span>
                         @else
-                            <span class="shrink-0 pl-1 text-xs text-slate-400 dark:text-slate-500" aria-hidden="true">↕</span>
+                            <span class="shrink-0 pl-1 text-xs text-text-muted dark:text-text-dark-muted" aria-hidden="true">↕</span>
                         @endif
                     </button>
                 </th>

@@ -23,7 +23,6 @@ class ErrorCodeRepository implements ErrorCodeRepositoryInterface
     public function searchAndFilter(
         ?string $search,
         ?int $filterApp,
-        ?string $severity,
         int $perPage = 15
     ): LengthAwarePaginator {
         $driver = DB::connection()->getDriverName();
@@ -53,7 +52,6 @@ class ErrorCodeRepository implements ErrorCodeRepositoryInterface
                 }
             })
             ->when($filterApp, fn ($query, $filterApp) => $query->where('application_id', $filterApp))
-            ->when($severity, fn ($q) => $q->where('severity', $severity))
             ->orderBy('code')
             ->paginate($perPage)
             ->withQueryString();

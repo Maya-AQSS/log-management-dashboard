@@ -23,7 +23,7 @@ $applicationIds = array_values(array_map(
 
 $errorCodeByApplication = [];
 foreach ($errorCodes as $errorCode) {
-    $errorCodeByApplication[(int) $errorCode['application_id']] = (int) $errorCode['id'];
+    $errorCodeByApplication[(int) $errorCode['application_id']] = $errorCode['code'];
 }
 
 $longSegment = 'trace context user request pipeline timeout retry database cache service';

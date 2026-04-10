@@ -2,402 +2,345 @@
 
 return [
   [
-    "application" => "Laravel",
+    "application_id" => 3,
     "code" => "LAR-DB-001",
     "name" => "Database Connection Failed",
-    "description" => "Fallo al establecer conexión con la base de datos principal o réplicas.",
-    "suggested_severity" => "critical"
+    "description" => "Fallo al establecer conexión con la base de datos principal o réplicas."
   ],
   [
-    "application" => "Laravel",
+    "application_id" => 3,
     "code" => "LAR-DB-002",
     "name" => "Query Execution Exception",
-    "description" => "Error al ejecutar una consulta SQL, generalmente por bloqueos o sintaxis inválida.",
-    "suggested_severity" => "high"
+    "description" => "Error al ejecutar una consulta SQL, generalmente por bloqueos o sintaxis inválida."
   ],
   [
-    "application" => "Laravel",
+    "application_id" => 3,
     "code" => "LAR-DB-003",
     "name" => "Database Timeout",
-    "description" => "La consulta superó el umbral máximo de tiempo de espera (Deadlock o query ineficiente).",
-    "suggested_severity" => "high"
+    "description" => "La consulta superó el umbral máximo de tiempo de espera (Deadlock o query ineficiente)."
   ],
   [
-    "application" => "Laravel",
+    "application_id" => 4,
     "code" => "LAR-SYS-001",
     "name" => "Cache Connection Refused",
-    "description" => "Fallo de conexión con el driver de caché (Redis/Memcached rechazó la conexión).",
-    "suggested_severity" => "critical"
+    "description" => "Fallo de conexión con el driver de caché (Redis/Memcached rechazó la conexión)."
   ],
   [
-    "application" => "Laravel",
+    "application_id" => 4,
     "code" => "LAR-SYS-002",
     "name" => "Missing Configuration Key",
-    "description" => "Falta una clave de configuración requerida en el entorno (.env o config files) para inicializar un servicio.",
-    "suggested_severity" => "critical"
+    "description" => "Falta una clave de configuración requerida en el entorno (.env o config files) para inicializar un servicio."
   ],
   [
-    "application" => "Laravel",
+    "application_id" => 4,
     "code" => "LAR-STO-001",
     "name" => "File Storage Write Failed",
-    "description" => "El sistema no pudo escribir o guardar un archivo en el disco local o S3 debido a permisos o espacio.",
-    "suggested_severity" => "high"
+    "description" => "El sistema no pudo escribir o guardar un archivo en el disco local o S3 debido a permisos o espacio."
   ],
   [
-    "application" => "Laravel",
+    "application_id" => 3,
     "code" => "LAR-JOB-001",
     "name" => "Queue Job Failed",
-    "description" => "Un trabajo encolado superó los intentos máximos permitidos o generó una excepción.",
-    "suggested_severity" => "medium"
+    "description" => "Un trabajo encolado superó los intentos máximos permitidos o generó una excepción."
   ],
   [
-    "application" => "Laravel",
+    "application_id" => 3,
     "code" => "LAR-JOB-002",
     "name" => "Queue Job Stalled",
-    "description" => "El proceso en segundo plano superó el tiempo máximo de ejecución previsto y quedó colgado.",
-    "suggested_severity" => "medium"
+    "description" => "El proceso en segundo plano superó el tiempo máximo de ejecución previsto y quedó colgado."
   ],
   [
-    "application" => "Laravel",
+    "application_id" => 1,
     "code" => "LAR-API-001",
     "name" => "External API Timeout / Unavailable",
-    "description" => "Tiempo de espera agotado o servicio 503 al intentar comunicar con una API de terceros.",
-    "suggested_severity" => "high"
+    "description" => "Tiempo de espera agotado o servicio 503 al intentar comunicar con una API de terceros."
   ],
   [
-    "application" => "Laravel",
+    "application_id" => 1,
     "code" => "LAR-API-002",
     "name" => "Rate Limit Exceeded",
-    "description" => "El cliente externo superó la cuota de peticiones permitida (Throttling).",
-    "suggested_severity" => "medium"
+    "description" => "El cliente externo superó la cuota de peticiones permitida (Throttling)."
   ],
   [
-    "application" => "Laravel",
+    "application_id" => 1,
     "code" => "LAR-API-003",
     "name" => "Invalid Payload Schema",
-    "description" => "El payload de entrada no coincide con el esquema JSON esperado por el endpoint.",
-    "suggested_severity" => "low"
+    "description" => "El payload de entrada no coincide con el esquema JSON esperado por el endpoint."
   ],
   [
-    "application" => "Laravel",
+    "application_id" => 1,
     "code" => "LAR-NET-001",
     "name" => "Email Transport Error",
-    "description" => "Fallo en la resolución o autenticación del transporte SMTP para envío de notificaciones.",
-    "suggested_severity" => "medium"
+    "description" => "Fallo en la resolución o autenticación del transporte SMTP para envío de notificaciones."
   ],
   [
-    "application" => "Laravel",
+    "application_id" => 2,
     "code" => "LAR-AUTH-001",
     "name" => "Invalid or Expired Session/JWT",
-    "description" => "Intento de acceso con un token caducado, sesión purgada o deserialización fallida.",
-    "suggested_severity" => "low"
+    "description" => "Intento de acceso con un token caducado, sesión purgada o deserialización fallida."
   ],
   [
-    "application" => "Laravel",
+    "application_id" => 2,
     "code" => "LAR-AUTH-002",
     "name" => "Webhook Signature Invalid",
-    "description" => "La firma criptográfica recibida en el webhook no coincide con el secret configurado.",
-    "suggested_severity" => "high"
+    "description" => "La firma criptográfica recibida en el webhook no coincide con el secret configurado."
   ],
   [
-    "application" => "Laravel",
+    "application_id" => 2,
     "code" => "LAR-AUTH-003",
     "name" => "Permission Denied",
-    "description" => "El usuario autenticado intentó realizar una acción sin los roles/políticas necesarias (Policy denegada).",
-    "suggested_severity" => "low"
+    "description" => "El usuario autenticado intentó realizar una acción sin los roles/políticas necesarias (Policy denegada)."
   ],
   [
-    "application" => "Laravel",
+    "application_id" => 4,
     "code" => "LAR-UI-001",
     "name" => "Template Rendering Failed",
-    "description" => "Excepción lanzada durante la compilación o renderizado de una vista Blade.",
-    "suggested_severity" => "medium"
+    "description" => "Excepción lanzada durante la compilación o renderizado de una vista Blade."
   ],
   [
-    "application" => "React",
+    "application_id" => 4,
     "code" => "REA-UI-001",
     "name" => "Component Crash (Error Boundary)",
-    "description" => "Un componente falló durante el renderizado, disparando la captura del Error Boundary.",
-    "suggested_severity" => "high"
+    "description" => "Un componente falló durante el renderizado, disparando la captura del Error Boundary."
   ],
   [
-    "application" => "React",
+    "application_id" => 1,
     "code" => "REA-API-001",
     "name" => "Backend Request Failed",
-    "description" => "Fallo general de red al intentar consumir el backend (CORS, 502, 503).",
-    "suggested_severity" => "high"
+    "description" => "Fallo general de red al intentar consumir el backend (CORS, 502, 503)."
   ],
   [
-    "application" => "Odoo",
+    "application_id" => 4,
     "code" => "ODO-SYS-001",
     "name" => "Module Initialization/Update Error",
-    "description" => "Fallo crítico al intentar instalar o actualizar un módulo (dependencias circulares, fallos en scripts pre/post init).",
-    "suggested_severity" => "critical"
+    "description" => "Fallo crítico al intentar instalar o actualizar un módulo (dependencias circulares, fallos en scripts pre/post init)."
   ],
   [
-    "application" => "Odoo",
+    "application_id" => 4,
     "code" => "ODO-SYS-002",
     "name" => "Worker Memory/Time Limit Exceeded",
-    "description" => "Un worker de Odoo fue terminado abruptamente por el SO o el proceso padre al superar 'limit_memory_hard' o 'limit_time_real'. Típico en reportes masivos.",
-    "suggested_severity" => "high"
+    "description" => "Un worker de Odoo fue terminado abruptamente por el SO o el proceso padre al superar 'limit_memory_hard' o 'limit_time_real'. Típico en reportes masivos."
   ],
   [
-    "application" => "Odoo",
+    "application_id" => 4,
     "code" => "ODO-SYS-003",
     "name" => "QWeb Template Rendering Failure",
-    "description" => "Error al renderizar una vista QWeb o reporte PDF (wkhtmltopdf). Suele ocurrir por herencias XML rotas tras una actualización o campos faltantes.",
-    "suggested_severity" => "medium"
+    "description" => "Error al renderizar una vista QWeb o reporte PDF (wkhtmltopdf). Suele ocurrir por herencias XML rotas tras una actualización o campos faltantes."
   ],
   [
-    "application" => "Odoo",
+    "application_id" => 3,
     "code" => "ODO-DB-001",
     "name" => "ORM Record Not Found",
-    "description" => "El ORM intentó acceder a un registro (browse/read) que ya no existe en la base de datos (MissingError).",
-    "suggested_severity" => "medium"
+    "description" => "El ORM intentó acceder a un registro (browse/read) que ya no existe en la base de datos (MissingError)."
   ],
   [
-    "application" => "Odoo",
+    "application_id" => 3,
     "code" => "ODO-DB-002",
     "name" => "PostgreSQL Concurrent Update Failure",
-    "description" => "Fallo de serialización o 'TransactionRollbackError'. Dos transacciones intentaron actualizar el mismo registro simultáneamente (muy común en inventario o TPV).",
-    "suggested_severity" => "high"
+    "description" => "Fallo de serialización o 'TransactionRollbackError'. Dos transacciones intentaron actualizar el mismo registro simultáneamente (muy común en inventario o TPV)."
   ],
   [
-    "application" => "Odoo",
+    "application_id" => 3,
     "code" => "ODO-DB-003",
     "name" => "ORM Constraint Violation",
-    "description" => "Intento de guardar un registro que viola una restricción SQL (IntegrityError) o una restricción lógica de Python (@api.constrains / ValidationError).",
-    "suggested_severity" => "low"
+    "description" => "Intento de guardar un registro que viola una restricción SQL (IntegrityError) o una restricción lógica de Python (@api.constrains / ValidationError)."
   ],
   [
-    "application" => "Odoo",
+    "application_id" => 2,
     "code" => "ODO-AUTH-001",
     "name" => "Access Rights Denied (CRUD)",
-    "description" => "AccessError: El usuario intentó realizar una operación de lectura, escritura, creación o borrado sobre un modelo sin tener los permisos de grupo necesarios.",
-    "suggested_severity" => "low"
+    "description" => "AccessError: El usuario intentó realizar una operación de lectura, escritura, creación o borrado sobre un modelo sin tener los permisos de grupo necesarios."
   ],
   [
-    "application" => "Odoo",
+    "application_id" => 2,
     "code" => "ODO-AUTH-002",
     "name" => "Record Rule Violation",
-    "description" => "El usuario tiene acceso al modelo, pero una Regla de Registro (Record Rule) bloqueó la operación (ej. intentar ver facturas de otra compañía en entorno multi-compañía).",
-    "suggested_severity" => "medium"
+    "description" => "El usuario tiene acceso al modelo, pero una Regla de Registro (Record Rule) bloqueó la operación (ej. intentar ver facturas de otra compañía en entorno multi-compañía)."
   ],
   [
-    "application" => "Odoo",
+    "application_id" => 4,
     "code" => "ODO-NET-001",
     "name" => "RPC Connection Exception",
-    "description" => "Fallo en la comunicación mediante protocolos XML-RPC o JSON-RPC desde sistemas externos hacia Odoo.",
-    "suggested_severity" => "medium"
+    "description" => "Fallo en la comunicación mediante protocolos XML-RPC o JSON-RPC desde sistemas externos hacia Odoo."
   ],
   [
-    "application" => "Odoo",
+    "application_id" => 1,
     "code" => "ODO-API-001",
     "name" => "External Service Integration Failed",
-    "description" => "Odoo no pudo comunicarse con una API externa requerida (ej. pasarelas de pago, proveedores de envío, facturación electrónica gubernamental).",
-    "suggested_severity" => "high"
+    "description" => "Odoo no pudo comunicarse con una API externa requerida (ej. pasarelas de pago, proveedores de envío, facturación electrónica gubernamental)."
   ],
   [
-    "application" => "Odoo",
+    "application_id" => 3,
     "code" => "ODO-JOB-001",
     "name" => "Scheduled Action (Cron) Failed",
-    "description" => "Una acción planificada nativa de Odoo falló durante su ejecución en segundo plano y generó un traceback en el log.",
-    "suggested_severity" => "medium"
+    "description" => "Una acción planificada nativa de Odoo falló durante su ejecución en segundo plano y generó un traceback en el log."
   ],
   [
-    "application" => "Odoo",
+    "application_id" => 3,
     "code" => "ODO-JOB-002",
     "name" => "OCA Queue Job Failed",
-    "description" => "Un trabajo asíncrono gestionado por el módulo 'queue_job' pasó a estado 'failed' tras superar el límite máximo de reintentos.",
-    "suggested_severity" => "medium"
+    "description" => "Un trabajo asíncrono gestionado por el módulo 'queue_job' pasó a estado 'failed' tras superar el límite máximo de reintentos."
   ],
   [
-    "application" => "Odoo",
+    "application_id" => 4,
     "code" => "ODO-STO-001",
     "name" => "Missing Filestore Attachment",
-    "description" => "Inconsistencia de almacenamiento: El registro 'ir.attachment' existe en base de datos, pero el archivo físico no se encuentra en el Filestore del servidor.",
-    "suggested_severity" => "high"
+    "description" => "Inconsistencia de almacenamiento: El registro 'ir.attachment' existe en base de datos, pero el archivo físico no se encuentra en el Filestore del servidor."
   ],
   [
-    "application" => "Odoo",
+    "application_id" => 4,
     "code" => "ODO-UI-001",
     "name" => "Client-Side Javascript Action Crash",
-    "description" => "Excepción capturada en el frontend (Web Client / POS). Una acción de vista, botón o widget de JS falló en el navegador del usuario.",
-    "suggested_severity" => "low"
+    "description" => "Excepción capturada en el frontend (Web Client / POS). Una acción de vista, botón o widget de JS falló en el navegador del usuario."
   ],
   [
-    "application" => "Infraestructura",
+    "application_id" => 4,
     "code" => "INF-SYS-001",
     "name" => "K3s Node Failover (Taint Eviction)",
-    "description" => "Un nodo (ej. Thor) perdió quórum. Los pods han sido reprogramados en el nodo superviviente tras expirar el 'pod-eviction-timeout'.",
-    "suggested_severity" => "critical"
+    "description" => "Un nodo (ej. Thor) perdió quórum. Los pods han sido reprogramados en el nodo superviviente tras expirar el 'pod-eviction-timeout'."
   ],
   [
-    "application" => "Infraestructura",
+    "application_id" => 4,
     "code" => "INF-SYS-002",
     "name" => "PriorityClass Eviction",
-    "description" => "El scheduler expulsó un pod de prioridad baja (ej. n8n, gitea) debido a presión de memoria en el nodo (failover en Loki). Degradación elegante activa.",
-    "suggested_severity" => "medium"
+    "description" => "El scheduler expulsó un pod de prioridad baja (ej. n8n, gitea) debido a presión de memoria en el nodo (failover en Loki). Degradación elegante activa."
   ],
   [
-    "application" => "Infraestructura",
+    "application_id" => 4,
     "code" => "INF-SYS-003",
     "name" => "OOMKilled Container limit",
-    "description" => "Un contenedor superó sus 'limits' de memoria estrictos (ej. Keycloak superando 2.5 Gi) y fue aniquilado por el Out Of Memory Killer del SO.",
-    "suggested_severity" => "high"
+    "description" => "Un contenedor superó sus 'limits' de memoria estrictos (ej. Keycloak superando 2.5 Gi) y fue aniquilado por el Out Of Memory Killer del SO."
   ],
   [
-    "application" => "Infraestructura",
+    "application_id" => 4,
     "code" => "INF-STO-001",
     "name" => "CSI Volume Mount Timeout",
-    "description" => "El pod quedó en estado 'Pending' indefinidamente. K3s no pudo montar el PVC asociado vía CSI (Típico fallo simultáneo NAS + Thor afectando a redis-session).",
-    "suggested_severity" => "critical"
+    "description" => "El pod quedó en estado 'Pending' indefinidamente. K3s no pudo montar el PVC asociado vía CSI (Típico fallo simultáneo NAS + Thor afectando a redis-session)."
   ],
   [
-    "application" => "Infraestructura",
+    "application_id" => 1,
     "code" => "INF-NET-001",
     "name" => "MetalLB VIP ARP Blackhole",
-    "description" => "Pérdida temporal de paquetes (RST/Timeout en capa TCP). MetalLB reanunció la VIP pero los switches aún no han actualizado la caché MAC.",
-    "suggested_severity" => "high"
+    "description" => "Pérdida temporal de paquetes (RST/Timeout en capa TCP). MetalLB reanunció la VIP pero los switches aún no han actualizado la caché MAC."
   ],
   [
-    "application" => "Infraestructura",
+    "application_id" => 1,
     "code" => "INF-NET-002",
     "name" => "Ingress Cold Start Routing",
-    "description" => "Traefik devolvió 502/503. Se enrutó tráfico a un pod recién creado que aún no estaba listo (Posible livenessProbe/readinessProbe mal configurado o ausente).",
-    "suggested_severity" => "high"
+    "description" => "Traefik devolvió 502/503. Se enrutó tráfico a un pod recién creado que aún no estaba listo (Posible livenessProbe/readinessProbe mal configurado o ausente)."
   ],
   [
-    "application" => "Infraestructura",
+    "application_id" => 3,
     "code" => "INF-DB-001",
     "name" => "Etcd Quorum Loss",
-    "description" => "Pérdida de consenso en el clúster etcd (Thor/Loki/RPi). Bloquea el Control Plane y la elección de líder de Patroni/PostgreSQL.",
-    "suggested_severity" => "critical"
+    "description" => "Pérdida de consenso en el clúster etcd (Thor/Loki/RPi). Bloquea el Control Plane y la elección de líder de Patroni/PostgreSQL."
   ],
   [
-    "application" => "Scripts",
+    "application_id" => 4,
     "code" => "SCR-SYS-001",
     "name" => "Batch Automation Panic / Non-Zero Exit",
-    "description" => "El script automatizado (ej. maya_signer, sign_validator) abortó inesperadamente con un código de salida de error a nivel de SO.",
-    "suggested_severity" => "high"
+    "description" => "El script automatizado (ej. maya_signer, sign_validator) abortó inesperadamente con un código de salida de error a nivel de SO."
   ],
   [
-    "application" => "Scripts",
+    "application_id" => 4,
     "code" => "SCR-STO-001",
     "name" => "I/O Artifact Not Found",
-    "description" => "El script no pudo leer o escribir el archivo objetivo en la ruta compartida temporal (ej. fallo al leer lote de PDFs para firma).",
-    "suggested_severity" => "high"
+    "description" => "El script no pudo leer o escribir el archivo objetivo en la ruta compartida temporal (ej. fallo al leer lote de PDFs para firma)."
   ],
   [
-    "application" => "Scripts",
+    "application_id" => 1,
     "code" => "SCR-API-001",
     "name" => "Webhook Automation Timeout",
-    "description" => "Un flujo automatizado (n8n o Python) agotó el tiempo de espera al intentar comunicarse con los endpoints internos (Traefik VIP).",
-    "suggested_severity" => "medium"
+    "description" => "Un flujo automatizado (n8n o Python) agotó el tiempo de espera al intentar comunicarse con los endpoints internos (Traefik VIP)."
   ],
   [
-    "application" => "Scripts",
+    "application_id" => 2,
     "code" => "SCR-AUTH-001",
     "name" => "Digital Signature Invalidated",
-    "description" => "El microservicio sign_validator rechazó el payload debido a un certificado revocado, expirado o firma corrupta en el lote.",
-    "suggested_severity" => "low"
+    "description" => "El microservicio sign_validator rechazó el payload debido a un certificado revocado, expirado o firma corrupta en el lote."
   ],
   [
-    "application" => "Scripts",
+    "application_id" => 3,
     "code" => "SCR-JOB-001",
     "name" => "Workflow Execution Stalled",
-    "description" => "Un proceso externo superó la ventana de ejecución máxima permitida y quedó zombi. Forzando terminación del proceso.",
-    "suggested_severity" => "medium"
+    "description" => "Un proceso externo superó la ventana de ejecución máxima permitida y quedó zombi. Forzando terminación del proceso."
   ],
   [
-    "application" => "Infraestructura",
+    "application_id" => 4,
     "code" => "INF-SYS-004",
     "name" => "RabbitMQ Memory High Watermark",
-    "description" => "RabbitMQ alcanzó su límite de memoria (ej. 512Mi) y ha pausado a todos los publicadores para evitar el colapso. Típico si los consumidores caen.",
-    "suggested_severity" => "critical"
+    "description" => "RabbitMQ alcanzó su límite de memoria (ej. 512Mi) y ha pausado a todos los publicadores para evitar el colapso. Típico si los consumidores caen."
   ],
   [
-    "application" => "Infraestructura",
+    "application_id" => 4,
     "code" => "INF-SYS-005",
     "name" => "Redis AOF fsync Delayed",
-    "description" => "Redis bloqueó el hilo principal porque la escritura al disco (AOF en NFS) tardó demasiado. Riesgo alto de degradación para sesiones de Odoo.",
-    "suggested_severity" => "high"
+    "description" => "Redis bloqueó el hilo principal porque la escritura al disco (AOF en NFS) tardó demasiado. Riesgo alto de degradación para sesiones de Odoo."
   ],
   [
-    "application" => "Infraestructura",
+    "application_id" => 3,
     "code" => "INF-DB-002",
     "name" => "Patroni Leader Election Failed",
-    "description" => "Fallo en el clúster de PostgreSQL: Patroni no pudo promover un nodo a Master tras una caída, dejando la base de datos en modo solo lectura.",
-    "suggested_severity" => "critical"
+    "description" => "Fallo en el clúster de PostgreSQL: Patroni no pudo promover un nodo a Master tras una caída, dejando la base de datos en modo solo lectura."
   ],
   [
-    "application" => "Infraestructura",
+    "application_id" => 1,
     "code" => "INF-NET-003",
     "name" => "Traefik TLS Certificate Error",
-    "description" => "Traefik está sirviendo un certificado caducado o inválido, o falló la renovación del ACME (Let's Encrypt).",
-    "suggested_severity" => "high"
+    "description" => "Traefik está sirviendo un certificado caducado o inválido, o falló la renovación del ACME (Let's Encrypt)."
   ],
   [
-    "application" => "Laravel",
+    "application_id" => 1,
     "code" => "LAR-NET-002",
     "name" => "SSE/WebSocket Stream Interrupted",
-    "description" => "La conexión en tiempo real con el cliente (WebSockets o Server-Sent Events) se cerró de forma anómala desde el lado del servidor.",
-    "suggested_severity" => "medium"
+    "description" => "La conexión en tiempo real con el cliente (WebSockets o Server-Sent Events) se cerró de forma anómala desde el lado del servidor."
   ],
   [
-    "application" => "Laravel",
+    "application_id" => 4,
     "code" => "LAR-SYS-003",
     "name" => "Cache Eviction Policy Triggered",
-    "description" => "Redis-cache (efímero) alcanzó su límite máximo de memoria y comenzó a expulsar llaves activas (allkeys-lru) agresivamente.",
-    "suggested_severity" => "low"
+    "description" => "Redis-cache (efímero) alcanzó su límite máximo de memoria y comenzó a expulsar llaves activas (allkeys-lru) agresivamente."
   ],
   [
-    "application" => "React",
+    "application_id" => 4,
     "code" => "REA-UI-002",
     "name" => "Lazy Chunk Load Error",
-    "description" => "El navegador no pudo descargar un fragmento (chunk) de JavaScript al navegar a otra vista. Usualmente indica que hubo un despliegue reciente y el hash del archivo cambió.",
-    "suggested_severity" => "medium"
+    "description" => "El navegador no pudo descargar un fragmento (chunk) de JavaScript al navegar a otra vista. Usualmente indica que hubo un despliegue reciente y el hash del archivo cambió."
   ],
   [
-    "application" => "React",
+    "application_id" => 4,
     "code" => "REA-NET-002",
     "name" => "Realtime Transport Disconnected",
-    "description" => "El cliente React perdió la conexión de WebSocket/SSE con el backend y agotó los intentos de reconexión automática.",
-    "suggested_severity" => "medium"
+    "description" => "El cliente React perdió la conexión de WebSocket/SSE con el backend y agotó los intentos de reconexión automática."
   ],
   [
-    "application" => "React",
+    "application_id" => 4,
     "code" => "REA-STO-001",
     "name" => "Local Storage Quota Exceeded",
-    "description" => "El navegador denegó la escritura en LocalStorage o IndexedDB porque se superó la cuota asignada al dominio.",
-    "suggested_severity" => "low"
+    "description" => "El navegador denegó la escritura en LocalStorage o IndexedDB porque se superó la cuota asignada al dominio."
   ],
   [
-    "application" => "Odoo",
+    "application_id" => 4,
     "code" => "ODO-SYS-004",
     "name" => "Report Generation Timeout (wkhtmltopdf)",
-    "description" => "El subproceso de wkhtmltopdf tardó demasiado en renderizar un informe pesado y fue liquidado para liberar CPU/RAM.",
-    "suggested_severity" => "high"
+    "description" => "El subproceso de wkhtmltopdf tardó demasiado en renderizar un informe pesado y fue liquidado para liberar CPU/RAM."
   ],
   [
-    "application" => "Odoo",
+    "application_id" => 4,
     "code" => "ODO-NET-002",
     "name" => "Mail Gateway Sync Failed",
-    "description" => "Fallo al intentar conectar vía IMAP/POP3 a un buzón externo (ej. para el módulo maya_incident) para generar registros automáticos.",
-    "suggested_severity" => "medium"
+    "description" => "Fallo al intentar conectar vía IMAP/POP3 a un buzón externo (ej. para el módulo maya_incident) para generar registros automáticos."
   ],
   [
-    "application" => "Scripts",
+    "application_id" => 4,
     "code" => "SCR-SYS-003",
     "name" => "Concurrency Lock Denied",
-    "description" => "El script automatizado abortó su ejecución porque otra instancia del mismo script ya está corriendo y mantiene un bloqueo activo (lock file).",
-    "suggested_severity" => "low"
+    "description" => "El script automatizado abortó su ejecución porque otra instancia del mismo script ya está corriendo y mantiene un bloqueo activo (lock file)."
   ],
   [
-    "application" => "Scripts",
+    "application_id" => 1,
     "code" => "SCR-API-002",
     "name" => "External Rate Limit Hit (429)",
-    "description" => "El script está siendo bloqueado por un servicio externo (Moodle, pasarelas de firma) por exceso de peticiones concurrentes (HTTP 429).",
-    "suggested_severity" => "high"
+    "description" => "El script está siendo bloqueado por un servicio externo (Moodle, pasarelas de firma) por exceso de peticiones concurrentes (HTTP 429)."
   ]
 ];

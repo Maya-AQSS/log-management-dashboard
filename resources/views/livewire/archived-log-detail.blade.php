@@ -30,7 +30,7 @@
                     <button
                         type="button"
                         wire:click="startEditingArchivedFields"
-                        class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]"
+                        class="inline-flex items-center rounded-full bg-odoo-purple px-4 py-2 text-sm font-semibold text-white hover:bg-odoo-purple-d"
                     >
                         {{ __('archived_logs.buttons.edit') }}
                     </button>
@@ -39,7 +39,7 @@
                         type="button"
                         wire:click="saveArchivedDetailChanges"
                         wire:loading.attr="disabled"
-                        class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#4a2d44] disabled:opacity-60"
+                        class="inline-flex items-center rounded-full bg-odoo-purple px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-odoo-purple-d disabled:opacity-60"
                     >
                         <span wire:loading.remove wire:target="saveArchivedDetailChanges">{{ __('archived_logs.buttons.save') }}</span>
                         <span wire:loading wire:target="saveArchivedDetailChanges">{{ __('archived_logs.buttons.save') }}…</span>
@@ -104,7 +104,7 @@
                     @class([
                         'rounded-xl p-4 shadow-sm transition-colors duration-150',
                         'border border-slate-200 bg-slate-50 text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100' => !$editingUrlTutorial,
-                        'border-2 border-[#5b3853]/45 bg-[#5b3853]/[0.06] text-slate-900 ring-2 ring-[#5b3853]/25 dark:border-[#5b3853]/50 dark:bg-[#5b3853]/20 dark:text-slate-100 dark:ring-[#5b3853]/35' => $editingUrlTutorial,
+                        'border-2 border-odoo-purple/45 bg-odoo-purple/[0.06] text-slate-900 ring-2 ring-odoo-purple/25 dark:border-odoo-purple/50 dark:bg-odoo-purple/20 dark:text-slate-100 dark:ring-odoo-purple/35' => $editingUrlTutorial,
                     ])
                 >
                     <div class="mb-3 border-b border-slate-200 pb-3 dark:border-slate-500/80">
@@ -118,7 +118,7 @@
                                     wire:key="archived-description-{{ app()->getLocale() }}"
                                     wire:model="descriptionInput"
                                     rows="6"
-                                    class="w-full min-w-0 rounded-xl border border-[#5b3853]/40 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-inner placeholder:text-slate-400 focus:border-[#5b3853] focus:outline-none focus:ring-2 focus:ring-[#5b3853]/25 dark:border-slate-500 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-[#c4a8bc] dark:focus:ring-[#5b3853]/40 @error('descriptionInput') border-red-500 focus:border-red-500 focus:ring-red-500/30 dark:border-red-500 @enderror"
+                                    class="w-full min-w-0 rounded-xl border border-odoo-purple/40 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-inner placeholder:text-slate-400 focus:border-odoo-purple focus:outline-none focus:ring-2 focus:ring-odoo-purple/25 dark:border-slate-500 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-odoo-purple-l dark:focus:ring-odoo-purple/40 @error('descriptionInput') border-red-500 focus:border-red-500 focus:ring-red-500/30 dark:border-red-500 @enderror"
                                     placeholder="{{ $descriptionPlaceholder }}"
                                 ></textarea>
                                 @error('descriptionInput')
@@ -127,7 +127,7 @@
                             </div>
                         @else
                             <div
-                                class="min-h-[7.5rem] w-full rounded-xl border border-[#5b3853]/40 bg-white px-3 py-2.5 text-sm shadow-inner dark:border-slate-500 dark:bg-slate-950"
+                                class="min-h-[7.5rem] w-full rounded-xl border border-odoo-purple/40 bg-white px-3 py-2.5 text-sm shadow-inner dark:border-slate-500 dark:bg-slate-950"
                             >
                                 <div @class([
                                     'whitespace-pre-wrap',
@@ -140,7 +140,7 @@
 
                     @cannot('update', $archivedLog)
                         <div
-                            class="min-h-[7.5rem] w-full rounded-xl border border-[#5b3853]/40 bg-white px-3 py-2.5 text-sm shadow-inner dark:border-slate-500 dark:bg-slate-950"
+                            class="min-h-[7.5rem] w-full rounded-xl border border-odoo-purple/40 bg-white px-3 py-2.5 text-sm shadow-inner dark:border-slate-500 dark:bg-slate-950"
                         >
                             <div @class([
                                 'whitespace-pre-wrap',
@@ -157,7 +157,7 @@
                     @class([
                         'rounded-xl p-4 shadow-sm transition-colors duration-150',
                         'border border-slate-200 bg-slate-50 text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100' => !$editingUrlTutorial,
-                        'border-2 border-[#5b3853]/45 bg-[#5b3853]/[0.06] text-slate-900 ring-2 ring-[#5b3853]/25 dark:border-[#5b3853]/50 dark:bg-[#5b3853]/20 dark:text-slate-100 dark:ring-[#5b3853]/35' => $editingUrlTutorial,
+                        'border-2 border-odoo-purple/45 bg-odoo-purple/[0.06] text-slate-900 ring-2 ring-odoo-purple/25 dark:border-odoo-purple/50 dark:bg-odoo-purple/20 dark:text-slate-100 dark:ring-odoo-purple/35' => $editingUrlTutorial,
                     ])
                 >
                     <div class="mb-3 border-b border-slate-200 pb-3 dark:border-slate-500/80">
@@ -175,7 +175,7 @@
                                     @class([
                                         'w-full min-w-0 rounded-xl border bg-white px-3 py-2.5 text-sm text-slate-900 shadow-inner placeholder:text-slate-400 focus:outline-none focus:ring-2 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500',
                                         'border-red-500 focus:border-red-500 focus:ring-red-500/30 dark:border-red-500' => $errors->has('urlTutorialInput'),
-                                        'border-[#5b3853]/40 focus:border-[#5b3853] focus:ring-[#5b3853]/25 dark:border-slate-500 dark:focus:border-[#c4a8bc] dark:focus:ring-[#5b3853]/40' => !$errors->has('urlTutorialInput'),
+                                        'border-odoo-purple/40 focus:border-odoo-purple focus:ring-odoo-purple/25 dark:border-slate-500 dark:focus:border-odoo-purple-l dark:focus:ring-odoo-purple/40' => !$errors->has('urlTutorialInput'),
                                     ])
                                     placeholder="{{ $urlTutorialPlaceholder }}"
                                     autocomplete="off"
@@ -193,7 +193,7 @@
                             @if(!blank($archivedLog->url_tutorial))
                                 <div class="flex flex-col gap-3">
                                     <div
-                                        class="min-h-[2.75rem] w-full break-all rounded-xl border border-[#5b3853]/40 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-inner dark:border-slate-500 dark:bg-slate-950 dark:text-slate-100"
+                                        class="min-h-[2.75rem] w-full break-all rounded-xl border border-odoo-purple/40 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-inner dark:border-slate-500 dark:bg-slate-950 dark:text-slate-100"
                                         title="{{ $archivedLog->url_tutorial }}"
                                     >
                                         {{ \Illuminate\Support\Str::limit($archivedLog->url_tutorial, 120) }}
@@ -202,13 +202,13 @@
                                         href="{{ $archivedLog->url_tutorial }}"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        class="inline-flex w-fit shrink-0 items-center rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#4a2d44]"
+                                        class="inline-flex w-fit shrink-0 items-center rounded-full bg-odoo-purple px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-odoo-purple-d"
                                     >
                                         {{ __('archived_logs.buttons.view_tutorial') }}
                                     </a>
                                 </div>
                             @else
-                                <div class="min-h-[2.75rem] w-full rounded-xl border border-[#5b3853]/40 bg-white px-3 py-2.5 text-sm shadow-inner dark:border-slate-500 dark:bg-slate-950">
+                                <div class="min-h-[2.75rem] w-full rounded-xl border border-odoo-purple/40 bg-white px-3 py-2.5 text-sm shadow-inner dark:border-slate-500 dark:bg-slate-950">
                                     <p class="text-slate-500 italic dark:text-slate-400">{{ __('archived_logs.url_tutorial.empty') }}</p>
                                 </div>
                             @endif
@@ -219,7 +219,7 @@
                         @if(!blank($archivedLog->url_tutorial))
                             <div class="flex flex-col gap-3">
                                 <div
-                                    class="min-h-[2.75rem] w-full break-all rounded-xl border border-[#5b3853]/40 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-inner dark:border-slate-500 dark:bg-slate-950 dark:text-slate-100"
+                                    class="min-h-[2.75rem] w-full break-all rounded-xl border border-odoo-purple/40 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-inner dark:border-slate-500 dark:bg-slate-950 dark:text-slate-100"
                                     title="{{ $archivedLog->url_tutorial }}"
                                 >
                                     {{ \Illuminate\Support\Str::limit($archivedLog->url_tutorial, 120) }}
@@ -228,13 +228,13 @@
                                     href="{{ $archivedLog->url_tutorial }}"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    class="inline-flex w-fit shrink-0 items-center rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#4a2d44]"
+                                    class="inline-flex w-fit shrink-0 items-center rounded-full bg-odoo-purple px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-odoo-purple-d"
                                 >
                                     {{ __('archived_logs.buttons.view_tutorial') }}
                                 </a>
                             </div>
                         @else
-                            <div class="min-h-[2.75rem] w-full rounded-xl border border-[#5b3853]/40 bg-white px-3 py-2.5 text-sm shadow-inner dark:border-slate-500 dark:bg-slate-950">
+                            <div class="min-h-[2.75rem] w-full rounded-xl border border-odoo-purple/40 bg-white px-3 py-2.5 text-sm shadow-inner dark:border-slate-500 dark:bg-slate-950">
                                 <p class="text-slate-500 italic dark:text-slate-400">—</p>
                             </div>
                         @endif

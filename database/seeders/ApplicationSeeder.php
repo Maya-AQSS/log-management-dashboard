@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Application;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class ApplicationSeeder extends Seeder
 {
@@ -21,6 +22,12 @@ class ApplicationSeeder extends Seeder
                     'name' => $application['name'],
                     'description' => $application['description'],
                 ]
+            );
+        }
+
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement(
+                "SELECT setval(pg_get_serial_sequence('applications', 'id'), (SELECT COALESCE(MAX(id), 1) FROM applications))"
             );
         }
     }

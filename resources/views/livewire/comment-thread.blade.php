@@ -150,7 +150,7 @@
 
         .rte-content:not(.rte-prosemirror) ul[data-type="taskList"] li[data-type="taskItem"][data-checked="true"]::before {
             content: '\2611'; /* ☑ cuadrado marcado */
-            color: #5b3853;
+            color: var(--color-odoo-purple);
         }
 
         /* Checkboxes no interactivos en la vista de sólo lectura del comentario */
@@ -225,7 +225,7 @@
         }
 
         .rte-toolbar-bar button.is-active {
-            background: #5b3853;
+            background: var(--color-odoo-purple);
             color: #fff;
         }
 
@@ -387,7 +387,7 @@
                 <button
                     type="button"
                     x-on:click.prevent="submitToWire('addComment')"
-                    class="rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]"
+                    class="rounded-full bg-odoo-purple px-4 py-2 text-sm font-semibold text-white hover:bg-odoo-purple-d"
         >
                     {{ __('comments.buttons.save') }}
         </button>
@@ -405,7 +405,7 @@
 
                     @if (auth()->id() === $comment->user_id)
                         <div class="flex gap-2">
-                            <button type="button" wire:click="startEditing({{ $comment->id }})" class="text-sm font-medium text-[#5b3853] hover:underline">
+                            <button type="button" wire:click="startEditing({{ $comment->id }})" class="text-sm font-medium text-odoo-purple hover:underline">
                                 {{ __('comments.buttons.edit') }}
                             </button>
                             <button type="button" wire:click="deleteComment({{ $comment->id }})" class="text-sm font-medium text-rose-600 hover:underline">
@@ -461,7 +461,7 @@
                             <button
                                 type="button"
                                 x-on:click.prevent="submitToWire('updateComment', {{ $comment->id }})"
-                                class="rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]"
+                                class="rounded-full bg-odoo-purple px-4 py-2 text-sm font-semibold text-white hover:bg-odoo-purple-d"
                             >
                                 {{ __('comments.buttons.update') }}
                             </button>

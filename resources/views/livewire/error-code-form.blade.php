@@ -33,7 +33,7 @@
                 <button
                     type="submit"
                     form="error-code-main-form"
-                    class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]"
+                    class="inline-flex items-center rounded-full bg-odoo-purple px-4 py-2 text-sm font-semibold text-white hover:bg-odoo-purple-d"
                 >
                     {{ __('error_codes.buttons.save') }}
                 </button>
@@ -42,7 +42,7 @@
                     <button
                         type="button"
                         wire:click="enableEdit"
-                        class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]"
+                        class="inline-flex items-center rounded-full bg-odoo-purple px-4 py-2 text-sm font-semibold text-white hover:bg-odoo-purple-d"
                     >
                         {{ __('error_codes.buttons.edit') }}
                     </button>
@@ -64,7 +64,7 @@
                     <button
                         type="submit"
                         form="error-code-main-form"
-                        class="inline-flex items-center rounded-full bg-[#5b3853] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a2d44]"
+                        class="inline-flex items-center rounded-full bg-odoo-purple px-4 py-2 text-sm font-semibold text-white hover:bg-odoo-purple-d"
                     >
                         {{ __('error_codes.buttons.save') }}
                     </button>
@@ -93,7 +93,7 @@
                 @class([
                     'rounded-xl p-4 shadow-sm transition-colors duration-150',
                     'border border-slate-200 bg-slate-50 text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100' => ! $formActive,
-                    'border-2 border-[#5b3853]/45 bg-[#5b3853]/[0.06] text-slate-900 ring-2 ring-[#5b3853]/25 dark:border-[#5b3853]/50 dark:bg-[#5b3853]/20 dark:text-slate-100 dark:ring-[#5b3853]/35' => $formActive,
+                    'border-2 border-odoo-purple/45 bg-odoo-purple/[0.06] text-slate-900 ring-2 ring-odoo-purple/25 dark:border-odoo-purple/50 dark:bg-odoo-purple/20 dark:text-slate-100 dark:ring-odoo-purple/35' => $formActive,
                 ])
             >
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-base">
@@ -107,7 +107,7 @@
                     value="{{ old('name', $errorCode->name ?? null) }}"
                     @class([
                         'mt-1 w-full rounded-xl border px-3 py-2.5 text-sm shadow-inner focus:outline-none focus:ring-2 dark:text-slate-100',
-                        'border-[#5b3853]/40 bg-white text-slate-900 placeholder:text-slate-400 focus:border-[#5b3853] focus:ring-[#5b3853]/25 dark:border-slate-500 dark:bg-slate-950 dark:placeholder:text-slate-500 dark:focus:border-[#c4a8bc] dark:focus:ring-[#5b3853]/40' => $formActive,
+                        'border-odoo-purple/40 bg-white text-slate-900 placeholder:text-slate-400 focus:border-odoo-purple focus:ring-odoo-purple/25 dark:border-slate-500 dark:bg-slate-950 dark:placeholder:text-slate-500 dark:focus:border-odoo-purple-l dark:focus:ring-odoo-purple/40' => $formActive,
                         'cursor-not-allowed border-slate-200 bg-white text-slate-700 opacity-90 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-300' => ! $formActive,
                     ])
                     @disabled(! $isEditable)
@@ -124,7 +124,7 @@
                     value="{{ old('code', $errorCode->code ?? null) }}"
                     @class([
                         'mt-1 w-full rounded-xl border px-3 py-2.5 text-sm shadow-inner focus:outline-none focus:ring-2 dark:text-slate-100',
-                        'border-[#5b3853]/40 bg-white text-slate-900 placeholder:text-slate-400 focus:border-[#5b3853] focus:ring-[#5b3853]/25 dark:border-slate-500 dark:bg-slate-950 dark:placeholder:text-slate-500 dark:focus:border-[#c4a8bc] dark:focus:ring-[#5b3853]/40' => $formActive,
+                        'border-odoo-purple/40 bg-white text-slate-900 placeholder:text-slate-400 focus:border-odoo-purple focus:ring-odoo-purple/25 dark:border-slate-500 dark:bg-slate-950 dark:placeholder:text-slate-500 dark:focus:border-odoo-purple-l dark:focus:ring-odoo-purple/40' => $formActive,
                         'cursor-not-allowed border-slate-200 bg-white text-slate-700 opacity-90 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-300' => ! $formActive,
                     ])
                     @disabled(! $isEditable)
@@ -141,8 +141,8 @@
                         id="application_id"
                         name="application_id"
                         @class([
-                            'mt-1 w-full rounded-xl border px-3 py-2.5 text-sm shadow-inner focus:outline-none focus:ring-2 dark:text-slate-100 pr-10',
-                            'border-[#5b3853]/40 bg-white text-slate-900 focus:border-[#5b3853] focus:ring-[#5b3853]/25 dark:border-slate-500 dark:bg-slate-950 dark:focus:border-[#c4a8bc] dark:focus:ring-[#5b3853]/40' => $formActive,
+                            'mt-1 w-full appearance-none rounded-xl border px-3 py-2.5 text-sm shadow-inner focus:outline-none focus:ring-2 dark:text-slate-100 pr-10',
+                            'border-odoo-purple/40 bg-white text-slate-900 focus:border-odoo-purple focus:ring-odoo-purple/25 dark:border-slate-500 dark:bg-slate-950 dark:focus:border-odoo-purple-l dark:focus:ring-odoo-purple/40' => $formActive,
                             'cursor-not-allowed border-slate-200 bg-white text-slate-700 opacity-90 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-300' => ! $formActive,
                         ])
                         @disabled(! $isEditable)
@@ -168,7 +168,7 @@
                     value="{{ old('file', $errorCode->file ?? null) }}"
                     @class([
                         'mt-1 w-full rounded-xl border px-3 py-2.5 text-sm shadow-inner focus:outline-none focus:ring-2 dark:text-slate-100',
-                        'border-[#5b3853]/40 bg-white text-slate-900 placeholder:text-slate-400 focus:border-[#5b3853] focus:ring-[#5b3853]/25 dark:border-slate-500 dark:bg-slate-950 dark:placeholder:text-slate-500 dark:focus:border-[#c4a8bc] dark:focus:ring-[#5b3853]/40' => $formActive,
+                        'border-odoo-purple/40 bg-white text-slate-900 placeholder:text-slate-400 focus:border-odoo-purple focus:ring-odoo-purple/25 dark:border-slate-500 dark:bg-slate-950 dark:placeholder:text-slate-500 dark:focus:border-odoo-purple-l dark:focus:ring-odoo-purple/40' => $formActive,
                         'cursor-not-allowed border-slate-200 bg-white text-slate-700 opacity-90 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-300' => ! $formActive,
                     ])
                     @disabled(! $isEditable)
@@ -188,7 +188,7 @@
                     value="{{ old('line', $errorCode->line ?? null) }}"
                     @class([
                         'mt-1 w-full rounded-xl border px-3 py-2.5 text-sm shadow-inner focus:outline-none focus:ring-2 dark:text-slate-100',
-                        'border-[#5b3853]/40 bg-white text-slate-900 placeholder:text-slate-400 focus:border-[#5b3853] focus:ring-[#5b3853]/25 dark:border-slate-500 dark:bg-slate-950 dark:placeholder:text-slate-500 dark:focus:border-[#c4a8bc] dark:focus:ring-[#5b3853]/40' => $formActive,
+                        'border-odoo-purple/40 bg-white text-slate-900 placeholder:text-slate-400 focus:border-odoo-purple focus:ring-odoo-purple/25 dark:border-slate-500 dark:bg-slate-950 dark:placeholder:text-slate-500 dark:focus:border-odoo-purple-l dark:focus:ring-odoo-purple/40' => $formActive,
                         'cursor-not-allowed border-slate-200 bg-white text-slate-700 opacity-90 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-300' => ! $formActive,
                     ])
                     @disabled(! $isEditable)
@@ -205,7 +205,7 @@
                     rows="4"
                     @class([
                         'mt-1 w-full min-w-0 rounded-xl border px-3 py-2.5 text-sm shadow-inner focus:outline-none focus:ring-2 dark:text-slate-100',
-                        'border-[#5b3853]/40 bg-white text-slate-900 placeholder:text-slate-400 focus:border-[#5b3853] focus:ring-[#5b3853]/25 dark:border-slate-500 dark:bg-slate-950 dark:placeholder:text-slate-500 dark:focus:border-[#c4a8bc] dark:focus:ring-[#5b3853]/40' => $formActive,
+                        'border-odoo-purple/40 bg-white text-slate-900 placeholder:text-slate-400 focus:border-odoo-purple focus:ring-odoo-purple/25 dark:border-slate-500 dark:bg-slate-950 dark:placeholder:text-slate-500 dark:focus:border-odoo-purple-l dark:focus:ring-odoo-purple/40' => $formActive,
                         'cursor-not-allowed border-slate-200 bg-white text-slate-700 opacity-90 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-300' => ! $formActive,
                     ])
                     @disabled(! $isEditable)
