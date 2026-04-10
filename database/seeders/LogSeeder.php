@@ -22,6 +22,10 @@ class LogSeeder extends Seeder
                 $row['metadata'] = json_encode($row['metadata'], JSON_UNESCAPED_UNICODE);
             }
 
+            if (empty($row['error_code_id']) && isset($row['application_id'])) {
+                $row['error_code_id'] = $errorCodeByApp[$row['application_id']] ?? null;
+            }
+
             return $row;
         }, $mockLogs);
 

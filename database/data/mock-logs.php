@@ -26,6 +26,8 @@ foreach ($errorCodes as $errorCode) {
     $errorCodeByApplication[(int) $errorCode['application_id']] = $errorCode['code'];
 }
 
+$errorCodeByApplication = [];
+
 $longSegment = 'trace context user request pipeline timeout retry database cache service';
 $messageBody = trim(implode(' ', array_fill(0, 36, $longSegment)));
 

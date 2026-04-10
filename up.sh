@@ -105,6 +105,13 @@ for i in $(seq 1 20); do
   sleep 2
 done
 
+# 1b) Build de assets Vite (bind mount sobrescribe la imagen)
+if ! docker exec "$BACKEND_CONTAINER" test -f public/build/manifest.json; then
+  info "Compilando assets Vite..."
+  docker exec "$BACKEND_CONTAINER" npm run build
+  success "Assets compilados."
+fi
+
 # 2) Esperar conexión con la BD (PDO directo — sin bootstrap de Laravel)
 info "Esperando conexión con la base de datos..."
 for i in $(seq 1 40); do

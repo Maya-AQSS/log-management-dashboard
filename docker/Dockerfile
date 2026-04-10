@@ -21,6 +21,7 @@ COPY . .
 
 RUN rm -f bootstrap/cache/services.php bootstrap/cache/packages.php 2>/dev/null || true
 RUN npm ci 2>/dev/null || true
+RUN npm run build 2>/dev/null || true
 RUN chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
 
 EXPOSE 8000 5173
