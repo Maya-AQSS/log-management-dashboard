@@ -8,15 +8,15 @@
     >
         <div class="absolute inset-0 bg-black/50" x-on:click="{{ $openVar }} = false"></div>
 
-        <div class="relative w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-700 dark:bg-slate-900">
-            <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{{ $resolvedTitle }}</h2>
-            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{{ $resolvedMessage }}</p>
+        <div class="relative w-full max-w-md rounded-lg border border-ui-border bg-ui-card p-5 shadow-dropdown dark:border-ui-dark-border dark:bg-ui-dark-card">
+            <h2 class="text-lg font-semibold text-text-primary dark:text-text-dark-primary">{{ $resolvedTitle }}</h2>
+            <p class="mt-2 text-sm text-text-secondary dark:text-text-dark-secondary">{{ $resolvedMessage }}</p>
 
             <div class="mt-4 flex justify-end gap-2">
                 <button
                     type="button"
                     x-on:click="{{ $openVar }} = false"
-                    class="inline-flex items-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                    class="inline-flex items-center rounded-full border border-ui-border bg-ui-card px-4 py-2 text-sm font-semibold text-text-primary hover:bg-ui-body dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-primary dark:hover:bg-ui-dark-border"
                 >
                     {{ $resolvedCancelLabel }}
                 </button>
@@ -30,7 +30,7 @@
                         type="submit"
                         @class([
                             'inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold shadow-sm',
-                            'border border-red-200 bg-red-50 text-red-700 hover:bg-red-100' => $confirmVariant === 'danger',
+                            'border border-danger/20 bg-danger-light text-danger-dark hover:bg-danger/20' => $confirmVariant === 'danger',
                             'bg-odoo-purple text-white hover:bg-odoo-purple-d' => $confirmVariant === 'primary',
                         ])
                     >

@@ -1,15 +1,15 @@
 <div x-data="{}">
-    <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-ui-dark-border dark:bg-ui-dark-card">
+    <div class="mt-4 rounded-lg border border-ui-border bg-ui-body p-4 dark:border-ui-dark-border dark:bg-ui-dark-card">
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div class="space-y-4">
                 <div>
-                    <label class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+                    <label class="mb-1 block text-sm font-medium text-text-secondary dark:text-text-dark-secondary">
                         {{ __('logs.filters.search') }}
                     </label>
                     <input
                         type="text"
                         wire:model.live.debounce.400ms="searchInput"
-                        class="w-full rounded-xl border border-ui-border bg-ui-card px-3 py-2 text-base shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-primary focus:border-odoo-purple focus:outline-none focus:ring-2 focus:ring-odoo-purple/20"
+                        class="w-full rounded-lg border border-ui-border bg-ui-card px-3 py-2 text-sm shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-primary focus:border-odoo-purple focus:outline-none focus:ring-2 focus:ring-odoo-purple/20"
                         placeholder="{{ __('logs.filters.search_placeholder') }}"
                     />
                 </div>
@@ -48,15 +48,15 @@
                 @endphp
                 <details
                     @if($hasResolvedSelected) open @endif
-                    class="group rounded-xl border border-ui-border bg-ui-card px-3 py-2 shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card"
+                    class="group rounded-lg border border-ui-border bg-ui-card px-3 py-2 shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card"
                 >
-                    <summary class="list-none cursor-pointer select-none flex items-center justify-between gap-3 text-sm font-medium text-slate-700 dark:text-slate-200">
+                    <summary class="list-none cursor-pointer select-none flex items-center justify-between gap-3 text-sm font-medium text-text-secondary dark:text-text-dark-secondary">
                         <span>{{ __('logs.filters.resolved_group') }}</span>
                         <x-chevron-down class="transition-transform group-open:rotate-180" />
                     </summary>
 
                     <div class="mt-2 grid grid-cols-1 gap-2">
-                        <label class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                        <label class="flex items-center gap-2 text-sm font-medium text-text-secondary dark:text-text-dark-secondary">
                             <input
                                 type="radio"
                                 name="resolved-filter"
@@ -66,7 +66,7 @@
                             />
                             {{ __('logs.filters.resolved_all') }}
                         </label>
-                        <label class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                        <label class="flex items-center gap-2 text-sm font-medium text-text-secondary dark:text-text-dark-secondary">
                             <input
                                 type="radio"
                                 name="resolved-filter"
@@ -76,7 +76,7 @@
                             />
                             {{ __('logs.filters.resolved_resolved') }}
                         </label>
-                        <label class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                        <label class="flex items-center gap-2 text-sm font-medium text-text-secondary dark:text-text-dark-secondary">
                             <input
                                 type="radio"
                                 name="resolved-filter"
@@ -95,7 +95,7 @@
             <button
                 type="button"
                 x-on:click="$dispatch('logs-apply-requested')"
-                class="inline-flex items-center rounded-full bg-odoo-purple px-4 py-2 text-base font-semibold text-white hover:bg-odoo-purple-d"
+                class="inline-flex items-center rounded-full bg-odoo-purple px-4 py-2 text-sm font-semibold text-white hover:bg-odoo-purple-d"
             >
                 {{ __('logs.buttons.apply') }}
             </button>
@@ -103,7 +103,7 @@
             <button
                 type="button"
                 wire:click="resetFilters"
-                class="inline-flex items-center rounded-full border border-slate-300 bg-white px-4 py-2 text-base font-semibold text-slate-800 hover:bg-slate-50"
+                class="inline-flex items-center rounded-full border border-ui-border bg-ui-card px-4 py-2 text-sm font-semibold text-text-primary hover:bg-ui-body dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-primary dark:hover:bg-ui-dark-border"
             >
                 {{ __('logs.buttons.reset') }}
             </button>
@@ -171,25 +171,25 @@
 
         @foreach($logs as $log)
                 <tr
-                    class="align-top cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
+                    class="align-top cursor-pointer hover:bg-ui-body dark:hover:bg-ui-dark-card"
                     data-href="{{ route('logs.show', $log->id) }}"
                     onclick="window.location.href=this.dataset.href"
                 >
-                    <td class="px-3 py-2 text-slate-700 dark:text-slate-200">{{ $log->application?->name ?? '-' }}</td>
+                    <td class="px-3 py-2 text-text-primary dark:text-text-dark-primary">{{ $log->application?->name ?? '-' }}</td>
                     <td class="px-3 py-2 whitespace-nowrap">
                         <x-severity-badge :severity="$log->severity" />
                     </td>
-                    <td class="min-w-[16rem] max-w-md px-3 py-2 text-slate-700 dark:text-slate-200 md:min-w-[18rem]">
+                    <td class="min-w-[16rem] max-w-md px-3 py-2 text-text-primary dark:text-text-dark-primary md:min-w-[18rem]">
                         <span class="break-words">{{ \Illuminate\Support\Str::limit($log->message ?? '-', 120) }}</span>
                     </td>
-                    <td class="px-3 py-2 text-slate-700 whitespace-nowrap dark:text-slate-200">{{ $log->errorCode?->code ?? '-' }}</td>
-                    <td class="px-3 py-2 text-slate-700 whitespace-nowrap dark:text-slate-200">
+                    <td class="px-3 py-2 text-text-primary whitespace-nowrap dark:text-text-dark-primary">{{ $log->errorCode?->code ?? '-' }}</td>
+                    <td class="px-3 py-2 text-text-primary whitespace-nowrap dark:text-text-dark-primary">
                         {{ optional($log->created_at)->locale(app()->getLocale())->translatedFormat('d F Y H:i:s') ?? '-' }}
                     </td>
-                    <td class="px-3 py-2 text-slate-700 whitespace-nowrap dark:text-slate-200">
+                    <td class="px-3 py-2 text-text-primary whitespace-nowrap dark:text-text-dark-primary">
                         <div class="flex flex-wrap gap-2">
                             @if($log->resolved)
-                                <span class="inline-flex items-center rounded-full bg-cyan-100 px-2 py-0.5 text-xs font-semibold text-cyan-800">
+                                <span class="inline-flex items-center rounded-full bg-info-light px-2 py-0.5 text-xs font-semibold text-info-dark dark:bg-info/20 dark:text-info">
                                     {{ __('logs.status.resolved') }}
                                 </span>
                             @endif

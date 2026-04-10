@@ -2,7 +2,7 @@
     <div class="grid grid-cols-1 gap-3 md:grid-cols-3 md:items-center">
         <div class="hidden md:block"></div>
 
-        <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100 text-center">
+        <h1 class="text-3xl font-bold text-text-primary dark:text-text-dark-primary md:text-4xl text-center">
             {{ __('error_codes.title') }}
         </h1>
 

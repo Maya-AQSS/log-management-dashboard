@@ -6,21 +6,21 @@
 
 <details
     @if($hasSelected) open @endif
-    class="group rounded-xl border border-slate-300 bg-white px-3 py-2 shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card"
+    class="group rounded-lg border border-ui-border bg-ui-card px-3 py-2 shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card"
 >
-    <summary class="list-none cursor-pointer select-none flex items-center justify-between gap-3 text-sm font-medium text-slate-700 dark:text-text-dark-primary">
+    <summary class="list-none cursor-pointer select-none flex items-center justify-between gap-3 text-sm font-medium text-text-secondary dark:text-text-dark-secondary">
         <span>{{ $title }}</span>
         <x-chevron-down class="transition-transform group-open:rotate-180" />
     </summary>
 
     <div class="mt-2 grid grid-cols-2 gap-2">
         @foreach($severities as $severity)
-            <label class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-text-dark-primary">
+            <label class="flex items-center gap-2 text-sm font-medium text-text-secondary dark:text-text-dark-secondary">
                 <input
                     type="checkbox"
                     value="{{ $severity }}"
                     wire:model.defer="{{ $wireModel }}"
-                    class="h-4 w-4 rounded border-slate-300 bg-white text-odoo-purple shadow-sm focus:ring-odoo-purple/30 dark:border-ui-dark-border dark:bg-ui-dark-card"
+                    class="h-4 w-4 rounded border-ui-border bg-ui-card text-odoo-purple shadow-sm focus:ring-odoo-purple/30 dark:border-ui-dark-border dark:bg-ui-dark-card"
                 />
                 {{ __('severity.' . $severity) }}
             </label>

@@ -341,7 +341,7 @@
     <div class="mt-4 space-y-4">
         <div
                 wire:key="comment-editor-create-{{ $newCommentKey }}"
-            class="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900"
+            class="space-y-3 rounded-xl border border-ui-border bg-ui-card p-4 shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card"
                 x-data="tiptapEditor({
                     initialValue: '',
                     messages: {
@@ -356,12 +356,12 @@
                 x-on:drop="handleDrop($event)"
                 x-on:dragover.prevent
         >
-        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ __('comments.form.new_comment') }}</label>
+        <label class="block text-sm font-medium text-text-secondary dark:text-text-dark-secondary">{{ __('comments.form.new_comment') }}</label>
         
                 <div wire:ignore style="position: relative">
                     <div class="rte-editor-box">
                         <x-rte-toolbar />
-                        <div class="p-3 cursor-text bg-white dark:bg-slate-950 rounded-b-xl">
+                        <div class="p-3 cursor-text bg-ui-body dark:bg-ui-dark-bg rounded-b-xl">
                             <div
                                 x-ref="editorEl"
                                 data-placeholder="{{ __('comments.editor.placeholder') }}"
@@ -378,10 +378,10 @@
                     >
                 </div>
         
-                <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('comments.editor.hint') }}</p>
+                <p class="text-xs text-text-muted dark:text-text-dark-muted">{{ __('comments.editor.hint') }}</p>
 
                 @error('content')
-                    <p class="text-sm text-rose-600">{{ $message }}</p>
+                    <p class="mt-1 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-900 dark:border-red-500 dark:bg-red-950 dark:!text-red-50" role="alert">{{ $message }}</p>
                 @enderror
         
                 <button
@@ -396,11 +396,11 @@
 
     <div class="mt-4 space-y-3">
         @forelse ($comments as $comment)
-            <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <article class="rounded-xl border border-ui-border bg-ui-card p-4 shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card">
                 <div class="flex items-start justify-between gap-4">
                     <div>
-                        <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ $comment->user?->name ?? __('comments.user.unknown') }}</p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">{{ $comment->created_at?->format('Y-m-d H:i') }}</p>
+                        <p class="text-sm font-semibold text-text-primary dark:text-text-dark-primary">{{ $comment->user?->name ?? __('comments.user.unknown') }}</p>
+                        <p class="text-xs text-text-secondary dark:text-text-dark-secondary">{{ $comment->created_at?->format('Y-m-d H:i') }}</p>
                     </div>
 
                     @if (auth()->id() === $comment->user_id)
@@ -408,7 +408,7 @@
                             <button type="button" wire:click="startEditing({{ $comment->id }})" class="text-sm font-medium text-odoo-purple hover:underline">
                                 {{ __('comments.buttons.edit') }}
                             </button>
-                            <button type="button" wire:click="deleteComment({{ $comment->id }})" class="text-sm font-medium text-rose-600 hover:underline">
+                            <button type="button" wire:click="deleteComment({{ $comment->id }})" class="text-sm font-medium text-danger hover:underline">
                                 {{ __('comments.buttons.delete') }}
                             </button>
                         </div>
@@ -436,7 +436,7 @@
                         <div wire:ignore style="position: relative">
                             <div class="rte-editor-box">
                                 <x-rte-toolbar />
-                                <div class="p-3 cursor-text bg-white dark:bg-slate-950 rounded-b-xl">
+                                <div class="p-3 cursor-text bg-ui-body dark:bg-ui-dark-bg rounded-b-xl">
                                     <div
                                         x-ref="editorEl"
                                         data-placeholder="{{ __('comments.editor.placeholder') }}"
@@ -454,7 +454,7 @@
                         </div>
 
                         @error('editingContent')
-                            <p class="text-sm text-rose-600">{{ $message }}</p>
+                            <p class="mt-1 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-900 dark:border-red-500 dark:bg-red-950 dark:!text-red-50" role="alert">{{ $message }}</p>
                         @enderror
 
                         <div class="flex gap-2">
@@ -468,7 +468,7 @@
                             <button
                                 type="button"
                                 wire:click="cancelEditing"
-                                class="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                                class="inline-flex items-center rounded-full border border-ui-border bg-ui-card px-4 py-2 text-sm font-semibold text-text-primary hover:bg-ui-body dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-primary dark:hover:bg-ui-dark-border"
                             >
                                 {{ __('comments.buttons.cancel') }}
                             </button>
@@ -476,11 +476,11 @@
                         </div>
                     </div>
                 @else
-                    <div class="rte-content mt-3 text-sm text-slate-700 dark:text-slate-300">{!! $comment->content !!}</div>
+                    <div class="rte-content mt-3 text-sm text-text-primary dark:text-text-dark-primary">{!! $comment->content !!}</div>
                 @endif
             </article>
         @empty
-            <p class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
+            <p class="rounded-xl border border-dashed border-ui-border bg-ui-card px-4 py-6 text-center text-sm text-text-secondary dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-secondary">
                 {{ __('comments.empty') }}
             </p>
         @endforelse

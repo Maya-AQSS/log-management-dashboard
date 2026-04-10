@@ -14,11 +14,11 @@ class SeverityBadge extends Component
      * @var array<string, string>
      */
     public const BADGE_CLASSES = [
-        'critical' => 'inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-800',
-        'high' => 'inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-xs font-semibold text-orange-800',
-        'medium' => 'inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-semibold text-yellow-800',
-        'low' => 'inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800',
-        'other' => 'inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700',
+        'critical' => 'inline-flex items-center rounded-full bg-danger-light px-2 py-0.5 text-xs font-semibold text-danger-dark',
+        'high' => 'inline-flex items-center rounded-full bg-warning-light px-2 py-0.5 text-xs font-semibold text-warning-dark',
+        'medium' => 'inline-flex items-center rounded-full bg-warning-light px-2 py-0.5 text-xs font-semibold text-warning-dark opacity-80',
+        'low' => 'inline-flex items-center rounded-full bg-success-light px-2 py-0.5 text-xs font-semibold text-success-dark',
+        'other' => 'inline-flex items-center rounded-full bg-ui-body px-2 py-0.5 text-xs font-semibold text-text-secondary',
     ];
 
     /**
@@ -28,29 +28,29 @@ class SeverityBadge extends Component
      */
     public const CARD_CLASSES = [
         'critical' => [
-            'background' => 'bg-rose-100 dark:bg-rose-700/35',
-            'text' => 'text-rose-900 dark:text-rose-100',
-            'border' => 'border-rose-200 dark:border-rose-500/40',
+            'background' => 'bg-danger-light dark:bg-danger-dark/50',
+            'text' => 'text-danger-dark dark:text-white',
+            'border' => 'border-danger/20 dark:border-danger/50',
         ],
         'high' => [
-            'background' => 'bg-orange-100 dark:bg-orange-700/35',
-            'text' => 'text-orange-900 dark:text-orange-100',
-            'border' => 'border-orange-200 dark:border-orange-500/40',
+            'background' => 'bg-warning-light dark:bg-warning-dark/50',
+            'text' => 'text-warning-dark dark:text-white',
+            'border' => 'border-warning/20 dark:border-warning/50',
         ],
         'medium' => [
-            'background' => 'bg-yellow-100 dark:bg-yellow-600/35',
-            'text' => 'text-yellow-900 dark:text-yellow-100',
-            'border' => 'border-yellow-200 dark:border-yellow-400/40',
+            'background' => 'bg-orange-100 dark:bg-orange-800/50',
+            'text' => 'text-orange-800 dark:text-white',
+            'border' => 'border-orange-300 dark:border-orange-500/50',
         ],
         'low' => [
-            'background' => 'bg-emerald-100 dark:bg-emerald-700/35',
-            'text' => 'text-emerald-900 dark:text-emerald-100',
-            'border' => 'border-emerald-200 dark:border-emerald-500/40',
+            'background' => 'bg-odoo-teal/10 dark:bg-odoo-teal/40',
+            'text' => 'text-odoo-teal-d dark:text-white',
+            'border' => 'border-odoo-teal/20 dark:border-odoo-teal/50',
         ],
         'other' => [
-            'background' => 'bg-slate-100 dark:bg-slate-700/45',
-            'text' => 'text-slate-800 dark:text-slate-100',
-            'border' => 'border-slate-200 dark:border-slate-500/40',
+            'background' => 'bg-ui-card dark:bg-ui-dark-card',
+            'text' => 'text-text-primary dark:text-white',
+            'border' => 'border-ui-border dark:border-ui-dark-border',
         ],
     ];
 
@@ -58,9 +58,9 @@ class SeverityBadge extends Component
      * Fallback card palette for non-severity cards (all).
      */
     public const CARD_DEFAULT = [
-        'background' => 'bg-[#ede7ef] dark:bg-[#5b3853]/45',
-        'text' => 'text-[#5b3853] dark:text-[#f7eaf2]',
-        'border' => 'border-[#d9c8df] dark:border-[#8f6f87]/50',
+        'background' => 'bg-odoo-purple/10 dark:bg-odoo-purple/40',
+        'text' => 'text-odoo-purple-d dark:text-white',
+        'border' => 'border-odoo-purple/20 dark:border-odoo-purple/50',
     ];
 
     public string $label;

@@ -1,5 +1,5 @@
 <div x-data="{}">
-    <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-ui-dark-border dark:bg-ui-dark-card">
+    <div class="mt-4 rounded-lg border border-ui-border bg-ui-body p-4 dark:border-ui-dark-border dark:bg-ui-dark-card">
         <div class="grid grid-cols-1 gap-3 md:grid-cols-5 md:items-end">
             <div class="md:col-span-2">
                 <x-date-range-filter
@@ -36,7 +36,7 @@
                 <button
                     type="button"
                     x-on:click="$dispatch('logs-apply-requested')"
-                    class="inline-flex items-center rounded-full bg-odoo-purple px-4 py-2 text-base font-semibold text-white hover:bg-odoo-purple-d"
+                    class="inline-flex items-center rounded-full bg-odoo-purple px-4 py-2 text-sm font-semibold text-white hover:bg-odoo-purple-d"
                 >
                     {{ __('archived_logs.buttons.apply') }}
                 </button>
@@ -44,7 +44,7 @@
                 <button
                     type="button"
                     wire:click="resetFilters"
-                    class="inline-flex items-center rounded-full border border-slate-300 bg-white px-4 py-2 text-base font-semibold text-slate-800 hover:bg-slate-50"
+                    class="inline-flex items-center rounded-full border border-ui-border bg-ui-card px-4 py-2 text-sm font-semibold text-text-primary hover:bg-ui-body dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-primary dark:hover:bg-ui-dark-border"
                 >
                     {{ __('archived_logs.buttons.reset') }}
                 </button>
@@ -96,20 +96,20 @@
 
         @foreach($archivedLogs as $item)
             <tr
-                class="align-top cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
+                class="align-top cursor-pointer hover:bg-ui-body dark:hover:bg-ui-dark-card"
                 data-href="{{ route('archived-logs.show', $item->id) }}"
                 onclick="window.location.href=this.dataset.href"
             >
-                <td class="px-3 py-2 text-slate-700 dark:text-slate-200">
+                <td class="px-3 py-2 text-text-primary dark:text-text-dark-primary">
                     {{ $item->application?->name ?? '-' }}
                 </td>
                 <td class="px-3 py-2 whitespace-nowrap">
                     <x-severity-badge :severity="$item->severity" />
                 </td>
-                <td class="px-3 py-2 text-slate-700 dark:text-slate-200">
+                <td class="px-3 py-2 text-text-primary dark:text-text-dark-primary">
                     {{ \Illuminate\Support\Str::limit($item->message ?? '-', 120) }}
                 </td>
-                <td class="px-3 py-2 text-slate-700 whitespace-nowrap dark:text-slate-200">
+                <td class="px-3 py-2 text-text-primary whitespace-nowrap dark:text-text-dark-primary">
                     {{ optional($item->archived_at)->locale(app()->getLocale())->translatedFormat('d F Y H:i:s') ?? '-' }}
                 </td>
             </tr>
