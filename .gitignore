@@ -57,3 +57,8 @@ __MACOSX/
 *.njsproj
 *.sln
 *.sw?
+
+# Claude Code — archivos generados (no commitear)
+.claude/
+.gemini/
+.github/workflows/
