@@ -204,6 +204,7 @@ class ArchivedLogDetail extends Component
             'metadataJson' => $metadataJson,
             'descriptionPlaceholder' => __('archived_logs.description.placeholder'),
             'urlTutorialPlaceholder' => __('archived_logs.url_tutorial.placeholder'),
+            'isEditable' => $this->descriptionPanelMode === 'editing',
         ]);
     }
 }

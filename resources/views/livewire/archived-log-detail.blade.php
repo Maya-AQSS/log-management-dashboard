@@ -196,7 +196,7 @@
                 <div>
                     <label for="archived_at_display" class="block text-sm font-medium text-text-secondary dark:text-text-dark-secondary">{{ __('archived_logs.detail.archived_at') }}</label>
                     <div class="mt-1 rounded-xl border border-ui-border bg-ui-body px-3 py-2.5 text-sm text-text-primary shadow-inner dark:border-ui-dark-border dark:bg-ui-dark-bg dark:text-text-dark-primary">
-                        {{ optional($archivedLog->archived_at)->locale(app()->getLocale())->translatedFormat('d F Y H:i:s') ?? '—' }}
+                        {{ $archivedLog->archived_at?->locale(app()->getLocale())->translatedFormat('d F Y H:i:s') ?? '—' }}
                     </div>
                 </div>
 
@@ -204,7 +204,7 @@
                 <div>
                     <label for="created_at_display" class="block text-sm font-medium text-text-secondary dark:text-text-dark-secondary">{{ __('archived_logs.detail.created_at') }}</label>
                     <div class="mt-1 rounded-xl border border-ui-border bg-ui-body px-3 py-2.5 text-sm text-text-primary shadow-inner dark:border-ui-dark-border dark:bg-ui-dark-bg dark:text-text-dark-primary">
-                        {{ optional($archivedLog->created_at)->locale(app()->getLocale())->translatedFormat('d F Y H:i:s') ?? '—' }}
+                        {{ $archivedLog->created_at?->locale(app()->getLocale())->translatedFormat('d F Y H:i:s') ?? '—' }}
                     </div>
                 </div>
 

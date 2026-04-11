@@ -25,6 +25,7 @@
         {{-- Toggle dark mode --}}
         <button
             type="button"
+            data-dark-mode-toggle
             class="p-2 rounded-lg hover:bg-ui-body dark:hover:bg-ui-dark-card text-text-secondary dark:text-text-dark-secondary transition-colors"
             data-dark-mode-toggle
             @click="toggleDarkMode()"
@@ -52,6 +53,7 @@
             </button>
 
             <div
+                data-user-menu-dropdown
                 x-show="userMenuOpen"
                 x-transition
                 @click.outside="userMenuOpen = false"

@@ -9,7 +9,10 @@
     >
         <div class="absolute inset-0 bg-black/50" x-on:click="{{ $openVar }} = false"></div>
 
-        <div class="relative w-full max-w-md rounded-lg border border-ui-border bg-ui-card p-5 shadow-dropdown dark:border-ui-dark-border dark:bg-ui-dark-card">
+        <div
+            class="relative w-full max-w-md rounded-lg border border-ui-border bg-ui-card p-5 shadow-dropdown dark:border-ui-dark-border dark:bg-ui-dark-card"
+            data-confirm-modal="{{ in_array($intent, ['delete', 'delete_archived']) ? 'delete' : $intent }}"
+        >
             <h2 class="text-lg font-semibold text-text-primary dark:text-text-dark-primary">{{ $resolvedTitle }}</h2>
             <p class="mt-2 text-sm text-text-secondary dark:text-text-dark-secondary">{{ $resolvedMessage }}</p>
 

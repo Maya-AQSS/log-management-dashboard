@@ -43,6 +43,7 @@ services:
       VITE_APP_NAME: ${APP_NAME:-Log Management}
     volumes:
       - .:/var/www/html
+      - ../packages:/packages
       - /var/www/html/vendor
       - /var/www/html/node_modules
     ports:
