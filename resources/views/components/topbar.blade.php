@@ -12,7 +12,7 @@
     class="h-14 bg-ui-topbar dark:bg-ui-dark-topbar shadow-topbar flex items-center justify-between px-6 z-[200] shrink-0 border-b border-ui-border dark:border-ui-dark-border"
 >
     {{-- Título de página --}}
-    <h1 class="text-md font-semibold text-text-primary dark:text-text-dark-primary truncate">
+    <h1 data-topbar-title class="text-md font-semibold text-text-primary dark:text-text-dark-primary truncate">
         {{ $pageTitle }}
     </h1>
 
@@ -25,6 +25,7 @@
         {{-- Toggle dark mode --}}
         <button
             type="button"
+            data-dark-mode-toggle
             class="p-2 rounded-lg hover:bg-ui-body dark:hover:bg-ui-dark-card text-text-secondary dark:text-text-dark-secondary transition-colors"
             @click="toggleDarkMode()"
             :aria-pressed="isDark"
@@ -43,6 +44,7 @@
         <div class="relative">
             <button
                 type="button"
+                data-user-menu-trigger
                 @click="userMenuOpen = !userMenuOpen"
                 class="w-8 h-8 rounded-full bg-odoo-purple flex items-center justify-center text-xs font-bold text-white transition-colors"
             >
@@ -50,6 +52,7 @@
             </button>
 
             <div
+                data-user-menu-dropdown
                 x-show="userMenuOpen"
                 x-transition
                 @click.outside="userMenuOpen = false"

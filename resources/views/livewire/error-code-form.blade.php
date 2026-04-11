@@ -117,19 +117,22 @@
             </div>
             <div>
                 <label for="code" class="block text-sm font-medium text-text-secondary dark:text-text-dark-secondary">{{ __('error_codes.table.code') }} <span class="text-red-600">*</span></label>
+                @if($formActive)
                 <input
                     id="code"
                     name="code"
                     type="text"
                     value="{{ old('code', $errorCode->code ?? null) }}"
-                    @class([
-                        'mt-1 w-full rounded-xl border px-3 py-2.5 text-sm shadow-inner focus:outline-none focus:ring-2 dark:text-text-dark-primary',
-                        'border-odoo-purple/40 bg-white text-text-primary placeholder:text-text-muted focus:border-odoo-purple focus:ring-odoo-purple/25 dark:border-slate-500 dark:bg-slate-950 dark:placeholder:text-text-dark-muted dark:focus:border-odoo-purple-l dark:focus:ring-odoo-purple/40' => $formActive,
-                        'cursor-not-allowed border-ui-border bg-ui-body text-text-secondary opacity-90 dark:border-ui-dark-border dark:bg-ui-dark-bg dark:text-text-dark-secondary' => ! $formActive,
-                    ])
-                    @disabled(! $isEditable)
+                    class="mt-1 w-full rounded-xl border px-3 py-2.5 text-sm shadow-inner focus:outline-none focus:ring-2 dark:text-text-dark-primary border-odoo-purple/40 bg-white text-text-primary placeholder:text-text-muted focus:border-odoo-purple focus:ring-odoo-purple/25 dark:border-slate-500 dark:bg-slate-950 dark:placeholder:text-text-dark-muted dark:focus:border-odoo-purple-l dark:focus:ring-odoo-purple/40"
                     required
                 />
+                @else
+                <div
+                    id="code"
+                    class="mt-1 w-full rounded-xl border px-3 py-2.5 text-sm shadow-inner cursor-not-allowed border-ui-border bg-ui-body text-text-secondary opacity-90 dark:border-ui-dark-border dark:bg-ui-dark-bg dark:text-text-dark-secondary"
+                >{{ $errorCode->code ?? '' }}</div>
+                <input type="hidden" name="code" value="{{ old('code', $errorCode->code ?? null) }}" />
+                @endif
                 @error('code')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
