@@ -37,6 +37,8 @@ return [
 
     'auth_gateway' => [
         'external_url' => env('AUTH_EXTERNAL_URL', 'http://auth.example.com'),
+        'public_url'   => env('AUTH_EXTERNAL_PUBLIC_URL', env('AUTH_EXTERNAL_URL', 'http://auth.example.com')),
+        'mock_enabled' => env('AUTH_MOCK_ENABLED', false),
         'mock_user_id' => (int) env('AUTH_MOCK_USER_ID', 1),
     ],
 

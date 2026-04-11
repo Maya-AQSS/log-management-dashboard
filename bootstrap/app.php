@@ -29,7 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 abort(401, 'Unauthenticated.');
             }
 
-            return rtrim((string) config('services.auth_gateway.external_url', 'http://auth.example.com'), '/').'/login';
+            return rtrim((string) config('services.auth_gateway.public_url', 'http://auth.example.com'), '/');
         });
 
     })

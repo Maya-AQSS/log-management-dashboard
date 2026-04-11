@@ -34,8 +34,8 @@ class AuthGateway
             return $next($request);
         }
 
-        // En local no se usa el servicio externo: sesión mock para desarrollo (ver AuthMock).
-        if (app()->environment('local')) {
+        // Si el mock de sesión está habilitado explícitamente, se usa (desarrollo rápido).
+        if (config('services.auth_gateway.mock_enabled', false)) {
             return $this->authMock->handle($request, $next);
         }
 
