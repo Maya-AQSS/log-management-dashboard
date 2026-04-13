@@ -56,7 +56,7 @@ class ErrorCodesTest extends DuskTestCase
                 ->type('#code', 'NEW-001')
                 ->select('#application_id', (string) $seed->applicationId)
                 ->press('button[type="submit"][form="error-code-main-form"]')
-                ->waitUntil("window.location.pathname.match(/^\\/error-codes\\/\\d+$/)")
+                ->waitUntil('window.location.pathname.match(/^\\/error-codes\\/\\d+$/)')
                 ->assertPathContains('/error-codes/');
         });
     }

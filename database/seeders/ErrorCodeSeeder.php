@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Application;
 use App\Models\ErrorCode;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -24,10 +25,10 @@ class ErrorCodeSeeder extends Seeder
             // If no application_id, resolve from application name
             if ($appId === null && isset($errorCode['application'])) {
                 $appName = $errorCode['application'];
-                if (!isset($appCache[$appName])) {
-                    $app = \App\Models\Application::firstOrCreate(
+                if (! isset($appCache[$appName])) {
+                    $app = Application::firstOrCreate(
                         ['name' => $appName],
-                        ['description' => $appName . ' application']
+                        ['description' => $appName.' application']
                     );
                     $appCache[$appName] = $app->id;
                 }
