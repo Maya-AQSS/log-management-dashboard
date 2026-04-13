@@ -38,19 +38,81 @@ class ArchivedLogSaveChangesTest extends TestCase
 
         Livewire::actingAs($user)
             ->test(ArchivedLogDetail::class, ['archivedLogId' => $archivedLog->id])
-            ->call('startEditingArchivedFields')
-            ->assertSet('editingUrlTutorial', true)
-            ->assertSet('descriptionPanelMode', 'editing')
+            ->call('enableEdit')
+            ->assertSet('isEditing', true)
             ->set('descriptionInput', $description)
             ->set('urlTutorialInput', $url)
-            ->call('saveArchivedDetailChanges')
+            ->call('save')
             ->assertHasNoErrors()
-            ->assertSet('editingUrlTutorial', false)
-            ->assertSet('descriptionPanelMode', 'closed');
+            ->assertSet('isEditing', false);
 
         $fresh = ArchivedLog::query()->find($archivedLog->id);
         $this->assertSame($description, $fresh->description);
         $this->assertSame($url, $fresh->url_tutorial);
+    }
+
+    public function test_saving_only_description_leaves_url_tutorial_unchanged(): void
+    {
+        $user = User::factory()->create();
+        [$application, $errorCode] = $this->seedApplicationAndErrorCode();
+
+        $existingUrl = 'https://docs.example.com/existing-page';
+
+        $archivedLog = ArchivedLog::query()->create([
+            'application_id' => $application->id,
+            'archived_by_id' => $user->id,
+            'error_code_id' => $errorCode->id,
+            'severity' => 'high',
+            'message' => 'Archived message',
+            'metadata' => null,
+            'description' => null,
+            'url_tutorial' => $existingUrl,
+            'original_created_at' => now()->subMinute(),
+            'archived_at' => now(),
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(ArchivedLogDetail::class, ['archivedLogId' => $archivedLog->id])
+            ->call('enableEdit')
+            ->set('descriptionInput', 'Nueva descripción añadida.')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $fresh = ArchivedLog::query()->find($archivedLog->id);
+        $this->assertSame('Nueva descripción añadida.', $fresh->description);
+        $this->assertSame($existingUrl, $fresh->url_tutorial);
+    }
+
+    public function test_saving_only_url_tutorial_leaves_description_unchanged(): void
+    {
+        $user = User::factory()->create();
+        [$application, $errorCode] = $this->seedApplicationAndErrorCode();
+
+        $existingDescription = 'Descripción preexistente que no debe cambiar.';
+
+        $archivedLog = ArchivedLog::query()->create([
+            'application_id' => $application->id,
+            'archived_by_id' => $user->id,
+            'error_code_id' => $errorCode->id,
+            'severity' => 'high',
+            'message' => 'Archived message',
+            'metadata' => null,
+            'description' => $existingDescription,
+            'url_tutorial' => null,
+            'original_created_at' => now()->subMinute(),
+            'archived_at' => now(),
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(ArchivedLogDetail::class, ['archivedLogId' => $archivedLog->id])
+            ->call('enableEdit')
+            ->set('urlTutorialInput', 'https://wiki.example.com/solution')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $fresh = ArchivedLog::query()->find($archivedLog->id);
+        $this->assertSame($existingDescription, $fresh->description);
+        $this->assertSame('https://wiki.example.com/solution', $fresh->url_tutorial);
     }
 
     public function test_invalid_url_in_combined_save_shows_validation_error_and_does_not_persist(): void
@@ -73,12 +135,12 @@ class ArchivedLogSaveChangesTest extends TestCase
 
         Livewire::actingAs($user)
             ->test(ArchivedLogDetail::class, ['archivedLogId' => $archivedLog->id])
-            ->call('startEditingArchivedFields')
+            ->call('enableEdit')
             ->set('descriptionInput', 'Descripción válida.')
             ->set('urlTutorialInput', 'https://single-label-host')
-            ->call('saveArchivedDetailChanges')
+            ->call('save')
             ->assertHasErrors(['urlTutorialInput'])
-            ->assertSet('editingUrlTutorial', true);
+            ->assertSet('isEditing', true);
 
         $fresh = ArchivedLog::query()->find($archivedLog->id);
         $this->assertNull($fresh->description);
@@ -106,11 +168,9 @@ class ArchivedLogSaveChangesTest extends TestCase
 
         Livewire::actingAs($other)
             ->test(ArchivedLogDetail::class, ['archivedLogId' => $archivedLog->id])
-            ->set('editingUrlTutorial', true)
-            ->set('descriptionPanelMode', 'editing')
             ->set('descriptionInput', 'Intento no autorizado')
             ->set('urlTutorialInput', 'https://docs.example.com/page')
-            ->call('saveArchivedDetailChanges')
+            ->call('save')
             ->assertForbidden();
 
         $fresh = ArchivedLog::query()->find($archivedLog->id);

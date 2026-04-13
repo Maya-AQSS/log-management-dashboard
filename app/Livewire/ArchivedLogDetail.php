@@ -2,10 +2,13 @@
 
 namespace App\Livewire;
 
+use App\Models\ArchivedLog;
+use App\Models\ErrorCode;
 use App\Rules\AcceptableTutorialUrl;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class ArchivedLogDetail extends Component
@@ -28,168 +31,98 @@ class ArchivedLogDetail extends Component
 
     public ?string $backHref = null;
 
-    public string $urlTutorialInput = '';
+    public bool $isEditing = false;
 
-    public bool $editingUrlTutorial = false;
+    // Campos editables ligados a la vista
+    public bool $resolved = false;
+
+    public ?int $errorCodeId = null;
+
+    public string $internalNotes = '';
 
     public string $descriptionInput = '';
 
-    /** closed | editing */
-    public string $descriptionPanelMode = 'closed';
+    public string $urlTutorialInput = '';
 
     public function mount(int $archivedLogId, ?string $backHref = null): void
     {
-        $archivedLog = $this->archivedLogService->findOrFail($archivedLogId);
-
         $this->archivedLogId = $archivedLogId;
         $this->backHref = $backHref;
-        $this->urlTutorialInput = $archivedLog->url_tutorial ?? '';
-        $this->descriptionInput = $archivedLog->description ?? '';
+        $this->syncFromModel($this->archivedLog);
+    }
+
+    #[Computed]
+    public function archivedLog(): ArchivedLog
+    {
+        return $this->archivedLogService->findOrFail($this->archivedLogId);
     }
 
     /**
-     * Abre edición de descripción y URL a la vez (solo quien archivó: policy update).
+     * @return array<int|string, string>
      */
-    public function startEditingArchivedFields(): void
+    #[Computed]
+    public function errorCodes(): array
     {
-        $archivedLog = $this->archivedLogService->findOrFail($this->archivedLogId);
+        if (! $this->isEditing) {
+            return [];
+        }
+
+        return ErrorCode::query()->orderBy('code')->pluck('code', 'id')->all();
+    }
+
+    public function enableEdit(): void
+    {
+        $this->authorize('update', $this->archivedLog);
+        $this->syncFromModel($this->archivedLog);
+        $this->isEditing = true;
+    }
+
+    public function cancelEdit(): void
+    {
+        $this->syncFromModel($this->archivedLog);
+        $this->isEditing = false;
+        $this->resetValidation();
+    }
+
+    public function save(): void
+    {
+        $archivedLog = $this->archivedLog;
         $this->authorize('update', $archivedLog);
 
+        $this->validate([
+            'descriptionInput' => ['nullable', 'string', 'max:5000'],
+            'urlTutorialInput' => ['nullable', 'string', 'max:500', new AcceptableTutorialUrl],
+            'internalNotes' => ['nullable', 'string', 'max:5000'],
+            'errorCodeId' => ['nullable', 'integer', 'exists:error_codes,id'],
+        ]);
+
+        $this->archivedLogService->updateArchivedFields($archivedLog, [
+            'resolved' => $this->resolved,
+            'error_code_id' => $this->errorCodeId,
+            'internal_notes' => blank($this->internalNotes) ? null : trim($this->internalNotes),
+            'description' => blank($this->descriptionInput) ? null : trim($this->descriptionInput),
+            'url_tutorial' => blank($this->urlTutorialInput) ? null : trim($this->urlTutorialInput),
+        ]);
+
+        // Invalida la cache del computed para que render() obtenga datos frescos
+        unset($this->archivedLog);
+
+        $this->isEditing = false;
+        $this->resetValidation();
+    }
+
+    private function syncFromModel(ArchivedLog $archivedLog): void
+    {
+        $this->resolved = (bool) $archivedLog->resolved;
+        $this->errorCodeId = $archivedLog->error_code_id;
+        $this->internalNotes = $archivedLog->internal_notes ?? '';
         $this->descriptionInput = $archivedLog->description ?? '';
         $this->urlTutorialInput = $archivedLog->url_tutorial ?? '';
-        $this->descriptionPanelMode = 'editing';
-        $this->editingUrlTutorial = true;
-    }
-
-    public function startEditingDescription(): void
-    {
-        $this->startEditingArchivedFields();
-    }
-
-    public function cancelEditingDescription(): void
-    {
-        $this->cancelEditingArchivedFields();
-    }
-
-    public function cancelEditingArchivedFields(): void
-    {
-        $archivedLog = $this->archivedLogService->findOrFail($this->archivedLogId);
-        $this->authorize('update', $archivedLog);
-
-        $this->descriptionInput = $archivedLog->description ?? '';
-        $this->urlTutorialInput = $archivedLog->url_tutorial ?? '';
-        $this->descriptionPanelMode = 'closed';
-        $this->editingUrlTutorial = false;
-        $this->resetValidation(['descriptionInput', 'urlTutorialInput']);
-    }
-
-    public function saveArchivedDetailChanges(): void
-    {
-        $archivedLog = $this->archivedLogService->findOrFail($this->archivedLogId);
-        $this->authorize('update', $archivedLog);
-
-        $this->validate(
-            [
-                'descriptionInput' => ['nullable', 'string', 'max:5000'],
-                'urlTutorialInput' => [
-                    'nullable',
-                    'string',
-                    'max:500',
-                    new AcceptableTutorialUrl(),
-                ],
-            ],
-            [
-                'descriptionInput.max' => __('validation.max.string', [
-                    'attribute' => __('archived_logs.description.field_label'),
-                    'max' => 5000,
-                ]),
-                'urlTutorialInput.max' => __('validation.max.string', ['attribute' => __('logs.table.url_tutorial'), 'max' => 500]),
-            ]
-        );
-
-        $text = trim($this->descriptionInput);
-        $text = $text === '' ? null : $text;
-
-        $url = trim($this->urlTutorialInput);
-        $url = $url === '' ? null : $url;
-
-        $archivedLog = $this->archivedLogService->updateDescription($archivedLog, $text);
-        $archivedLog = $this->archivedLogService->updateUrlTutorial($archivedLog, $url);
-
-        $this->descriptionInput = $archivedLog->description ?? '';
-        $this->urlTutorialInput = $archivedLog->url_tutorial ?? '';
-        $this->descriptionPanelMode = 'closed';
-        $this->editingUrlTutorial = false;
-        $this->resetValidation(['descriptionInput', 'urlTutorialInput']);
-    }
-
-    public function updateDescription(): void
-    {
-        $archivedLog = $this->archivedLogService->findOrFail($this->archivedLogId);
-        $this->authorize('update', $archivedLog);
-
-        $this->validate(
-            [
-                'descriptionInput' => ['nullable', 'string', 'max:5000'],
-            ],
-            [
-                'descriptionInput.max' => __('validation.max.string', [
-                    'attribute' => __('archived_logs.description.field_label'),
-                    'max' => 5000,
-                ]),
-            ]
-        );
-
-        $text = trim($this->descriptionInput);
-        $text = $text === '' ? null : $text;
-
-        $fresh = $this->archivedLogService->updateDescription($archivedLog, $text);
-        $this->descriptionInput = $fresh->description ?? '';
-        $this->descriptionPanelMode = 'closed';
-        $this->editingUrlTutorial = false;
-    }
-
-    public function startEditingUrlTutorial(): void
-    {
-        $this->startEditingArchivedFields();
-    }
-
-    public function cancelEditingUrlTutorial(): void
-    {
-        $this->cancelEditingArchivedFields();
-    }
-
-    public function updateUrlTutorial(): void
-    {
-        $archivedLog = $this->archivedLogService->findOrFail($this->archivedLogId);
-        $this->authorize('update', $archivedLog);
-
-        $this->validate(
-            [
-                'urlTutorialInput' => [
-                    'nullable',
-                    'string',
-                    'max:500',
-                    new AcceptableTutorialUrl(),
-                ],
-            ],
-            [
-                'urlTutorialInput.max' => __('validation.max.string', ['attribute' => __('logs.table.url_tutorial'), 'max' => 500]),
-            ]
-        );
-
-        $url = trim($this->urlTutorialInput);
-        $url = $url === '' ? null : $url;
-
-        $fresh = $this->archivedLogService->updateUrlTutorial($archivedLog, $url);
-        $this->urlTutorialInput = $fresh->url_tutorial ?? '';
-        $this->editingUrlTutorial = false;
-        $this->descriptionPanelMode = 'closed';
     }
 
     public function render(): View
     {
-        $archivedLog = $this->archivedLogService->findOrFail($this->archivedLogId);
+        $archivedLog = $this->archivedLog;
 
         $metadataJson = null;
         if (is_array($archivedLog->metadata) && $archivedLog->metadata !== []) {
@@ -202,9 +135,8 @@ class ArchivedLogDetail extends Component
         return view('livewire.archived-log-detail', [
             'archivedLog' => $archivedLog,
             'metadataJson' => $metadataJson,
-            'descriptionPlaceholder' => __('archived_logs.description.placeholder'),
-            'urlTutorialPlaceholder' => __('archived_logs.url_tutorial.placeholder'),
-            'isEditable' => $this->descriptionPanelMode === 'editing',
+            'isEditable' => $this->isEditing,
+            'errorCodes' => $this->errorCodes,
         ]);
     }
 }

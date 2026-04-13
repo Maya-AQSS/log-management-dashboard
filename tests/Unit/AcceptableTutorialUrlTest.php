@@ -10,7 +10,7 @@ class AcceptableTutorialUrlTest extends TestCase
     private function validate(string $value): ?string
     {
         $error = null;
-        (new AcceptableTutorialUrl())->validate('url', $value, function (string $message) use (&$error): void {
+        (new AcceptableTutorialUrl)->validate('url', $value, function (string $message) use (&$error): void {
             $error = $message;
         });
 

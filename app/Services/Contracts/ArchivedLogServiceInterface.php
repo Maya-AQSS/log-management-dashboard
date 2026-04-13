@@ -21,9 +21,10 @@ interface ArchivedLogServiceInterface
 
     public function findOrFail(int $id): ArchivedLog;
 
-    public function updateUrlTutorial(ArchivedLog $archivedLog, ?string $url): ArchivedLog;
-
-    public function updateDescription(ArchivedLog $archivedLog, ?string $description): ArchivedLog;
+    /**
+     * @param  array<string, mixed>  $fields
+     */
+    public function updateArchivedFields(ArchivedLog $archivedLog, array $fields): ArchivedLog;
 
     public function delete(ArchivedLog $archivedLog): void;
 

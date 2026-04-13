@@ -38,12 +38,12 @@ class ArchivedLogDescriptionTest extends TestCase
 
         Livewire::actingAs($user)
             ->test(ArchivedLogDetail::class, ['archivedLogId' => $archivedLog->id])
-            ->call('startEditingDescription')
-            ->assertSet('descriptionPanelMode', 'editing')
+            ->call('enableEdit')
+            ->assertSet('isEditing', true)
             ->set('descriptionInput', $text)
-            ->call('updateDescription')
+            ->call('save')
             ->assertHasNoErrors()
-            ->assertSet('descriptionPanelMode', 'closed');
+            ->assertSet('isEditing', false);
 
         $this->assertSame($text, ArchivedLog::query()->find($archivedLog->id)->description);
     }
@@ -70,9 +70,9 @@ class ArchivedLogDescriptionTest extends TestCase
 
         Livewire::actingAs($user)
             ->test(ArchivedLogDetail::class, ['archivedLogId' => $archivedLog->id])
-            ->call('startEditingDescription')
+            ->call('enableEdit')
             ->set('descriptionInput', $updated)
-            ->call('updateDescription')
+            ->call('save')
             ->assertHasNoErrors();
 
         $this->assertSame($updated, ArchivedLog::query()->find($archivedLog->id)->description);
@@ -100,9 +100,64 @@ class ArchivedLogDescriptionTest extends TestCase
         Livewire::actingAs($other)
             ->test(ArchivedLogDetail::class, ['archivedLogId' => $archivedLog->id])
             ->set('descriptionInput', 'Intento no autorizado')
-            ->set('descriptionPanelMode', 'editing')
-            ->call('updateDescription')
+            ->call('save')
             ->assertForbidden();
+
+        $this->assertNull(ArchivedLog::query()->find($archivedLog->id)->description);
+    }
+
+    public function test_whitespace_only_description_is_saved_as_null(): void
+    {
+        $user = User::factory()->create();
+        [$application, $errorCode] = $this->seedApplicationAndErrorCode();
+
+        $archivedLog = ArchivedLog::query()->create([
+            'application_id' => $application->id,
+            'archived_by_id' => $user->id,
+            'error_code_id' => $errorCode->id,
+            'severity' => 'high',
+            'message' => 'Archived message',
+            'metadata' => null,
+            'description' => null,
+            'url_tutorial' => null,
+            'original_created_at' => now()->subMinute(),
+            'archived_at' => now(),
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(ArchivedLogDetail::class, ['archivedLogId' => $archivedLog->id])
+            ->call('enableEdit')
+            ->set('descriptionInput', '   ')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertNull(ArchivedLog::query()->find($archivedLog->id)->description);
+    }
+
+    public function test_clearing_existing_description_saves_null(): void
+    {
+        $user = User::factory()->create();
+        [$application, $errorCode] = $this->seedApplicationAndErrorCode();
+
+        $archivedLog = ArchivedLog::query()->create([
+            'application_id' => $application->id,
+            'archived_by_id' => $user->id,
+            'error_code_id' => $errorCode->id,
+            'severity' => 'high',
+            'message' => 'Archived message',
+            'metadata' => null,
+            'description' => 'Texto original a borrar.',
+            'url_tutorial' => null,
+            'original_created_at' => now()->subMinute(),
+            'archived_at' => now(),
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(ArchivedLogDetail::class, ['archivedLogId' => $archivedLog->id])
+            ->call('enableEdit')
+            ->set('descriptionInput', '')
+            ->call('save')
+            ->assertHasNoErrors();
 
         $this->assertNull(ArchivedLog::query()->find($archivedLog->id)->description);
     }
@@ -127,9 +182,9 @@ class ArchivedLogDescriptionTest extends TestCase
 
         Livewire::actingAs($user)
             ->test(ArchivedLogDetail::class, ['archivedLogId' => $archivedLog->id])
-            ->call('startEditingDescription')
+            ->call('enableEdit')
             ->set('descriptionInput', str_repeat('a', 5001))
-            ->call('updateDescription')
+            ->call('save')
             ->assertHasErrors(['descriptionInput']);
     }
 

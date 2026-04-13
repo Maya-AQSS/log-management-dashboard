@@ -180,6 +180,60 @@
                     @endif
                 </div>
 
+                {{-- description (editable) --}}
+                <div class="md:col-span-2">
+                    <label for="description_input" class="block text-sm font-medium text-text-secondary dark:text-text-dark-secondary">
+                        {{ __('archived_logs.description.field_label') }}
+                    </label>
+                    @if($formActive)
+                        <textarea
+                            id="description_input"
+                            wire:model="descriptionInput"
+                            rows="4"
+                            placeholder="{{ __('archived_logs.description.placeholder') }}"
+                            @class([
+                                'mt-1 w-full min-w-0 rounded-xl border px-3 py-2.5 text-sm shadow-inner focus:outline-none focus:ring-2',
+                                'border-odoo-purple/40 bg-white text-text-primary placeholder:text-text-muted focus:border-odoo-purple focus:ring-odoo-purple/25 dark:border-slate-500 dark:bg-slate-950 dark:text-text-dark-primary dark:placeholder:text-text-dark-muted dark:focus:border-odoo-purple-l dark:focus:ring-odoo-purple/40' => $formActive,
+                            ])
+                            @disabled(! $isEditable)
+                        >{{ $descriptionInput }}</textarea>
+                        @error('descriptionInput')<p class="mt-1 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-900 dark:border-red-500 dark:bg-red-950 dark:!text-red-50" role="alert">{{ $message }}</p>@enderror
+                    @else
+                        <div class="mt-1 max-h-40 overflow-y-auto rounded-xl border border-ui-border bg-ui-body px-3 py-2.5 text-sm text-text-primary whitespace-pre-wrap shadow-inner dark:border-ui-dark-border dark:bg-ui-dark-bg dark:text-text-dark-primary">
+                            {{ filled($archivedLog->description) ? $archivedLog->description : '—' }}
+                        </div>
+                    @endif
+                </div>
+
+                {{-- url tutorial (editable) --}}
+                <div class="md:col-span-2">
+                    <label for="url_tutorial_input" class="block text-sm font-medium text-text-secondary dark:text-text-dark-secondary">
+                        {{ __('logs.table.url_tutorial') }}
+                    </label>
+                    @if($formActive)
+                        <input
+                            id="url_tutorial_input"
+                            type="url"
+                            wire:model="urlTutorialInput"
+                            placeholder="{{ __('archived_logs.url_tutorial.placeholder') }}"
+                            @class([
+                                'mt-1 w-full min-w-0 rounded-xl border px-3 py-2.5 text-sm shadow-inner focus:outline-none focus:ring-2',
+                                'border-odoo-purple/40 bg-white text-text-primary placeholder:text-text-muted focus:border-odoo-purple focus:ring-odoo-purple/25 dark:border-slate-500 dark:bg-slate-950 dark:text-text-dark-primary dark:placeholder:text-text-dark-muted dark:focus:border-odoo-purple-l dark:focus:ring-odoo-purple/40' => $formActive,
+                            ])
+                            @disabled(! $isEditable)
+                        />
+                        @error('urlTutorialInput')<p class="mt-1 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-900 dark:border-red-500 dark:bg-red-950 dark:!text-red-50" role="alert">{{ $message }}</p>@enderror
+                    @else
+                        <div class="mt-1 rounded-xl border border-ui-border bg-ui-body px-3 py-2.5 text-sm text-text-primary shadow-inner dark:border-ui-dark-border dark:bg-ui-dark-bg dark:text-text-dark-primary">
+                            @if(filled($archivedLog->url_tutorial))
+                                <a href="{{ $archivedLog->url_tutorial }}" target="_blank" rel="noopener noreferrer" class="text-odoo-purple underline hover:text-odoo-purple-d dark:text-odoo-purple-l dark:hover:text-odoo-purple">{{ $archivedLog->url_tutorial }}</a>
+                            @else
+                                —
+                            @endif
+                        </div>
+                    @endif
+                </div>
+
                 {{-- file --}}
                 <div>
                     <label for="file_display" class="block text-sm font-medium text-text-secondary dark:text-text-dark-secondary">{{ __('archived_logs.detail.file') }}</label>

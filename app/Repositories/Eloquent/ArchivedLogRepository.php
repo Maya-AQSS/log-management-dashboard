@@ -13,6 +13,8 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
 {
     private const SORT_DIRECTIONS = ['asc', 'desc'];
 
+    private const ALLOWED_ARCHIVED_FIELDS = ['resolved', 'error_code_id', 'internal_notes', 'description', 'url_tutorial'];
+
     /**
      * Devuelve una página de logs archivados.
      */
@@ -91,16 +93,12 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
             ->findOrFail($id);
     }
 
-    public function updateUrlTutorial(ArchivedLog $archivedLog, ?string $url): void
+    /**
+     * @param  array<string, mixed>  $fields
+     */
+    public function updateArchivedFields(ArchivedLog $archivedLog, array $fields): void
     {
-        $archivedLog->url_tutorial = $url;
-        $archivedLog->save();
-    }
-
-    public function updateDescription(ArchivedLog $archivedLog, ?string $description): void
-    {
-        $archivedLog->description = $description;
-        $archivedLog->save();
+        $archivedLog->update(array_intersect_key($fields, array_flip(self::ALLOWED_ARCHIVED_FIELDS)));
     }
 
     /**
