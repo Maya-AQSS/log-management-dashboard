@@ -28,4 +28,22 @@ final class AuthExternalUrlGuard
             );
         }
     }
+
+    /**
+     * Fail fast on deploy if the API key is missing.
+     * An empty key would cause all auth requests to be sent without credentials.
+     */
+    public static function assertApiKeyConfiguredForDeploy(string $environment, string $apiKey): void
+    {
+        if (! in_array($environment, ['production', 'staging'], true)) {
+            return;
+        }
+
+        if (trim($apiKey) === '') {
+            throw new RuntimeException(
+                'AUTH_EXTERNAL_API_KEY must be set in production and staging. '.
+                'Without it, requests to the external auth service are sent without credentials.'
+            );
+        }
+    }
 }

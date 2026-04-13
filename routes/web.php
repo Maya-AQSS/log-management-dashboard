@@ -6,24 +6,29 @@ use App\Http\Controllers\ErrorCodeController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\LogoutController;
+use App\Http\Middleware\AuthGateway;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware([AuthGateway::class, 'auth'])->group(function () {
     // Dashboard: contenido canónico en "/dashboard"
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     // "/" redirige 301 a "/dashboard"
     Route::permanentRedirect('/', '/dashboard')->name('home');
 
     // ArchivedLogs
-    Route::get('/archived-logs', [ArchivedLogController::class, 'index'])->name('archived-logs.index');
-    Route::get('/archived-logs/{id}', [ArchivedLogController::class, 'show'])->whereNumber('id')->name('archived-logs.show');
-    Route::delete('/archived-logs/{id}', [ArchivedLogController::class, 'destroy'])->whereNumber('id')->name('archived-logs.destroy');
+    Route::prefix('archived-logs')->group(function () {
+        Route::get('/', [ArchivedLogController::class, 'index'])->name('archived-logs.index');
+        Route::get('/{id}', [ArchivedLogController::class, 'show'])->whereNumber('id')->name('archived-logs.show');
+        Route::delete('/{id}', [ArchivedLogController::class, 'destroy'])->whereNumber('id')->name('archived-logs.destroy');
+    });
 
     // Logs
-    Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
-    Route::get('/logs/{id}', [LogController::class, 'show'])->whereNumber('id')->name('logs.show');
-    Route::post('/logs/{id}/archive', [LogController::class, 'archive'])->whereNumber('id')->name('logs.archive');
-    Route::patch('/logs/{id}/resolve', [LogController::class, 'resolve'])->whereNumber('id')->name('logs.resolve');
+    Route::prefix('logs')->group(function () {
+        Route::get('/', [LogController::class, 'index'])->name('logs.index');
+        Route::get('/{id}', [LogController::class, 'show'])->whereNumber('id')->name('logs.show');
+        Route::post('/{id}/archive', [LogController::class, 'archive'])->whereNumber('id')->name('logs.archive');
+        Route::patch('/{id}/resolve', [LogController::class, 'resolve'])->whereNumber('id')->name('logs.resolve');
+    });
 
     // SSE
     Route::get('/sse/logs', [LogController::class, 'stream'])->name('logs.stream');

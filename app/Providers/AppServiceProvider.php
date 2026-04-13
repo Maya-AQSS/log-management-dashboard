@@ -46,6 +46,11 @@ class AppServiceProvider extends ServiceProvider
             (string) config('services.auth_gateway.external_url', '')
         );
 
+        AuthExternalUrlGuard::assertApiKeyConfiguredForDeploy(
+            (string) $this->app->environment(),
+            (string) config('services.auth_gateway.api_key', '')
+        );
+
         if ($this->app->environment(['production', 'staging'])) {
             URL::forceScheme('https');
         }

@@ -76,4 +76,43 @@ class AuthExternalUrlGuardTest extends TestCase
         AuthExternalUrlGuard::assertConfiguredForDeploy('staging', 'https://staging-auth.company.example/v1');
         $this->assertTrue(true);
     }
+
+    // --- assertApiKeyConfiguredForDeploy ---
+
+    public function test_api_key_throws_when_empty_in_production(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessageMatches('/AUTH_EXTERNAL_API_KEY/');
+        AuthExternalUrlGuard::assertApiKeyConfiguredForDeploy('production', '');
+    }
+
+    public function test_api_key_throws_when_empty_in_staging(): void
+    {
+        $this->expectException(RuntimeException::class);
+        AuthExternalUrlGuard::assertApiKeyConfiguredForDeploy('staging', '');
+    }
+
+    public function test_api_key_throws_when_whitespace_only_in_production(): void
+    {
+        $this->expectException(RuntimeException::class);
+        AuthExternalUrlGuard::assertApiKeyConfiguredForDeploy('production', "   \t  ");
+    }
+
+    public function test_api_key_does_not_throw_for_valid_key_in_production(): void
+    {
+        AuthExternalUrlGuard::assertApiKeyConfiguredForDeploy('production', 'a-real-api-key-abc123');
+        $this->assertTrue(true);
+    }
+
+    public function test_api_key_does_not_throw_in_local_environment(): void
+    {
+        AuthExternalUrlGuard::assertApiKeyConfiguredForDeploy('local', '');
+        $this->assertTrue(true);
+    }
+
+    public function test_api_key_does_not_throw_in_testing_environment(): void
+    {
+        AuthExternalUrlGuard::assertApiKeyConfiguredForDeploy('testing', '');
+        $this->assertTrue(true);
+    }
 }

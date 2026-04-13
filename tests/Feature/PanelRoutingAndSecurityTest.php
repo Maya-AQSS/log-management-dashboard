@@ -69,13 +69,13 @@ class PanelRoutingAndSecurityTest extends TestCase
             '/error-codes',
             '/error-codes/'.$errorCode->id,
         ] as $uri) {
-            $this->get($uri)->assertRedirect('http://auth.example.com/login');
+            $this->get($uri)->assertRedirectContains('http://auth.example.com/login');
         }
 
         $this->get('/sse/logs')->assertUnauthorized();
 
         $this->delete('/archived-logs/'.$archivedLog->id)
-            ->assertRedirect('http://auth.example.com/login');
+            ->assertRedirectContains('http://auth.example.com/login');
     }
 
     public function test_authenticated_user_can_access_minimum_panel_routes(): void
