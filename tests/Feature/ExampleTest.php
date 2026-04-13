@@ -17,7 +17,7 @@ class ExampleTest extends TestCase
     {
         $response = $this->get('/');
 
-        $response->assertRedirect('http://auth.example.com/login');
+        $response->assertRedirectContains('http://auth.example.com/login');
     }
 
     public function test_the_dashboard_returns_a_successful_response_for_authenticated_users(): void

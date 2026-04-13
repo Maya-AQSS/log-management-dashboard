@@ -98,7 +98,7 @@ class IlikeSpecialCharactersTest extends TestCase
     }
 
     /**
-     * @param array<int,string> $messages
+     * @param  array<int,string>  $messages
      */
     private function seedLogs(int $applicationId, int $errorCodeId, array $messages): void
     {
@@ -107,15 +107,15 @@ class IlikeSpecialCharactersTest extends TestCase
 
         foreach ($messages as $index => $message) {
             $rows[] = [
-                'error_code_id'  => $errorCodeId,
+                'error_code_id' => $errorCodeId,
                 'application_id' => $applicationId,
-                'severity'       => 'high',
-                'message'        => $message,
-                'file'           => 'app/Jobs/Test.php',
-                'line'           => 12,
-                'metadata'       => json_encode(['context' => 'test'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-                'resolved'       => false,
-                'created_at'     => $now->copy()->subSeconds($index),
+                'severity' => 'high',
+                'message' => $message,
+                'file' => 'app/Jobs/Test.php',
+                'line' => 12,
+                'metadata' => json_encode(['context' => 'test'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                'resolved' => false,
+                'created_at' => $now->copy()->subSeconds($index),
             ];
         }
 
