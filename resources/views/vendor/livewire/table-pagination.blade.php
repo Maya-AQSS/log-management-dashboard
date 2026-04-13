@@ -24,17 +24,11 @@
     <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between mx-4">
         <div>
             <p class="text-sm text-text-secondary leading-5 dark:text-text-dark-secondary">
-                {!! __('Showing') !!}
                 @if ($paginator->firstItem())
-                    <span class="font-medium text-text-primary dark:text-text-dark-primary">{{ $paginator->firstItem() }}</span>
-                    {!! __('to') !!}
-                    <span class="font-medium text-text-primary dark:text-text-dark-primary">{{ $paginator->lastItem() }}</span>
+                    {{ __('pagination.showing', ['from' => $paginator->firstItem(), 'to' => $paginator->lastItem(), 'total' => $paginator->total()]) }}
                 @else
-                    {{ $paginator->count() }}
+                    {{ $paginator->count() }} {{ __('of') }} {{ $paginator->total() }} {{ __('results') }}
                 @endif
-                {!! __('of') !!}
-                <span class="font-medium text-text-primary dark:text-text-dark-primary">{{ $paginator->total() }}</span>
-                {!! __('results') !!}
             </p>
         </div>
 

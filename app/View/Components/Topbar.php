@@ -20,11 +20,11 @@ class Topbar extends Component
         $request = request();
 
         return match (true) {
-            $request->routeIs('dashboard*')      => __('dashboard.menu'),
-            $request->routeIs('logs*')           => __('logs.menu'),
-            $request->routeIs('archived-logs*')  => __('archived_logs.menu'),
-            $request->routeIs('error-codes*')    => __('error_codes.menu'),
-            default                              => __('app.app_name'),
+            $request->routeIs('dashboard*') => __('dashboard.menu'),
+            $request->routeIs('logs*') => __('logs.menu'),
+            $request->routeIs('archived-logs*') => __('archived_logs.menu'),
+            $request->routeIs('error-codes*') => __('error_codes.menu'),
+            default => __('app.app_name'),
         };
     }
 
