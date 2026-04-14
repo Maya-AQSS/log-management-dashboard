@@ -26,4 +26,6 @@ RUN chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
 
 EXPOSE 8000 5173
 
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+# Dev entrypoint: installs deps if needed, starts Vite + artisan serve
+COPY --chmod=755 docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+ENTRYPOINT ["docker-entrypoint.sh"]
