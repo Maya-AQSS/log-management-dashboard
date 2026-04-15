@@ -23,6 +23,33 @@ info()    { echo -e "${CYAN}[log-mgmt]${NC} $*"; }
 success() { echo -e "${GREEN}[log-mgmt]${NC} $*"; }
 warn()    { echo -e "${YELLOW}[log-mgmt]${NC} $*"; }
 
+upsert_env_var() {
+  local file="$1"
+  local key="$2"
+  local value="$3"
+  local tmp
+
+  if [[ ! -f "$file" ]]; then
+    return 1
+  fi
+
+  tmp="$(mktemp)"
+  if ! awk -v key="$key" -v value="$value" '
+    BEGIN { updated=0 }
+    index($0, key "=") == 1 { print key "=" value; updated=1; next }
+    { print }
+    END { if (!updated) print key "=" value }
+  ' "$file" > "$tmp"; then
+    rm -f "$tmp"
+    return 1
+  fi
+
+  if ! mv "$tmp" "$file"; then
+    rm -f "$tmp"
+    return 1
+  fi
+}
+
 # ─── Cargar .env ─────────────────────────────────────────────────────────────
 if [[ ! -f .env ]]; then
     warn ".env no encontrado — copiando desde .env.example"
@@ -32,6 +59,11 @@ else
     NEED_KEY_GENERATE=false
 fi
 set -a; source .env; set +a
+
+if [[ -z "${APP_KEY:-}" ]]; then
+  warn "APP_KEY vacío en .env — se generará automáticamente"
+  NEED_KEY_GENERATE=true
+fi
 
 # ─── Subcomandos rápidos ──────────────────────────────────────────────────────
 DC="docker compose -f docker-compose.yml"
@@ -55,7 +87,7 @@ esac
 # ─── Verificar y levantar infra compartida ───────────────────────────────────
 # Por defecto busca en ../infra (repo hermano). Puedes sobreescribir con:
 #   MAYA_INFRA_DIR=/ruta/absoluta/a/infra ./up.sh
-INFRA_SCRIPT="${MAYA_INFRA_DIR:-$SCRIPT_DIR/../infra}/ensure-running.sh"
+INFRA_SCRIPT="${MAYA_INFRA_DIR:-$SCRIPT_DIR/../maya_infra}/ensure-running.sh"
 if [[ -f "$INFRA_SCRIPT" ]]; then
     bash "$INFRA_SCRIPT"
 else
@@ -75,21 +107,35 @@ $DC up -d ${EXTRA_FLAGS[@]+"${EXTRA_FLAGS[@]}"}
 # ─── Generar APP_KEY si es .env nuevo ─────────────────────────────────────────
 if [[ "$NEED_KEY_GENERATE" == true ]]; then
     info "Generando APP_KEY..."
+    KEY_GENERATED=false
     for i in $(seq 1 10); do
       if docker exec maya_log_mgmt php -v > /dev/null 2>&1; then
-        # Generate key and capture it
-        NEW_KEY=$(docker exec maya_log_mgmt php artisan key:generate --show 2>/dev/null)
-        if [[ -n "$NEW_KEY" ]]; then
-          # Write to host .env so docker compose can pass it as env var
-          sed -i "s|^APP_KEY=.*|APP_KEY=${NEW_KEY}|" .env
-          # Restart container to pick up the new env var
-          $DC restart
+        NEW_KEY=$(docker exec maya_log_mgmt php artisan key:generate --show 2>/dev/null || true)
+        if [[ -n "$NEW_KEY" && "$NEW_KEY" == base64:* ]]; then
+          if ! upsert_env_var .env APP_KEY "$NEW_KEY"; then
+            warn "No se pudo escribir APP_KEY en .env"
+            exit 1
+          fi
+
+          $DC restart > /dev/null
           success "APP_KEY generada y aplicada."
+          KEY_GENERATED=true
+        else
+          warn "APP_KEY inválida o vacía en intento $i/10."
         fi
-        break
+
+        if [[ "$KEY_GENERATED" == true ]]; then
+          break
+        fi
       fi
       sleep 2
     done
+
+    if [[ "$KEY_GENERATED" != true ]]; then
+      warn "No se pudo generar una APP_KEY válida tras 10 intentos."
+      warn "Ejecuta manualmente: docker exec maya_log_mgmt php artisan key:generate"
+      exit 1
+    fi
 fi
 
 # ─── Migraciones automáticas ──────────────────────────────────────────────────
@@ -105,11 +151,24 @@ for i in $(seq 1 20); do
   sleep 2
 done
 
-# 1b) Build de assets Vite (bind mount sobrescribe la imagen)
-if ! docker exec "$BACKEND_CONTAINER" test -f public/build/manifest.json; then
-  info "Compilando assets Vite..."
-  docker exec "$BACKEND_CONTAINER" npm run build
-  success "Assets compilados."
+# 1b) Esperar a que el entrypoint termine de compilar assets Vite
+# El entrypoint hace npm install + npm run build; solo esperamos el resultado.
+docker exec "$BACKEND_CONTAINER" rm -f public/hot 2>/dev/null || true
+if ! docker exec "$BACKEND_CONTAINER" test -f public/build/manifest.json 2>/dev/null; then
+  info "Esperando a que el entrypoint compile los assets Vite..."
+  VITE_READY=false
+  for i in $(seq 1 60); do
+    if docker exec "$BACKEND_CONTAINER" test -f public/build/manifest.json 2>/dev/null; then
+      VITE_READY=true
+      break
+    fi
+    sleep 5
+  done
+  if [[ "$VITE_READY" == true ]]; then
+    success "Assets Vite listos."
+  else
+    warn "Timeout esperando assets Vite — continuando de todos modos."
+  fi
 fi
 
 # 2) Esperar conexión con la BD (PDO directo — sin bootstrap de Laravel)
@@ -135,19 +194,67 @@ done
 
 # 3) Ejecutar migraciones si la BD está accesible
 if [[ "$DB_READY" == true ]]; then
-  PENDING=$(docker exec "$BACKEND_CONTAINER" php artisan migrate:status 2>&1 | grep -c "Pending" || true)
-  TOTAL=$(docker exec "$BACKEND_CONTAINER" php artisan migrate:status 2>&1 | grep -cE "Ran|Pending" || true)
+  SEED_MODE="${DB_SEED_MODE:-if-empty}" # always | if-empty | never
 
-  if [[ "$TOTAL" -eq 0 ]] || [[ "$TOTAL" -eq "$PENDING" ]]; then
-    info "Base de datos vacía — ejecutando migraciones y seeds..."
-    docker exec "$BACKEND_CONTAINER" php artisan migrate --seed --force
-    success "Migraciones y seeds aplicados."
-  elif [[ "$PENDING" -gt 0 ]]; then
-    info "${PENDING} migraciones pendientes — ejecutando migrate..."
-    docker exec "$BACKEND_CONTAINER" php artisan migrate --force
-    success "Migraciones aplicadas."
+  database_has_data() {
+    local has_data
+    has_data=$(docker exec "$BACKEND_CONTAINER" php -r "
+      try {
+        \$h = getenv('DB_HOST') ?: 'maya_infra_postgres';
+        \$p = getenv('DB_PORT') ?: '5432';
+        \$d = getenv('DB_DATABASE');
+        \$u = getenv('DB_USERNAME');
+        \$w = getenv('DB_PASSWORD');
+        \$pdo = new PDO(\"pgsql:host=\$h;port=\$p;dbname=\$d\", \$u, \$w, [PDO::ATTR_TIMEOUT => 3]);
+        \$skip = ['migrations','failed_jobs','jobs','job_batches','cache','cache_locks','password_reset_tokens','sessions'];
+        \$tables = \$pdo->query(\"SELECT tablename FROM pg_tables WHERE schemaname = 'public'\")->fetchAll(PDO::FETCH_COLUMN);
+        foreach (\$tables as \$table) {
+          if (in_array(\$table, \$skip) || !preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', \$table)) continue;
+          \$stmt = \$pdo->query(\"SELECT 1 FROM \\\"\$table\\\" LIMIT 1\");
+          if (\$stmt && \$stmt->fetchColumn() !== false) { echo '1'; exit(0); }
+        }
+        echo '0';
+      } catch (Exception \$e) { exit(2); }
+    " 2>/dev/null)
+    local rc=$?
+    if [[ $rc -ne 0 ]]; then
+      warn "No se pudo verificar el estado de la BD — se omiten seeds por seguridad."
+      return 2
+    fi
+    [[ "$has_data" == "1" ]]
+  }
+
+  info "Aplicando migraciones..."
+  docker exec "$BACKEND_CONTAINER" php artisan migrate --force
+  success "Migraciones aplicadas/verificadas."
+
+  SHOULD_SEED=false
+  case "$SEED_MODE" in
+    always)
+      SHOULD_SEED=true
+      ;;
+    never)
+      SHOULD_SEED=false
+      ;;
+    if-empty|*)
+      [[ "$SEED_MODE" == "if-empty" ]] || warn "DB_SEED_MODE inválido ('$SEED_MODE'). Usando 'if-empty'."
+      database_has_data && seed_rc=0 || seed_rc=$?
+      if [[ $seed_rc -eq 0 ]]; then
+        info "DB con datos detectados — no se ejecutan seeds (DB_SEED_MODE=if-empty)."
+      elif [[ $seed_rc -eq 2 ]]; then
+        SHOULD_SEED=false
+      else
+        SHOULD_SEED=true
+      fi
+      ;;
+  esac
+
+  if [[ "$SHOULD_SEED" == true ]]; then
+    info "Ejecutando seeders (DB_SEED_MODE=$SEED_MODE)..."
+    docker exec "$BACKEND_CONTAINER" php artisan db:seed --force
+    success "Seeders aplicados."
   else
-    success "Base de datos al día — nada que migrar."
+    success "Seeders omitidos (DB_SEED_MODE=$SEED_MODE)."
   fi
 else
   warn "No se pudo conectar con la BD — omitiendo migraciones automáticas."
@@ -157,7 +264,7 @@ fi
 # ─── URLs de acceso ───────────────────────────────────────────────────────────
 echo ""
 success "Sistema listo. Accesos disponibles:"
-echo -e "  ${GREEN}Dashboard:${NC}        http://logs.localhost"
+echo -e "  ${GREEN}Dashboard:${NC}        http://maya_logs.localhost"
 echo -e "  ${GREEN}Keycloak:${NC}         http://keycloak.localhost"
 echo -e "  ${GREEN}Traefik dashboard:${NC} http://localhost:8888"
 echo ""
