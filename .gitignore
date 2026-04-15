@@ -62,3 +62,9 @@ __MACOSX/
 .claude/
 .gemini/
 .github/workflows/
+
+# Claude Code — archivos generados (no commitear)
+.claude/
+.agent/
+.github/
+!.github/workflows/

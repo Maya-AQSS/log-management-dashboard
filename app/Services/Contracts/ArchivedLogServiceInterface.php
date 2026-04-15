@@ -24,7 +24,7 @@ interface ArchivedLogServiceInterface
     /**
      * @param  array<string, mixed>  $fields
      */
-    public function updateArchivedFields(ArchivedLog $archivedLog, array $fields): ArchivedLog;
+    public function updateArchivedFields(ArchivedLog $archivedLog, array $fields): void;
 
     public function delete(ArchivedLog $archivedLog): void;
 

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\Cache;
 
 class ErrorCode extends Model
 {
@@ -18,6 +19,11 @@ class ErrorCode extends Model
         // Cascade delete comments when error code is deleted
         static::deleting(function (self $errorCode) {
             $errorCode->comments()->delete();
+        });
+
+        // Invalida el cache del selector de error codes cuando se crea o edita uno.
+        static::saved(function () {
+            Cache::forget('error_codes:for_select');
         });
     }
 

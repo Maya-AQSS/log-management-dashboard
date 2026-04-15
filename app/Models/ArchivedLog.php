@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -70,5 +71,25 @@ class ArchivedLog extends Model
     public function comments(): MorphMany
     {
         return $this->morphMany(Comment::class, 'commentable');
+    }
+
+    /**
+     * Aplica eager loading estándar para vistas de lista y detalle.
+     *
+     * @param  Builder<ArchivedLog>  $query
+     * @return Builder<ArchivedLog>
+     */
+    public function scopeWithStandardRelations(Builder $query): Builder
+    {
+        return $query->with(['application', 'archivedBy', 'errorCode'])->withCount('comments');
+    }
+
+    public function getMetadataFormattedAttribute(): ?string
+    {
+        if (! is_array($this->metadata) || $this->metadata === []) {
+            return null;
+        }
+
+        return json_encode($this->metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 }

@@ -21,8 +21,7 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
         return ArchivedLog::query()
-            ->with(['application', 'archivedBy', 'errorCode'])
-            ->withCount('comments')
+            ->withStandardRelations()
             ->latest('archived_at')
             ->paginate($perPage)
             ->withQueryString();
@@ -45,14 +44,13 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
         $validatedSortDirection = in_array($sortDir, self::SORT_DIRECTIONS, true) ? $sortDir : 'asc';
 
         $query = ArchivedLog::query()
-            ->with(['application', 'archivedBy', 'errorCode'])
-            ->withCount('comments')
+            ->withStandardRelations()
             ->when($severities !== null && $severities !== [], fn ($q) => $q->whereIn('severity', $severities))
             ->when($applicationId !== null, fn ($q) => $q->where('application_id', $applicationId))
             ->when($dateFrom !== null, fn ($q) => $q->where('archived_at', '>=', $dateFrom))
             ->when($dateTo !== null, fn ($q) => $q->where('archived_at', '<=', $dateTo));
 
-        match ($sortBy) {
+        $query = match ($sortBy) {
             'archived_at' => $query
                 ->orderBy('archived_at', $validatedSortDirection)
                 ->orderByDesc('id'),
@@ -71,7 +69,7 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
      * Orden de negocio: critical → high → medium → low → other (ASC).
      * DESC invierte ese ranking.
      */
-    private function applySeverityRankOrder(Builder $query, string $direction): void
+    private function applySeverityRankOrder(Builder $query, string $direction): Builder
     {
         $dir = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
         $query->orderByRaw(
@@ -80,6 +78,8 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
         );
         $query->orderByDesc('archived_at');
         $query->orderByDesc('id');
+
+        return $query;
     }
 
     /**
@@ -88,8 +88,7 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
     public function findOrFail(int $id): ArchivedLog
     {
         return ArchivedLog::query()
-            ->with(['application', 'archivedBy', 'errorCode'])
-            ->withCount('comments')
+            ->withStandardRelations()
             ->findOrFail($id);
     }
 
