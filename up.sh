@@ -23,6 +23,33 @@ info()    { echo -e "${CYAN}[log-mgmt]${NC} $*"; }
 success() { echo -e "${GREEN}[log-mgmt]${NC} $*"; }
 warn()    { echo -e "${YELLOW}[log-mgmt]${NC} $*"; }
 
+upsert_env_var() {
+  local file="$1"
+  local key="$2"
+  local value="$3"
+  local tmp
+
+  if [[ ! -f "$file" ]]; then
+    return 1
+  fi
+
+  tmp="$(mktemp)"
+  if ! awk -v key="$key" -v value="$value" '
+    BEGIN { updated=0 }
+    index($0, key "=") == 1 { print key "=" value; updated=1; next }
+    { print }
+    END { if (!updated) print key "=" value }
+  ' "$file" > "$tmp"; then
+    rm -f "$tmp"
+    return 1
+  fi
+
+  if ! mv "$tmp" "$file"; then
+    rm -f "$tmp"
+    return 1
+  fi
+}
+
 # ─── Cargar .env ─────────────────────────────────────────────────────────────
 if [[ ! -f .env ]]; then
     warn ".env no encontrado — copiando desde .env.example"
@@ -32,6 +59,11 @@ else
     NEED_KEY_GENERATE=false
 fi
 set -a; source .env; set +a
+
+if [[ -z "${APP_KEY:-}" ]]; then
+  warn "APP_KEY vacío en .env — se generará automáticamente"
+  NEED_KEY_GENERATE=true
+fi
 
 # ─── Subcomandos rápidos ──────────────────────────────────────────────────────
 DC="docker compose -f docker-compose.yml"
@@ -75,21 +107,35 @@ $DC up -d ${EXTRA_FLAGS[@]+"${EXTRA_FLAGS[@]}"}
 # ─── Generar APP_KEY si es .env nuevo ─────────────────────────────────────────
 if [[ "$NEED_KEY_GENERATE" == true ]]; then
     info "Generando APP_KEY..."
+    KEY_GENERATED=false
     for i in $(seq 1 10); do
       if docker exec maya_log_mgmt php -v > /dev/null 2>&1; then
-        # Generate key and capture it
-        NEW_KEY=$(docker exec maya_log_mgmt php artisan key:generate --show 2>/dev/null)
-        if [[ -n "$NEW_KEY" ]]; then
-          # Write to host .env so docker compose can pass it as env var
-          sed -i "s|^APP_KEY=.*|APP_KEY=${NEW_KEY}|" .env
-          # Restart container to pick up the new env var
-          $DC restart
+        NEW_KEY=$(docker exec maya_log_mgmt php artisan key:generate --show 2>/dev/null || true)
+        if [[ -n "$NEW_KEY" && "$NEW_KEY" == base64:* ]]; then
+          if ! upsert_env_var .env APP_KEY "$NEW_KEY"; then
+            warn "No se pudo escribir APP_KEY en .env"
+            exit 1
+          fi
+
+          $DC restart > /dev/null
           success "APP_KEY generada y aplicada."
+          KEY_GENERATED=true
+        else
+          warn "APP_KEY inválida o vacía en intento $i/10."
         fi
-        break
+
+        if [[ "$KEY_GENERATED" == true ]]; then
+          break
+        fi
       fi
       sleep 2
     done
+
+    if [[ "$KEY_GENERATED" != true ]]; then
+      warn "No se pudo generar una APP_KEY válida tras 10 intentos."
+      warn "Ejecuta manualmente: docker exec maya_log_mgmt php artisan key:generate"
+      exit 1
+    fi
 fi
 
 # ─── Migraciones automáticas ──────────────────────────────────────────────────
