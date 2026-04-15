@@ -8,19 +8,23 @@ cd /var/www/html
 rm -f bootstrap/cache/packages.php bootstrap/cache/services.php
 
 # Composer dependencies (volumen bind monta packages/ en runtime)
-if [ ! -d "vendor" ] || [ "composer.json" -nt "vendor/autoload.php" ]; then
+if [ ! -f "vendor/autoload.php" ] || [ "composer.json" -nt "vendor/autoload.php" ]; then
     echo "[entrypoint] Installing composer dependencies..."
     composer install --optimize-autoloader --no-interaction
 else
     echo "[entrypoint] Composer deps up to date"
 fi
 
-# npm dependencies
-if [ ! -d "node_modules" ] || [ "package.json" -nt "node_modules/.package-lock.json" ]; then
+# npm dependencies + Vite build
+if [ ! -f "node_modules/.bin/vite" ] || [ "package.json" -nt "node_modules/.package-lock.json" ]; then
     echo "[entrypoint] Installing npm dependencies..."
     npm install
+fi
+if [ ! -f "public/build/manifest.json" ]; then
+    echo "[entrypoint] Building Vite assets..."
+    npm run build
 else
-    echo "[entrypoint] npm deps up to date"
+    echo "[entrypoint] npm/Vite assets up to date"
 fi
 
 # Storage y permisos

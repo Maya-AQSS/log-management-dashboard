@@ -3,10 +3,11 @@ FROM php:8.4-fpm-alpine
 RUN apk add --no-cache \
     bash git curl libpng-dev libxml2-dev zip unzip \
     postgresql-dev oniguruma-dev linux-headers \
+    libzip-dev \
     nodejs npm
 
 RUN docker-php-ext-install \
-    pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd
+    pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip
 
 COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 

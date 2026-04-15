@@ -151,13 +151,24 @@ for i in $(seq 1 20); do
   sleep 2
 done
 
-# 1b) Build de assets Vite (bind mount sobrescribe la imagen)
-# Eliminar hot file si existe (apunta al servidor dev, causa que los assets no carguen en Docker)
+# 1b) Esperar a que el entrypoint termine de compilar assets Vite
+# El entrypoint hace npm install + npm run build; solo esperamos el resultado.
 docker exec "$BACKEND_CONTAINER" rm -f public/hot 2>/dev/null || true
-if ! docker exec "$BACKEND_CONTAINER" test -f public/build/manifest.json; then
-  info "Compilando assets Vite..."
-  docker exec "$BACKEND_CONTAINER" npm run build
-  success "Assets compilados."
+if ! docker exec "$BACKEND_CONTAINER" test -f public/build/manifest.json 2>/dev/null; then
+  info "Esperando a que el entrypoint compile los assets Vite..."
+  VITE_READY=false
+  for i in $(seq 1 60); do
+    if docker exec "$BACKEND_CONTAINER" test -f public/build/manifest.json 2>/dev/null; then
+      VITE_READY=true
+      break
+    fi
+    sleep 5
+  done
+  if [[ "$VITE_READY" == true ]]; then
+    success "Assets Vite listos."
+  else
+    warn "Timeout esperando assets Vite — continuando de todos modos."
+  fi
 fi
 
 # 2) Esperar conexión con la BD (PDO directo — sin bootstrap de Laravel)
