@@ -152,6 +152,8 @@ for i in $(seq 1 20); do
 done
 
 # 1b) Build de assets Vite (bind mount sobrescribe la imagen)
+# Eliminar hot file si existe (apunta al servidor dev, causa que los assets no carguen en Docker)
+docker exec "$BACKEND_CONTAINER" rm -f public/hot 2>/dev/null || true
 if ! docker exec "$BACKEND_CONTAINER" test -f public/build/manifest.json; then
   info "Compilando assets Vite..."
   docker exec "$BACKEND_CONTAINER" npm run build
@@ -185,39 +187,29 @@ if [[ "$DB_READY" == true ]]; then
 
   database_has_data() {
     local has_data
-    has_data=$(docker exec "$BACKEND_CONTAINER" php -r '
+    has_data=$(docker exec "$BACKEND_CONTAINER" php -r "
       try {
-        $h = getenv("DB_HOST") ?: "maya_infra_postgres";
-        $p = getenv("DB_PORT") ?: "5432";
-        $d = getenv("DB_DATABASE");
-        $u = getenv("DB_USERNAME");
-        $w = getenv("DB_PASSWORD");
-        $pdo = new PDO("pgsql:host=$h;port=$p;dbname=$d", $u, $w, [PDO::ATTR_TIMEOUT => 3]);
-
-        $tables = $pdo->query("SELECT tablename FROM pg_tables WHERE schemaname = ''public'' AND tablename NOT IN (''migrations'', ''failed_jobs'', ''jobs'', ''job_batches'', ''cache'', ''cache_locks'', ''password_reset_tokens'', ''sessions'')")->fetchAll(PDO::FETCH_COLUMN);
-
-        foreach ($tables as $table) {
-          if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $table)) {
-            continue;
-          }
-
-          $stmt = $pdo->query("SELECT 1 FROM \"{$table}\" LIMIT 1");
-          if ($stmt && $stmt->fetchColumn() !== false) {
-            echo "1";
-            exit(0);
-          }
+        \$h = getenv('DB_HOST') ?: 'maya_infra_postgres';
+        \$p = getenv('DB_PORT') ?: '5432';
+        \$d = getenv('DB_DATABASE');
+        \$u = getenv('DB_USERNAME');
+        \$w = getenv('DB_PASSWORD');
+        \$pdo = new PDO(\"pgsql:host=\$h;port=\$p;dbname=\$d\", \$u, \$w, [PDO::ATTR_TIMEOUT => 3]);
+        \$skip = ['migrations','failed_jobs','jobs','job_batches','cache','cache_locks','password_reset_tokens','sessions'];
+        \$tables = \$pdo->query(\"SELECT tablename FROM pg_tables WHERE schemaname = 'public'\")->fetchAll(PDO::FETCH_COLUMN);
+        foreach (\$tables as \$table) {
+          if (in_array(\$table, \$skip) || !preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', \$table)) continue;
+          \$stmt = \$pdo->query(\"SELECT 1 FROM \\\"\$table\\\" LIMIT 1\");
+          if (\$stmt && \$stmt->fetchColumn() !== false) { echo '1'; exit(0); }
         }
-
-        echo "0";
-      } catch (Exception $e) {
-        exit(2);
-      }')
-
-    if [[ "$?" -ne 0 ]]; then
+        echo '0';
+      } catch (Exception \$e) { exit(2); }
+    " 2>/dev/null)
+    local rc=$?
+    if [[ $rc -ne 0 ]]; then
       warn "No se pudo verificar el estado de la BD — se omiten seeds por seguridad."
       return 2
     fi
-
     [[ "$has_data" == "1" ]]
   }
 
@@ -233,27 +225,15 @@ if [[ "$DB_READY" == true ]]; then
     never)
       SHOULD_SEED=false
       ;;
-    if-empty)
-      if database_has_data; then
+    if-empty|*)
+      [[ "$SEED_MODE" == "if-empty" ]] || warn "DB_SEED_MODE inválido ('$SEED_MODE'). Usando 'if-empty'."
+      database_has_data && seed_rc=0 || seed_rc=$?
+      if [[ $seed_rc -eq 0 ]]; then
         info "DB con datos detectados — no se ejecutan seeds (DB_SEED_MODE=if-empty)."
+      elif [[ $seed_rc -eq 2 ]]; then
+        SHOULD_SEED=false
       else
-        if [[ "$?" -eq 2 ]]; then
-          SHOULD_SEED=false
-        else
-          SHOULD_SEED=true
-        fi
-      fi
-      ;;
-    *)
-      warn "DB_SEED_MODE inválido ('$SEED_MODE'). Usando 'if-empty'."
-      if database_has_data; then
-        info "DB con datos detectados — no se ejecutan seeds (DB_SEED_MODE=if-empty)."
-      else
-        if [[ "$?" -eq 2 ]]; then
-          SHOULD_SEED=false
-        else
-          SHOULD_SEED=true
-        fi
+        SHOULD_SEED=true
       fi
       ;;
   esac
