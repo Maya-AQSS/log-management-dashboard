@@ -12,16 +12,10 @@ COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Copy composer files first for layer caching
-COPY composer.json composer.lock ./
-RUN composer install --optimize-autoloader --no-dev --no-interaction --no-scripts
-
-# Copy rest of the app (vendor excluded via .dockerignore)
+# Copy app (vendor excluded via .dockerignore)
 COPY . .
 
 RUN rm -f bootstrap/cache/services.php bootstrap/cache/packages.php 2>/dev/null || true
-RUN npm ci 2>/dev/null || true
-RUN npm run build 2>/dev/null || true
 RUN chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
 
 EXPOSE 8000 5173
