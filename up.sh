@@ -273,7 +273,7 @@ fi
 # ─── URLs de acceso ───────────────────────────────────────────────────────────
 echo ""
 success "Sistema listo. Accesos disponibles:"
-echo -e "  ${GREEN}Dashboard:${NC}        http://logs.localhost"
+echo -e "  ${GREEN}Dashboard:${NC}        http://maya_logs.localhost"
 echo -e "  ${GREEN}Keycloak:${NC}         http://keycloak.localhost"
 echo -e "  ${GREEN}Traefik dashboard:${NC} http://localhost:8888"
 echo ""
