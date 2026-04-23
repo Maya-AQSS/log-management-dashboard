@@ -44,13 +44,18 @@ class ArchivedLogService implements ArchivedLogServiceInterface
     }
 
     /**
+     * Sanitizes string fields (trim + blank→null) before persisting.
+     *
      * @param  array<string, mixed>  $fields
      */
-    public function updateArchivedFields(ArchivedLog $archivedLog, array $fields): ArchivedLog
+    public function updateArchivedFields(ArchivedLog $archivedLog, array $fields): void
     {
-        $this->archivedLogRepository->updateArchivedFields($archivedLog, $fields);
+        $sanitized = array_map(
+            static fn ($value) => is_string($value) ? (blank($value) ? null : trim($value)) : $value,
+            $fields
+        );
 
-        return $archivedLog;
+        $this->archivedLogRepository->updateArchivedFields($archivedLog, $sanitized);
     }
 
     public function delete(ArchivedLog $archivedLog): void

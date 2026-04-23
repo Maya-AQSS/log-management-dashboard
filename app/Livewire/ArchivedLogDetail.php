@@ -8,6 +8,7 @@ use App\Rules\AcceptableTutorialUrl;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -67,7 +68,7 @@ class ArchivedLogDetail extends Component
             return [];
         }
 
-        return ErrorCode::query()->orderBy('code')->pluck('code', 'id')->all();
+        return Cache::remember('error_codes:for_select', 3600, fn () => ErrorCode::query()->orderBy('code')->pluck('code', 'id')->all());
     }
 
     public function enableEdit(): void
@@ -99,16 +100,21 @@ class ArchivedLogDetail extends Component
         $this->archivedLogService->updateArchivedFields($archivedLog, [
             'resolved' => $this->resolved,
             'error_code_id' => $this->errorCodeId,
-            'internal_notes' => blank($this->internalNotes) ? null : trim($this->internalNotes),
-            'description' => blank($this->descriptionInput) ? null : trim($this->descriptionInput),
-            'url_tutorial' => blank($this->urlTutorialInput) ? null : trim($this->urlTutorialInput),
+            'internal_notes' => $this->internalNotes,
+            'description' => $this->descriptionInput,
+            'url_tutorial' => $this->urlTutorialInput,
         ]);
 
-        // Invalida la cache del computed para que render() obtenga datos frescos
-        unset($this->archivedLog);
+        $this->refreshArchivedLog();
 
         $this->isEditing = false;
         $this->resetValidation();
+    }
+
+    /** Invalida la cache del computed para que render() obtenga datos frescos de BD. */
+    private function refreshArchivedLog(): void
+    {
+        unset($this->archivedLog);
     }
 
     private function syncFromModel(ArchivedLog $archivedLog): void
@@ -124,17 +130,9 @@ class ArchivedLogDetail extends Component
     {
         $archivedLog = $this->archivedLog;
 
-        $metadataJson = null;
-        if (is_array($archivedLog->metadata) && $archivedLog->metadata !== []) {
-            $metadataJson = json_encode(
-                $archivedLog->metadata,
-                JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-            );
-        }
-
         return view('livewire.archived-log-detail', [
             'archivedLog' => $archivedLog,
-            'metadataJson' => $metadataJson,
+            'metadataJson' => $archivedLog->metadata_formatted,
             'isEditable' => $this->isEditing,
             'errorCodes' => $this->errorCodes,
         ]);
