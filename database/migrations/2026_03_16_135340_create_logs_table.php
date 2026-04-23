@@ -7,10 +7,14 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Tabla gestionada externamente por n8n.
-     * Esta migración la crea solo si no existe (entornos de desarrollo/test).
+     * Tabla escrita por el worker `php artisan logs:consume` que consume la
+     * cola `logs.ingest` de RabbitMQ (exchange `maya.logs`).
      *
-     * Estructura esperada en producción:
+     * El modelo Eloquent `App\Models\Log` bloquea escrituras via booted(); el
+     * worker usa DB::table('logs')->insert(...) para saltarse ese bloqueo.
+     * Esta migración solo crea la tabla si no existe aún (dev/test).
+     *
+     * Estructura esperada:
      *   id               bigserial PK
      *   error_code_id    bigint FK nullable → error_codes.id
      *   application_id   bigint FK → applications.id
@@ -48,7 +52,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        // Precaución: en producción esta tabla es gestionada por n8n.
+        // Precaucion: dropea datos historicos. Solo usar en dev/test.
         Schema::dropIfExists('logs');
     }
 };

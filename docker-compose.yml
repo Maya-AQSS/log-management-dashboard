@@ -38,7 +38,16 @@ services:
       AUTH_MOCK_USER_ID: ${AUTH_MOCK_USER_ID:-1}
       # ─── Logging ────────────────────────────────────────────────
       LOG_CHANNEL: stack
+      LOG_STACK: "daily,rabbit"
       LOG_LEVEL: debug
+      LOG_RABBIT_LEVEL: warning
+      # ─── RabbitMQ (broker compartido en maya_infra) ─────────────
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-maya_rabbitmq}
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      RABBITMQ_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-admin}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
+      MAYA_MESSAGING_APP: maya_logs
       # ─── Vite ───────────────────────────────────────────────────
       VITE_APP_NAME: ${APP_NAME:-Log Management}
     volumes:
@@ -54,6 +63,41 @@ services:
       - "traefik.http.routers.log-mgmt.rule=Host(`logs.localhost`)"
       - "traefik.http.routers.log-mgmt.entrypoints=web"
       - "traefik.http.services.log-mgmt.loadbalancer.server.port=8000"
+    networks:
+      - maya_network
+
+  # ─── Worker: consumer AMQP logs.ingest → tabla logs ──────────
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: maya_log_mgmt_worker
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      APP_NAME: ${APP_NAME:-Log Management}
+      APP_ENV: ${APP_ENV:-local}
+      APP_KEY: ${APP_KEY:-}
+      DB_CONNECTION: pgsql
+      DB_HOST: maya_infra_postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-log_mgmt_db}
+      DB_USERNAME: ${DB_USERNAME:-log_mgmt_user}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      CACHE_STORE: database
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-maya_rabbitmq}
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      RABBITMQ_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-admin}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
+      MAYA_MESSAGING_APP: maya_logs
+    command: ["php", "artisan", "logs:consume"]
+    volumes:
+      - .:/var/www/html
+      - ../packages:/packages
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
     networks:
       - maya_network
 
