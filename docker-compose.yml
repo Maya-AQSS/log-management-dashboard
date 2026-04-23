@@ -96,18 +96,24 @@ services:
       RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
       MAYA_MESSAGING_APP: maya_logs
     # Override del ENTRYPOINT del Dockerfile (que hace exec php artisan serve
-    # hardcoded e ignora CMD). Espera a que backend complete composer install
-    # sobre el volumen compartido y luego arranca el consumer.
+    # hardcoded e ignora CMD). Cada servicio tiene su propio volumen anonymous
+    # para vendor/, asi que el worker instala sus deps tambien (rapido en el
+    # segundo run porque composer cache de paquetes existe en la imagen).
     entrypoint:
       - /bin/sh
       - -c
       - |
         cd /var/www/html
-        until [ -f vendor/autoload.php ]; do
-          echo "[worker] waiting for vendor/autoload.php (backend composer install)..."
+        if [ ! -f vendor/autoload.php ]; then
+          echo "[worker] vendor missing, running composer install..."
+          composer install --optimize-autoloader --no-interaction --no-ansi
+        fi
+        echo "[worker] vendor ready — waiting for backend migrations (logs table)..."
+        until php -r "exit(is_file('vendor/autoload.php') ? 0 : 1);" 2>/dev/null && \
+              php artisan migrate:status --no-interaction 2>/dev/null | grep -q "create_logs_table"; do
           sleep 3
         done
-        echo "[worker] vendor ready — starting logs:consume"
+        echo "[worker] migrations ready — starting logs:consume"
         exec php artisan logs:consume
     command: []
     volumes:
