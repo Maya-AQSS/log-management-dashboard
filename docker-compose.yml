@@ -93,7 +93,21 @@ services:
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-admin}
       RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
       MAYA_MESSAGING_APP: maya_logs
-    command: ["php", "artisan", "logs:consume"]
+    # Override del ENTRYPOINT del Dockerfile (que hace exec php artisan serve
+    # hardcoded e ignora CMD). Espera a que backend complete composer install
+    # sobre el volumen compartido y luego arranca el consumer.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        cd /var/www/html
+        until [ -f vendor/autoload.php ]; do
+          echo "[worker] waiting for vendor/autoload.php (backend composer install)..."
+          sleep 3
+        done
+        echo "[worker] vendor ready — starting logs:consume"
+        exec php artisan logs:consume
+    command: []
     volumes:
       - .:/var/www/html
       - ../packages:/packages
