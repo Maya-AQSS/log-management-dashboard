@@ -54,6 +54,8 @@ services:
     volumes:
       - .:/var/www/html
       - ../maya_infra/packages:/packages
+      # composer.json usa "../packages/..." que desde WORKDIR /var/www/html resuelve a /var/www/packages.
+      - ../maya_infra/packages:/var/www/packages
       - /var/www/html/vendor
       - /var/www/html/node_modules
     ports:
@@ -111,6 +113,8 @@ services:
     volumes:
       - .:/var/www/html
       - ../packages:/packages
+      # composer.json usa "../packages/..." que desde WORKDIR /var/www/html resuelve a /var/www/packages.
+      - ../packages:/var/www/packages
       - /var/www/html/vendor
       - /var/www/html/node_modules
     networks:
