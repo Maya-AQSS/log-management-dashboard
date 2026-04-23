@@ -56,18 +56,21 @@ class ConsumeLogs extends Command
         return self::SUCCESS;
     }
 
-    private function resolveApplicationId(?string $slug): ?int
+    private function resolveApplicationId(?string $name): ?int
     {
-        if ($slug === null) {
+        if ($name === null || $name === '') {
             return null;
         }
 
-        $app = Application::query()
-            ->where('slug', $slug)
-            ->orWhere('name', $slug)
-            ->first();
+        // Auto-registra apps nuevas para que los logs no se pierdan. Si quieres
+        // un control estricto de que solo las apps conocidas puedan emitir,
+        // reemplaza esto por ->first()?->id con early return.
+        $app = Application::firstOrCreate(
+            ['name' => $name],
+            ['description' => 'Auto-registered from logs.ingest', 'created_at' => now()],
+        );
 
-        return $app?->id;
+        return $app->id;
     }
 
     private function resolveErrorCodeId(?string $code, int $applicationId, ?string $file, ?int $line): ?int
