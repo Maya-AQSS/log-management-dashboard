@@ -1,0 +1,41 @@
+{
+  "title": "Códigos de error",
+  "loading": "Cargando códigos…",
+  "loadError": "No se pudieron cargar los códigos de error",
+  "createTitle": "Nuevo código de error",
+  "editTitle": "Editar código de error",
+  "empty": "No hay códigos de error.",
+  "emptyFiltered": "No hay códigos de error que coincidan con los filtros.",
+  "filters": {
+    "searchPlaceholder": "Código, nombre, fichero…",
+    "applicationAll": "Todas las aplicaciones",
+    "reset": "Limpiar"
+  },
+  "columns": {
+    "code": "Código",
+    "application": "Aplicación",
+    "name": "Nombre",
+    "file": "Fichero",
+    "line": "Línea"
+  },
+  "fields": {
+    "code": "Código",
+    "description": "Descripción",
+    "severity": "Severidad",
+    "application": "Aplicación"
+  },
+  "form": {
+    "name": "Nombre",
+    "code": "Código",
+    "application": "Aplicación",
+    "applicationPlaceholder": "Selecciona una aplicación",
+    "file": "Fichero",
+    "line": "Línea",
+    "description": "Descripción"
+  },
+  "actions": {
+    "create": "Crear código",
+    "save": "Guardar cambios",
+    "delete": "Eliminar"
+  }
+}

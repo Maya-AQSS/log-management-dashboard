@@ -1,0 +1,58 @@
+{
+  "title": "Archived logs",
+  "loading": "Loading archived…",
+  "loadError": "Could not load archived logs",
+  "listLoadError": "Could not load archived logs: {{message}}",
+  "empty": "No archived logs match the current filters.",
+  "restoreAction": "Restore",
+  "restoredAt": "Archived on {{date}}",
+  "filters": {
+    "applicationAll": "All applications",
+    "reset": "Clear"
+  },
+  "columns": {
+    "application": "Application",
+    "severity": "Severity",
+    "message": "Message",
+    "archived": "Archived",
+    "sortTitle": "Sort",
+    "emptyText": "No archived logs match the filters."
+  },
+  "detail": {
+    "title": "Archived log detail",
+    "titleWithId": "Archived log detail #{{id}}",
+    "back": "Back",
+    "notFound": "The requested archived log was not found.",
+    "loading": "Loading…",
+    "loadError": "Could not load the archived log: {{message}}",
+    "listLoadError": "Could not load archived logs: {{message}}",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "save": "Save",
+    "editableInfo": "Editable information",
+    "comments": "Comments",
+    "fields": {
+      "application": "Application",
+      "severity": "Severity",
+      "errorCode": "Error code",
+      "archivedBy": "Archived by",
+      "archivedAt": "Archived on",
+      "originalCreatedAt": "Original date",
+      "message": "Message",
+      "metadata": "Metadata",
+      "noMetadata": "No metadata",
+      "description": "Description",
+      "urlTutorial": "Tutorial URL",
+      "noDescription": "No description",
+      "noUrl": "No URL"
+    }
+  },
+  "confirmations": {
+    "delete": {
+      "title": "Delete archived log",
+      "message": "Are you sure you want to delete this archived log? This action cannot be undone.",
+      "confirmLabel": "Delete"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "loading": "Carregant panell…",
+  "error": "No s'ha pogut carregar el panell",
+  "unresolvedLabel": "Sense resoldre",
+  "resolvedLabel": "Resolts",
+  "byApplication": "Per aplicació",
+  "byApplicationHint": "Volum de logs al sistema per servei. Polsa una fila per obrir el llistat filtrat per eixa aplicació.",
+  "logsTotalLabel": "Logs al sistema",
+  "openFilteredLogs": "Veure logs filtrats per {{app}}"
+}
