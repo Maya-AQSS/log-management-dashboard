@@ -105,36 +105,38 @@ info "Levantando servicios..."
 $DC up -d ${EXTRA_FLAGS[@]+"${EXTRA_FLAGS[@]}"}
 
 # ─── Generar APP_KEY si es .env nuevo ─────────────────────────────────────────
+# Sondeamos vendor/autoload.php porque el entrypoint instala Composer bajo demanda
+# en el primer arranque (clon limpio). Usar `php -v` daría un falso positivo — el
+# binario PHP responde de inmediato, pero `artisan key:generate` aborta sin vendor.
 if [[ "$NEED_KEY_GENERATE" == true ]]; then
-    info "Generando APP_KEY..."
+    info "Generando APP_KEY (esperando a composer install del entrypoint)..."
     KEY_GENERATED=false
-    for i in $(seq 1 10); do
-      if docker exec maya_log_mgmt php -v > /dev/null 2>&1; then
+    for i in $(seq 1 90); do
+      if docker exec maya_log_mgmt test -f /var/www/html/vendor/autoload.php 2>/dev/null; then
         NEW_KEY=$(docker exec maya_log_mgmt php artisan key:generate --show 2>/dev/null || true)
         if [[ -n "$NEW_KEY" && "$NEW_KEY" == base64:* ]]; then
           if ! upsert_env_var .env APP_KEY "$NEW_KEY"; then
             warn "No se pudo escribir APP_KEY en .env"
-            exit 1
+            break
           fi
 
           $DC restart > /dev/null
           success "APP_KEY generada y aplicada."
           KEY_GENERATED=true
         else
-          warn "APP_KEY inválida o vacía en intento $i/10."
+          warn "APP_KEY inválida o vacía desde artisan key:generate --show."
         fi
-
-        if [[ "$KEY_GENERATED" == true ]]; then
-          break
-        fi
+        break
+      fi
+      if (( i % 10 == 0 )); then
+        info "  … esperando a que el entrypoint instale vendor ($((i * 2))s/180s)"
       fi
       sleep 2
     done
 
     if [[ "$KEY_GENERATED" != true ]]; then
-      warn "No se pudo generar una APP_KEY válida tras 10 intentos."
-      warn "Ejecuta manualmente: docker exec maya_log_mgmt php artisan key:generate"
-      exit 1
+      warn "No se pudo generar una APP_KEY automáticamente."
+      warn "Ejecuta manualmente: docker exec maya_log_mgmt php artisan key:generate --force"
     fi
 fi
 
