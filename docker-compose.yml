@@ -1,9 +1,9 @@
 services:
 
-  # ─── Backend (Laravel 12 + Livewire 4 — monolito) ────────────
+  # ─── Backend (Laravel 12 API) ────────────────────────────────
   backend:
     build:
-      context: .
+      context: ./backend
       dockerfile: docker/Dockerfile
     container_name: maya_log_mgmt
     restart: unless-stopped
@@ -49,10 +49,14 @@ services:
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-admin}
       RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
       MAYA_MESSAGING_APP: maya_logs
-      # ─── Vite ───────────────────────────────────────────────────
-      VITE_APP_NAME: ${APP_NAME:-Log Management}
+      # ─── JWT / JWKS ───────────────────────────────────────────
+      JWKS_URL: ${JWKS_URL:-http://maya_auth_keycloak:8080/realms/maya/protocol/openid-connect/certs}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-maya-logs}
+      JWT_ISSUER: ${JWT_ISSUER:-http://keycloak.localhost/realms/maya}
+      # ─── CORS ─────────────────────────────────────────────────
+      FRONTEND_URL: ${FRONTEND_URL:-http://logs.localhost}
     volumes:
-      - .:/var/www/html
+      - ./backend:/var/www/html
       - ../maya_infra/packages:/packages
       # composer.json usa "../packages/..." que desde WORKDIR /var/www/html resuelve a /var/www/packages.
       - ../maya_infra/packages:/var/www/packages
@@ -60,19 +64,18 @@ services:
       - /var/www/html/node_modules
     ports:
       - "${BACKEND_PORT:-8002}:8000"
-      - "${VITE_PORT:-5176}:5173"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.log-mgmt.rule=Host(`maya_logs.localhost`)"
-      - "traefik.http.routers.log-mgmt.entrypoints=web"
-      - "traefik.http.services.log-mgmt.loadbalancer.server.port=8000"
+      - "traefik.http.routers.logs-api.rule=Host(`logs-api.localhost`)"
+      - "traefik.http.routers.logs-api.entrypoints=web"
+      - "traefik.http.services.logs-api.loadbalancer.server.port=8000"
     networks:
       - maya_network
 
   # ─── Worker: consumer AMQP logs.ingest → tabla logs ──────────
   worker:
     build:
-      context: .
+      context: ./backend
       dockerfile: docker/Dockerfile
     container_name: maya_log_mgmt_worker
     restart: unless-stopped
@@ -117,12 +120,41 @@ services:
         exec php artisan logs:consume
     command: []
     volumes:
-      - .:/var/www/html
-      - ../packages:/packages
+      - ./backend:/var/www/html
+      - ../maya_infra/packages:/packages
       # composer.json usa "../packages/..." que desde WORKDIR /var/www/html resuelve a /var/www/packages.
-      - ../packages:/var/www/packages
+      - ../maya_infra/packages:/var/www/packages
       - /var/www/html/vendor
       - /var/www/html/node_modules
+    networks:
+      - maya_network
+
+  # ─── Frontend (React 19 + Vite + TS) ─────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: maya_log_mgmt_frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://logs-api.localhost/api/v1}
+      VITE_KEYCLOAK_URL: ${VITE_KEYCLOAK_URL:-http://keycloak.localhost}
+      VITE_KEYCLOAK_REALM: ${VITE_KEYCLOAK_REALM:-maya}
+      VITE_KEYCLOAK_CLIENT_ID: ${VITE_KEYCLOAK_CLIENT_ID:-maya-logs}
+      VITE_DASHBOARD_API_URL: ${VITE_DASHBOARD_API_URL:-http://maya_dashboard_api.localhost}
+    volumes:
+      - ./frontend:/app
+      - ../maya_infra/packages:/maya_infra/packages
+      - /app/node_modules
+    ports:
+      - "${FRONTEND_PORT:-5176}:5173"
+    depends_on:
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.logs-front.rule=Host(`logs.localhost`)"
+      - "traefik.http.routers.logs-front.entrypoints=web"
+      - "traefik.http.services.logs-front.loadbalancer.server.port=5173"
     networks:
       - maya_network
 

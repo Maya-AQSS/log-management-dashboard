@@ -50,15 +50,15 @@ upsert_env_var() {
   fi
 }
 
-# ─── Cargar .env ─────────────────────────────────────────────────────────────
-if [[ ! -f .env ]]; then
-    warn ".env no encontrado — copiando desde .env.example"
-    cp .env.example .env
+# ─── Cargar .env (backend) ───────────────────────────────────────────────────
+if [[ ! -f backend/.env ]]; then
+    warn "backend/.env no encontrado — copiando desde backend/.env.example"
+    cp backend/.env.example backend/.env
     NEED_KEY_GENERATE=true
 else
     NEED_KEY_GENERATE=false
 fi
-set -a; source .env; set +a
+set -a; source backend/.env; set +a
 
 if [[ -z "${APP_KEY:-}" ]]; then
   warn "APP_KEY vacío en .env — se generará automáticamente"
@@ -115,7 +115,7 @@ if [[ "$NEED_KEY_GENERATE" == true ]]; then
       if docker exec maya_log_mgmt test -f /var/www/html/vendor/autoload.php 2>/dev/null; then
         NEW_KEY=$(docker exec maya_log_mgmt php artisan key:generate --show 2>/dev/null || true)
         if [[ -n "$NEW_KEY" && "$NEW_KEY" == base64:* ]]; then
-          if ! upsert_env_var .env APP_KEY "$NEW_KEY"; then
+          if ! upsert_env_var backend/.env APP_KEY "$NEW_KEY"; then
             warn "No se pudo escribir APP_KEY en .env"
             break
           fi
@@ -152,26 +152,6 @@ for i in $(seq 1 20); do
   fi
   sleep 2
 done
-
-# 1b) Esperar a que el entrypoint termine de compilar assets Vite
-# El entrypoint hace npm install + npm run build; solo esperamos el resultado.
-docker exec "$BACKEND_CONTAINER" rm -f public/hot 2>/dev/null || true
-if ! docker exec "$BACKEND_CONTAINER" test -f public/build/manifest.json 2>/dev/null; then
-  info "Esperando a que el entrypoint compile los assets Vite..."
-  VITE_READY=false
-  for i in $(seq 1 60); do
-    if docker exec "$BACKEND_CONTAINER" test -f public/build/manifest.json 2>/dev/null; then
-      VITE_READY=true
-      break
-    fi
-    sleep 5
-  done
-  if [[ "$VITE_READY" == true ]]; then
-    success "Assets Vite listos."
-  else
-    warn "Timeout esperando assets Vite — continuando de todos modos."
-  fi
-fi
 
 # 2) Esperar conexión con la BD (PDO directo — sin bootstrap de Laravel)
 info "Esperando conexión con la base de datos..."
@@ -266,11 +246,12 @@ fi
 # ─── URLs de acceso ───────────────────────────────────────────────────────────
 echo ""
 success "Sistema listo. Accesos disponibles:"
-echo -e "  ${GREEN}Dashboard:${NC}        http://maya_logs.localhost"
+echo -e "  ${GREEN}Frontend:${NC}         http://logs.localhost"
+echo -e "  ${GREEN}Backend API:${NC}      http://logs-api.localhost/api/v1"
 echo -e "  ${GREEN}Keycloak:${NC}         http://keycloak.localhost"
 echo -e "  ${GREEN}Traefik dashboard:${NC} http://localhost:8888"
 echo ""
 echo -e "  ${YELLOW}Acceso directo (sin Traefik):${NC}"
 echo -e "    Backend:   http://localhost:${BACKEND_PORT:-8002}"
-echo -e "    Vite HMR:  http://localhost:${VITE_PORT:-5176}"
+echo -e "    Frontend:  http://localhost:${FRONTEND_PORT:-5176}"
 echo ""

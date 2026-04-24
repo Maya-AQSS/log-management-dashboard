@@ -15,18 +15,6 @@ else
     echo "[entrypoint] Composer deps up to date"
 fi
 
-# npm dependencies + Vite build
-if [ ! -f "node_modules/.bin/vite" ] || [ "package.json" -nt "node_modules/.package-lock.json" ]; then
-    echo "[entrypoint] Installing npm dependencies..."
-    npm install
-fi
-if [ ! -f "public/build/manifest.json" ]; then
-    echo "[entrypoint] Building Vite assets..."
-    npm run build
-else
-    echo "[entrypoint] npm/Vite assets up to date"
-fi
-
 # Storage y permisos
 mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs
 chmod -R 775 storage
@@ -34,8 +22,5 @@ chown -R www-data:www-data storage 2>/dev/null || true
 
 # Package discovery
 php artisan package:discover --ansi 2>/dev/null || true
-
-# Eliminar hot file si quedó de una sesión dev anterior
-rm -f public/hot
 
 exec php artisan serve --host=0.0.0.0 --port=8000

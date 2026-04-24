@@ -3,8 +3,7 @@ FROM php:8.4-fpm-alpine
 RUN apk add --no-cache \
     bash git curl libpng-dev libxml2-dev zip unzip \
     postgresql-dev oniguruma-dev linux-headers \
-    libzip-dev \
-    nodejs npm
+    libzip-dev
 
 RUN docker-php-ext-install \
     pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip sockets
@@ -19,8 +18,8 @@ COPY . .
 RUN rm -f bootstrap/cache/services.php bootstrap/cache/packages.php 2>/dev/null || true
 RUN chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
 
-EXPOSE 8000 5173
+EXPOSE 8000
 
-# Dev entrypoint: installs deps if needed, starts Vite + artisan serve
+# Dev entrypoint: installs composer deps if needed, starts artisan serve
 COPY --chmod=755 docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["docker-entrypoint.sh"]

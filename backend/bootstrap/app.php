@@ -12,6 +12,7 @@ use Illuminate\Session\Middleware\StartSession;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
@@ -21,6 +22,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // Sin esto, $request->fullUrl() puede devolver el Host header forjado por el cliente
         // y permitir un open redirect via el parámetro return_to del SSO.
         $middleware->trustProxies(at: '*');
+
+        $middleware->alias([
+            'jwt' => \Maya\Auth\Middleware\JwtMiddleware::class,
+        ]);
 
         $middleware->web(append: [
             SetLocale::class,
