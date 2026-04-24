@@ -1,0 +1,10 @@
+{
+  "loading": "Loading dashboard…",
+  "error": "Could not load dashboard",
+  "unresolvedLabel": "Unresolved",
+  "resolvedLabel": "Resolved",
+  "byApplication": "By application",
+  "byApplicationHint": "Log volume in the system by service. Click a row to open the list filtered by that application.",
+  "logsTotalLabel": "Logs in system",
+  "openFilteredLogs": "View logs filtered by {{app}}"
+}

@@ -1,0 +1,10 @@
+{
+  "loading": "Cargando panel…",
+  "error": "No se pudo cargar el panel",
+  "unresolvedLabel": "Sin resolver",
+  "resolvedLabel": "Resueltos",
+  "byApplication": "Por aplicación",
+  "byApplicationHint": "Volumen de logs en el sistema por servicio. Pulsa una fila para abrir el listado filtrado por esa aplicación.",
+  "logsTotalLabel": "Logs en el sistema",
+  "openFilteredLogs": "Ver logs filtrados por {{app}}"
+}

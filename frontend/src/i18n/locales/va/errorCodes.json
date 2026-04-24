@@ -1,0 +1,41 @@
+{
+  "title": "Codis d'error",
+  "loading": "Carregant codis…",
+  "loadError": "No s'han pogut carregar els codis d'error",
+  "createTitle": "Nou codi d'error",
+  "editTitle": "Editar codi d'error",
+  "empty": "No hi ha codis d'error.",
+  "emptyFiltered": "No hi ha codis d'error que coincidisquen amb els filtres.",
+  "filters": {
+    "searchPlaceholder": "Codi, nom, arxiu…",
+    "applicationAll": "Totes les aplicacions",
+    "reset": "Netejar"
+  },
+  "columns": {
+    "code": "Codi",
+    "application": "Aplicació",
+    "name": "Nom",
+    "file": "Arxiu",
+    "line": "Línia"
+  },
+  "fields": {
+    "code": "Codi",
+    "description": "Descripció",
+    "severity": "Severitat",
+    "application": "Aplicació"
+  },
+  "form": {
+    "name": "Nom",
+    "code": "Codi",
+    "application": "Aplicació",
+    "applicationPlaceholder": "Selecciona una aplicació",
+    "file": "Arxiu",
+    "line": "Línia",
+    "description": "Descripció"
+  },
+  "actions": {
+    "create": "Crear codi",
+    "save": "Guardar canvis",
+    "delete": "Eliminar"
+  }
+}
