@@ -13,6 +13,11 @@ dist-ssr
 *.local
 package-lock.json
 
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
 # Variables locales (JWT, URLs).
 .env
 .env.*.local

@@ -18,7 +18,6 @@ use App\Services\Contracts\ErrorCodeServiceInterface;
 use App\Services\Contracts\LogServiceInterface;
 use App\Services\ErrorCodeService;
 use App\Services\LogService;
-use App\Support\AuthExternalUrlGuard;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -41,16 +40,6 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        AuthExternalUrlGuard::assertConfiguredForDeploy(
-            (string) $this->app->environment(),
-            (string) config('services.auth_gateway.external_url', '')
-        );
-
-        AuthExternalUrlGuard::assertApiKeyConfiguredForDeploy(
-            (string) $this->app->environment(),
-            (string) config('services.auth_gateway.api_key', '')
-        );
-
         if ($this->app->environment(['production', 'staging'])) {
             URL::forceScheme('https');
         }
