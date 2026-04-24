@@ -4,6 +4,9 @@
         favOpen: false,
         favorites: [],
         favError: false,
+        notifOpen: false,
+        notifications: [],
+        unreadCount: 0,
         isDark: document.documentElement.classList.contains('dark'),
         toggleDarkMode() {
             this.isDark = !this.isDark;
@@ -50,8 +53,63 @@
             const form = document.getElementById('topbar-logout-form');
             if (form) form.submit();
         },
+        async loadNotifications() {
+            const token = this.getCookie('session_token');
+            if (!token) { this.notifications = []; this.unreadCount = 0; return; }
+            const base = 'http://maya_dashboard_api.localhost';
+            try {
+                const [listResp, countResp] = await Promise.all([
+                    fetch(`${base}/api/v1/notifications?per_page=10`, { headers: { Accept: 'application/json', Authorization: `Bearer ${token}` } }),
+                    fetch(`${base}/api/v1/notifications/unread-count`, { headers: { Accept: 'application/json', Authorization: `Bearer ${token}` } }),
+                ]);
+                if (listResp.ok) {
+                    const d = await listResp.json();
+                    this.notifications = Array.isArray(d?.data) ? d.data : [];
+                }
+                if (countResp.ok) {
+                    const d = await countResp.json();
+                    this.unreadCount = Number(d?.unread ?? 0);
+                }
+            } catch {}
+        },
+        async markNotifRead(id) {
+            const token = this.getCookie('session_token');
+            if (!token) return;
+            try {
+                const r = await fetch(`http://maya_dashboard_api.localhost/api/v1/notifications/${id}/read`, {
+                    method: 'POST', headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+                });
+                if (r.ok) {
+                    const n = this.notifications.find(x => x.id === id);
+                    if (n && !n.read_at) { n.read_at = new Date().toISOString(); this.unreadCount = Math.max(0, this.unreadCount - 1); }
+                }
+            } catch {}
+        },
+        async markAllNotifRead() {
+            const token = this.getCookie('session_token');
+            if (!token) return;
+            try {
+                const r = await fetch('http://maya_dashboard_api.localhost/api/v1/notifications/mark-all-read', {
+                    method: 'POST', headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+                });
+                if (r.ok) {
+                    const now = new Date().toISOString();
+                    this.notifications = this.notifications.map(n => n.read_at ? n : { ...n, read_at: now });
+                    this.unreadCount = 0;
+                }
+            } catch {}
+        },
+        formatRel(iso) {
+            const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+            if (diff < 60) return 'ahora';
+            if (diff < 3600) return Math.floor(diff / 60) + ' min';
+            if (diff < 86400) return Math.floor(diff / 3600) + ' h';
+            return new Date(iso).toLocaleDateString();
+        },
         init() {
             this.loadFavorites();
+            this.loadNotifications();
+            setInterval(() => this.loadNotifications(), 60000);
             window.addEventListener('storage', (e) => { if (e.key === 'maya:favorites-updated-at') this.loadFavorites(); });
         },
     }"
@@ -68,6 +126,64 @@
             $userName = auth()->user()->name ?? __('app.nav_user');
             $initial  = strtoupper(substr($userName, 0, 1));
         @endphp
+
+        {{-- Campana de notificaciones --}}
+        <div class="relative">
+            <button
+                type="button"
+                class="relative flex items-center justify-center w-8 h-8 rounded-lg text-text-secondary dark:text-text-dark-secondary hover:bg-ui-body dark:hover:bg-ui-dark-card transition-colors"
+                @click="notifOpen = ! notifOpen; favOpen = false; userMenuOpen = false"
+                :aria-expanded="notifOpen"
+                aria-haspopup="menu"
+                title="Notificaciones"
+                aria-label="Notificaciones"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5" aria-hidden="true">
+                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                </svg>
+                <span
+                    x-show="unreadCount > 0"
+                    x-text="unreadCount > 9 ? '9+' : unreadCount"
+                    class="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center"
+                    style="display: none;"
+                ></span>
+            </button>
+            <div
+                x-show="notifOpen"
+                x-transition
+                @click.outside="notifOpen = false"
+                role="menu"
+                class="absolute right-0 top-full mt-1 w-80 max-w-[92vw] bg-ui-card dark:bg-ui-dark-card border border-ui-border dark:border-ui-dark-border rounded-md shadow-lg z-[210]"
+                style="display: none;"
+            >
+                <div class="px-3 py-2 flex items-center justify-between border-b border-ui-border dark:border-ui-dark-border">
+                    <span class="text-sm font-semibold text-text-primary dark:text-text-dark-primary">Notificaciones</span>
+                    <button x-show="unreadCount > 0" type="button" @click="markAllNotifRead()" class="text-xs text-odoo-purple hover:underline">Marcar todo como leído</button>
+                </div>
+                <div class="max-h-80 overflow-y-auto">
+                    <template x-if="notifications.length === 0">
+                        <div class="px-3 py-4 text-sm text-text-muted dark:text-text-dark-muted text-center">Sin notificaciones</div>
+                    </template>
+                    <template x-for="n in notifications" :key="n.id">
+                        <button
+                            type="button"
+                            @click="if (!n.read_at) markNotifRead(n.id)"
+                            class="w-full text-left px-3 py-2 border-b border-ui-border dark:border-ui-dark-border transition-colors hover:bg-ui-body dark:hover:bg-ui-dark-bg last:border-b-0 flex gap-2 items-start"
+                            :class="n.read_at ? 'opacity-70' : ''"
+                        >
+                            <span class="mt-1.5 w-2 h-2 rounded-full shrink-0" :class="n.read_at ? 'bg-transparent' : 'bg-red-500'" aria-hidden="true"></span>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-sm font-medium text-text-primary dark:text-text-dark-primary truncate" x-text="n.title"></span>
+                                    <span class="text-[10px] text-text-muted dark:text-text-dark-muted shrink-0" x-text="formatRel(n.created_at)"></span>
+                                </div>
+                                <p class="text-xs text-text-muted dark:text-text-dark-muted mt-0.5 line-clamp-2" x-text="n.body"></p>
+                            </div>
+                        </button>
+                    </template>
+                </div>
+            </div>
+        </div>
 
         {{-- Favoritos --}}
         <div class="relative">
