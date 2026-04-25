@@ -11,7 +11,9 @@
         "laravel/tinker": "^2.10.1",
         "maya/shared-auth-laravel": "@dev",
         "maya/shared-messaging-laravel": "@dev",
-        "mews/purifier": "^3.4"
+        "mews/purifier": "^3.4",
+        "predis/predis": "^2.3",
+        "vladimir-yuldashev/laravel-queue-rabbitmq": "^14.1"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^4.1",
