@@ -1,0 +1,1 @@
+export { LogDetailView } from './LogDetailView';

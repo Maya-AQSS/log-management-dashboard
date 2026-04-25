@@ -4,6 +4,11 @@ set -e
 # ─── Log Management Dashboard entrypoint ───────────────────────
 cd /var/www/html
 
+# Asegurar que bootstrap/cache existe (gitignored, no llega en clones limpios)
+mkdir -p bootstrap/cache
+chmod -R 775 bootstrap/cache
+chown -R www-data:www-data bootstrap/cache 2>/dev/null || true
+
 # Limpiar cache de bootstrap obsoleto
 rm -f bootstrap/cache/packages.php bootstrap/cache/services.php
 

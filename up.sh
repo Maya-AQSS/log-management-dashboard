@@ -246,8 +246,8 @@ fi
 # ─── URLs de acceso ───────────────────────────────────────────────────────────
 echo ""
 success "Sistema listo. Accesos disponibles:"
-echo -e "  ${GREEN}Frontend:${NC}         http://logs.localhost"
-echo -e "  ${GREEN}Backend API:${NC}      http://logs-api.localhost/api/v1"
+echo -e "  ${GREEN}Frontend:${NC}         http://maya_logs.localhost"
+echo -e "  ${GREEN}Backend API:${NC}      http://maya_logs_api.localhost/api/v1"
 echo -e "  ${GREEN}Keycloak:${NC}         http://keycloak.localhost"
 echo -e "  ${GREEN}Traefik dashboard:${NC} http://localhost:8888"
 echo ""
