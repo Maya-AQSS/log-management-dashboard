@@ -28,4 +28,7 @@ chown -R www-data:www-data storage 2>/dev/null || true
 # Package discovery
 php artisan package:discover --ansi 2>/dev/null || true
 
+# Config cache (bake env vars including FRONTEND_URL for CORS)
+php artisan config:cache 2>/dev/null || true
+
 exec php artisan serve --host=0.0.0.0 --port=8000
