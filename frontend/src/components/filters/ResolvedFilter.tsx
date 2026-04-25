@@ -6,9 +6,10 @@ type ResolvedFilterProps = {
   value: ResolvedFilterValue;
   onChange: (value: ResolvedFilterValue) => void;
   label?: string;
+  hideLabel?: boolean;
 };
 
-export function ResolvedFilter({ value, onChange, label }: ResolvedFilterProps) {
+export function ResolvedFilter({ value, onChange, label, hideLabel = false }: ResolvedFilterProps) {
   const { t } = useTranslation('common');
   const resolvedLabel = label ?? t('filters.resolvedLabel');
 
@@ -19,28 +20,31 @@ export function ResolvedFilter({ value, onChange, label }: ResolvedFilterProps) 
   ];
 
   return (
-    <fieldset>
-      <legend className="mb-1 block text-sm font-medium text-text-secondary dark:text-text-dark-secondary">
-        {resolvedLabel}
-      </legend>
-      <div className="flex flex-wrap gap-3">
-        {options.map((opt) => (
-          <label
-            key={opt.value}
-            className="flex items-center gap-2 text-sm text-text-primary dark:text-text-dark-primary"
-          >
-            <input
-              type="radio"
-              name="resolved-filter"
-              value={opt.value}
-              checked={value === opt.value}
-              onChange={() => onChange(opt.value)}
-              className="h-4 w-4 border-ui-border text-odoo-purple focus:ring-odoo-purple/30 dark:border-ui-dark-border"
-            />
-            <span>{opt.label}</span>
-          </label>
-        ))}
+    <div>
+      {!hideLabel && (
+        <label className="mb-1 block text-xs font-semibold text-text-secondary dark:text-text-dark-secondary">
+          {resolvedLabel}
+        </label>
+      )}
+      <div className="relative">
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value as ResolvedFilterValue)}
+          className="w-full appearance-none rounded-lg border border-ui-border bg-ui-card px-3 py-2 pr-10 text-sm shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-primary focus:border-odoo-purple focus:outline-none focus:ring-2 focus:ring-odoo-purple/20"
+        >
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+        <span
+          className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-text-muted dark:text-text-dark-muted"
+          aria-hidden
+        >
+          ▾
+        </span>
       </div>
-    </fieldset>
+    </div>
   );
 }

@@ -12,6 +12,7 @@
     "resolved": "Estat"
   },
   "filters": {
+    "title": "Filtres",
     "search": "Cercar",
     "searchPlaceholder": "Cerca per missatge, codi…",
     "severity": "Severitat",

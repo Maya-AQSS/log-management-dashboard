@@ -26,10 +26,10 @@ export function SeverityFilterCheckboxes({
 
   return (
     <fieldset>
-      <legend className="mb-1 block text-sm font-medium text-text-secondary dark:text-text-dark-secondary">
+      <legend className="mb-1 block text-xs font-semibold text-text-secondary dark:text-text-dark-secondary">
         {resolvedLabel}
       </legend>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      <div className="flex flex-wrap gap-x-4 gap-y-1.5">
         {LOG_SEVERITY_KEYS.map((key) => (
           <label
             key={key}

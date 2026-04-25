@@ -10,7 +10,8 @@ import {
   type SupportedLocale,
 } from './resources';
 
-const STORAGE_KEY = 'maya_logs.locale';
+// Shared key with @maya/shared-sidebar-react LocaleSelector
+const STORAGE_KEY = 'locale';
 
 void i18next
   .use(LanguageDetector)
@@ -31,6 +32,15 @@ void i18next
     },
     react: { useSuspense: false },
   });
+
+// Sync LocaleSelector changes (storage event) immediately to i18next
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (e) => {
+    if (e.key === STORAGE_KEY && e.newValue) {
+      void i18next.changeLanguage(e.newValue);
+    }
+  });
+}
 
 export function changeLocale(locale: SupportedLocale): Promise<unknown> {
   return i18next.changeLanguage(locale);

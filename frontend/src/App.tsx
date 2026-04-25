@@ -2,11 +2,12 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from '@maya/shared-layout-react';
+import { LocaleSelector, NotificationsBell, SidebarFavorites } from '@maya/shared-sidebar-react';
 import './App.css';
 import { useOidcSession } from './auth/useOidcSession';
 import { useNavItems } from './components/layout';
-import { LanguageSwitcher } from './components/ui/LanguageSwitcher';
 import { profileDisplayInitials, useUserProfile } from './features/user-profile';
+
 import {
   ArchivedLogDetailPage,
   ArchivedLogsPage,
@@ -18,6 +19,9 @@ import {
   LogsPage,
   PlaceholderPage,
 } from './pages';
+
+const DASHBOARD_API_URL = (import.meta.env.VITE_DASHBOARD_API_URL as string | undefined)
+  ?? 'http://maya_dashboard_api.localhost';
 
 function AppRoutes() {
   const { t } = useTranslation('common');
@@ -38,12 +42,18 @@ function AppRoutes() {
 }
 
 function AppWithLayout() {
-  const { logout } = useOidcSession();
+  const { logout, user } = useOidcSession();
   const { profile } = useUserProfile();
   const navItems = useNavItems();
+  const { i18n } = useTranslation();
 
   const userName = profile?.name?.trim() ?? '';
   const userInitials = profileDisplayInitials(profile);
+
+  // Sync Keycloak locale preference to i18next
+  useEffect(() => {
+    if (user?.locale) void i18n.changeLanguage(user.locale);
+  }, [user?.locale, i18n]);
 
   return (
     <AppLayout
@@ -53,7 +63,13 @@ function AppWithLayout() {
       userName={userName}
       userInitials={userInitials}
       onLogout={logout}
-      topbarActions={<LanguageSwitcher />}
+      topbarActions={
+        <>
+          <NotificationsBell dashboardApiUrl={DASHBOARD_API_URL} />
+          <LocaleSelector />
+        </>
+      }
+      sidebarFooter={<SidebarFavorites label="Favoritas" dashboardApiUrl={DASHBOARD_API_URL} />}
     >
       <AppRoutes />
     </AppLayout>

@@ -7,6 +7,7 @@
   "empty": "No error codes.",
   "emptyFiltered": "No error codes match the filters.",
   "filters": {
+    "title": "Filters",
     "searchPlaceholder": "Code, name, file…",
     "applicationAll": "All applications",
     "reset": "Clear"

@@ -12,6 +12,7 @@
     "resolved": "Estado"
   },
   "filters": {
+    "title": "Filtros",
     "search": "Buscar",
     "searchPlaceholder": "Buscar por mensaje, código…",
     "severity": "Severidad",

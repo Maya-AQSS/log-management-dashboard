@@ -12,6 +12,7 @@
     "resolved": "Status"
   },
   "filters": {
+    "title": "Filters",
     "search": "Search",
     "searchPlaceholder": "Search by message, code…",
     "severity": "Severity",

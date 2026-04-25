@@ -7,6 +7,7 @@
   "restoreAction": "Restaurar",
   "restoredAt": "Archivado el {{date}}",
   "filters": {
+    "title": "Filtros",
     "applicationAll": "Todas las aplicaciones",
     "reset": "Limpiar"
   },

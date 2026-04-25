@@ -1,6 +1,24 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ApplicationRef } from '../../types/logs';
+import { Button } from '../ui';
 import { ApplicationSelect, SearchInput } from '../filters';
+
+const ChevronIcon = ({ open }: { open: boolean }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 20 20"
+    fill="currentColor"
+    aria-hidden="true"
+    className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`}
+  >
+    <path
+      fillRule="evenodd"
+      d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+      clipRule="evenodd"
+    />
+  </svg>
+);
 
 export type ErrorCodesFiltersState = {
   search: string;
@@ -21,31 +39,56 @@ export function ErrorCodesFilters({
   onReset,
 }: ErrorCodesFiltersProps) {
   const { t } = useTranslation('errorCodes');
+  const [isOpen, setIsOpen] = useState(false);
+
+  const hasActiveFilters = value.search || value.applicationId !== null;
+
   return (
-    <div className="mt-4 rounded-lg border border-ui-border bg-ui-body p-4 dark:border-ui-dark-border dark:bg-ui-dark-card">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <SearchInput
-          value={value.search}
-          onChange={(search) => onChange({ search })}
-          hideLabel
-          placeholder={t('filters.searchPlaceholder')}
-        />
-        <ApplicationSelect
-          applications={applications}
-          value={value.applicationId}
-          hideLabel
-          placeholder={t('filters.applicationAll')}
-          onChange={(applicationId) => onChange({ applicationId })}
-        />
-      </div>
-      <div className="mt-4 flex w-full justify-center gap-2">
-        <button
-          type="button"
-          onClick={onReset}
-          className="inline-flex items-center bg-transparent text-text-secondary dark:text-text-dark-secondary border border-ui-border dark:border-ui-dark-border hover:text-text-primary dark:hover:text-text-dark-primary hover:border-text-secondary dark:hover:border-text-dark-secondary px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer"
-        >
-          {t('filters.reset')}
-        </button>
+    <div className="bg-ui-card dark:bg-ui-dark-card border border-ui-border dark:border-ui-dark-border rounded-lg mb-6 shadow-sm">
+      {/* Toggle visible solo en móvil */}
+      <button
+        type="button"
+        onClick={() => setIsOpen((v) => !v)}
+        aria-expanded={isOpen}
+        aria-controls="error-codes-filter-panel"
+        className="md:hidden w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-text-primary dark:text-text-dark-primary"
+      >
+        <span>
+          {t('filters.title')}
+          {hasActiveFilters && (
+            <span className="ml-2 inline-flex items-center justify-center w-2 h-2 rounded-full bg-odoo-purple" aria-hidden="true" />
+          )}
+        </span>
+        <ChevronIcon open={isOpen} />
+      </button>
+
+      {/* Panel de filtros: colapsable en móvil, siempre visible en ≥ md */}
+      <div
+        id="error-codes-filter-panel"
+        className={`${isOpen ? 'flex' : 'hidden'} md:flex flex-wrap items-end gap-3 p-4`}
+      >
+        <div className="flex-1 min-w-[180px]">
+          <SearchInput
+            value={value.search}
+            onChange={(search) => onChange({ search })}
+            hideLabel
+            placeholder={t('filters.searchPlaceholder')}
+          />
+        </div>
+        <div className="flex-1 min-w-[150px]">
+          <ApplicationSelect
+            applications={applications}
+            value={value.applicationId}
+            hideLabel
+            placeholder={t('filters.applicationAll')}
+            onChange={(applicationId) => onChange({ applicationId })}
+          />
+        </div>
+        <div className="shrink-0">
+          <Button type="button" variant="secondary" size="sm" onClick={onReset}>
+            {t('filters.reset')}
+          </Button>
+        </div>
       </div>
     </div>
   );
