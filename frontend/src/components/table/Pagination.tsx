@@ -67,7 +67,7 @@ export function Pagination({ meta, onChangePage }: PaginationProps) {
                 className={[
                   'rounded-md border px-3 py-1 text-sm',
                   p === current
-                    ? 'border-odoo-purple bg-odoo-purple text-white'
+                    ? 'border-odoo-purple bg-odoo-purple text-text-inverse'
                     : 'border-ui-border bg-ui-card dark:border-ui-dark-border dark:bg-ui-dark-card',
                 ].join(' ')}
               >

@@ -136,8 +136,35 @@
 }
 
 /* ─── Mobile typography floor ───────────────────────────── */
+/* Los tokens de texto están calibrados a la escala Odoo desktop (13px base).
+   En viewports pequeños subimos el mínimo para legibilidad. */
 @media (max-width: 767px) {
   .text-xs   { font-size: 12px; }
   .text-sm   { font-size: 13px; }
   .text-base { font-size: 14px; }
+}
+
+/* ─── Animaciones canónicas ──────────────────────────────── */
+@layer utilities {
+  .animate-slide-up      { animation: slide-up      0.25s ease-out both; }
+  .animate-slide-up-full { animation: slide-up-full 0.3s  ease-out both; }
+  .animate-fade-in       { animation: fade-in       0.18s ease-out both; }
+  .animate-fade-in-up    { animation: fade-in-up    0.18s ease-out both; }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(12px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@keyframes slide-up-full {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }

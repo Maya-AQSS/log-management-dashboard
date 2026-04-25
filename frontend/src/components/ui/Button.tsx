@@ -39,7 +39,7 @@ const variantClass: Record<ButtonVariant, string> = {
   primary:
     'bg-odoo-purple dark:bg-odoo-dark-purple text-text-inverse border border-odoo-purple dark:border-odoo-dark-purple hover:bg-odoo-purple-d dark:hover:bg-odoo-dark-purple-d hover:border-odoo-purple-d dark:hover:border-odoo-dark-purple-d',
   secondary:
-    'border border-ui-border dark:border-ui-dark-border bg-ui-card dark:bg-ui-dark-card text-text-primary dark:text-text-dark-primary hover:bg-white dark:hover:bg-ui-dark-bg',
+    'border border-ui-border dark:border-ui-dark-border bg-ui-card dark:bg-ui-dark-card text-text-primary dark:text-text-dark-primary hover:bg-ui-card dark:hover:bg-ui-dark-bg',
   danger: 'bg-danger text-text-inverse border border-danger hover:bg-danger/90 active:bg-danger/90',
   teal: 'bg-odoo-teal text-text-inverse border border-odoo-teal hover:bg-odoo-teal-d active:bg-odoo-teal-d',
   outline:

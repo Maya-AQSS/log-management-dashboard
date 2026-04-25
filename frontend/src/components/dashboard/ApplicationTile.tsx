@@ -30,7 +30,7 @@ export function ApplicationTile({
     >
       <span
         aria-hidden
-        className="flex w-14 shrink-0 flex-col items-center justify-center rounded-md bg-gradient-to-b from-odoo-purple to-odoo-purple-d text-lg font-bold text-white shadow-inner shadow-black/25"
+        className="flex w-14 shrink-0 flex-col items-center justify-center rounded-md bg-gradient-to-b from-odoo-purple to-odoo-purple-d text-lg font-bold text-text-inverse shadow-inner shadow-black/25"
       >
         {initial}
       </span>
