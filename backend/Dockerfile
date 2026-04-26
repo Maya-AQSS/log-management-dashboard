@@ -21,5 +21,5 @@ RUN chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
 EXPOSE 8000
 
 # Dev entrypoint: installs composer deps if needed, starts artisan serve
-COPY --chmod=755 docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["docker-entrypoint.sh"]

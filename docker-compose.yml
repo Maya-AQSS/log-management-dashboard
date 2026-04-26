@@ -4,7 +4,7 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: docker/Dockerfile
+      dockerfile: Dockerfile
     container_name: maya_log_mgmt
     restart: unless-stopped
     environment:
@@ -74,7 +74,7 @@ services:
   worker:
     build:
       context: ./backend
-      dockerfile: docker/Dockerfile
+      dockerfile: Dockerfile
     container_name: maya_log_mgmt_worker
     restart: unless-stopped
     depends_on:
@@ -96,6 +96,14 @@ services:
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-admin}
       RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
       MAYA_MESSAGING_APP: maya_logs
+      # ─── Logging ────────────────────────────────────────────────
+      # IMPORTANTE: el worker NO debe publicar a 'rabbit' — consumiría sus
+      # propios logs desde logs.ingest, generando un loop infinito.
+      # Solo escribe a archivo local (daily). El backend HTTP sí puede usar
+      # 'daily,rabbit' porque no consume colas.
+      LOG_CHANNEL: stack
+      LOG_STACK: "daily"
+      LOG_LEVEL: info
     # Override del ENTRYPOINT del Dockerfile (que hace exec php artisan serve
     # hardcoded e ignora CMD). Cada servicio tiene su propio volumen anonymous
     # para vendor/, asi que el worker instala sus deps tambien (rapido en el
