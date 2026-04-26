@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# up.sh — Script de arranque de Log Management Dashboard
+# up.sh — Script de arranque de Maya Logs
 #
 # Uso:
 #   ./up.sh            Arranca todos los servicios
@@ -19,9 +19,15 @@ YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-info()    { echo -e "${CYAN}[log-mgmt]${NC} $*"; }
-success() { echo -e "${GREEN}[log-mgmt]${NC} $*"; }
-warn()    { echo -e "${YELLOW}[log-mgmt]${NC} $*"; }
+info()    { echo -e "${CYAN}[maya-logs]${NC} $*"; }
+success() { echo -e "${GREEN}[maya-logs]${NC} $*"; }
+warn()    { echo -e "${YELLOW}[maya-logs]${NC} $*"; }
+
+# UID/GID locales para evitar archivos root-owned en bind mounts (ej. frontend/node_modules).
+# Permite override explícito vía entorno si fuese necesario.
+export LOCAL_UID="${LOCAL_UID:-$(id -u)}"
+export LOCAL_GID="${LOCAL_GID:-$(id -g)}"
+info "Usando LOCAL_UID=$LOCAL_UID LOCAL_GID=$LOCAL_GID para docker compose"
 
 upsert_env_var() {
   local file="$1"
@@ -50,36 +56,33 @@ upsert_env_var() {
   fi
 }
 
-# ─── Cargar .env (backend) ───────────────────────────────────────────────────
-if [[ ! -f backend/.env ]]; then
-    warn "backend/.env no encontrado — copiando desde backend/.env.example"
-    cp backend/.env.example backend/.env
-    NEED_KEY_GENERATE=true
-else
-    NEED_KEY_GENERATE=false
+# ─── Cargar .env ─────────────────────────────────────────────────────────────
+if [[ ! -f .env ]]; then
+    warn ".env no encontrado — copiando desde .env.example"
+    cp .env.example .env
 fi
-set -a; source backend/.env; set +a
+set -a; source .env; set +a
 
+# ─── Detectar APP_KEY vacío en root .env (re-runs con .env pre-existente) ────
+NEED_KEY_GENERATE=false
 if [[ -z "${APP_KEY:-}" ]]; then
-  warn "APP_KEY vacío en .env — se generará automáticamente"
-  NEED_KEY_GENERATE=true
+    warn "APP_KEY vacío en .env — se generará automáticamente"
+    NEED_KEY_GENERATE=true
 fi
 
 # ─── Subcomandos rápidos ──────────────────────────────────────────────────────
-DC="docker compose -f docker-compose.yml"
-
 case "${1:-}" in
     down)
         info "Parando todos los servicios..."
-        $DC down
+        docker compose down
         exit 0
         ;;
     logs)
-        $DC logs -f "${@:2}"
+        docker compose logs -f "${@:2}"
         exit 0
         ;;
     ps|status)
-        $DC ps
+        docker compose ps
         exit 0
         ;;
 esac
@@ -100,43 +103,51 @@ fi
 EXTRA_FLAGS=()
 [[ "${1:-}" == "--build" ]] && EXTRA_FLAGS+=("--build")
 
+# ─── Preparar frontend/.env ──────────────────────────────────────────────────
+# El .env raíz se monta en el contenedor como /app/.env (docker-compose.yml).
+# Para desarrollo local sin Docker (npm run dev) necesitamos frontend/.env con
+# las mismas vars VITE_*. Lo generamos automáticamente desde los valores del .env raíz.
+if [[ ! -f frontend/.env ]] || [[ ! -s frontend/.env ]]; then
+    info "Generando frontend/.env desde variables VITE_* del .env raíz..."
+    touch frontend/.env
+fi
+
+upsert_env_var frontend/.env VITE_API_URL             "${VITE_API_URL:-http://maya_logs_api.localhost/api/v1}"
+upsert_env_var frontend/.env VITE_KEYCLOAK_URL        "${VITE_KEYCLOAK_URL:-http://keycloak.localhost}"
+upsert_env_var frontend/.env VITE_KEYCLOAK_REALM      "${VITE_KEYCLOAK_REALM:-maya}"
+upsert_env_var frontend/.env VITE_KEYCLOAK_CLIENT_ID  "${VITE_KEYCLOAK_CLIENT_ID:-maya-logs}"
+upsert_env_var frontend/.env VITE_DASHBOARD_API_URL   "${VITE_DASHBOARD_API_URL:-http://maya_dashboard_api.localhost}"
+
 # ─── Levantar servicios ──────────────────────────────────────────────────────
 info "Levantando servicios..."
-$DC up -d ${EXTRA_FLAGS[@]+"${EXTRA_FLAGS[@]}"}
+docker compose up -d ${EXTRA_FLAGS[@]+"${EXTRA_FLAGS[@]}"}
 
 # ─── Generar APP_KEY si es .env nuevo ─────────────────────────────────────────
-# Sondeamos vendor/autoload.php porque el entrypoint instala Composer bajo demanda
-# en el primer arranque (clon limpio). Usar `php -v` daría un falso positivo — el
-# binario PHP responde de inmediato, pero `artisan key:generate` aborta sin vendor.
 if [[ "$NEED_KEY_GENERATE" == true ]]; then
-    info "Generando APP_KEY (esperando a composer install del entrypoint)..."
-    KEY_GENERATED=false
-    for i in $(seq 1 90); do
+    info "Generando APP_KEY..."
+    KEY_SYNCED=false
+    for i in $(seq 1 10); do
       if docker exec maya_log_mgmt test -f /var/www/html/vendor/autoload.php 2>/dev/null; then
         NEW_KEY=$(docker exec maya_log_mgmt php artisan key:generate --show 2>/dev/null || true)
         if [[ -n "$NEW_KEY" && "$NEW_KEY" == base64:* ]]; then
-          if ! upsert_env_var backend/.env APP_KEY "$NEW_KEY"; then
-            warn "No se pudo escribir APP_KEY en .env"
+          if ! upsert_env_var .env APP_KEY "$NEW_KEY"; then
+            warn "No se pudo actualizar APP_KEY en .env"
             break
           fi
 
-          $DC restart > /dev/null
-          success "APP_KEY generada y aplicada."
-          KEY_GENERATED=true
+          docker compose up -d backend > /dev/null
+          KEY_SYNCED=true
+          success "APP_KEY generada y escrita en .env."
         else
           warn "APP_KEY inválida o vacía desde artisan key:generate --show."
         fi
         break
       fi
-      if (( i % 10 == 0 )); then
-        info "  … esperando a que el entrypoint instale vendor ($((i * 2))s/180s)"
-      fi
       sleep 2
     done
 
-    if [[ "$KEY_GENERATED" != true ]]; then
-      warn "No se pudo generar una APP_KEY automáticamente."
-      warn "Ejecuta manualmente: docker exec maya_log_mgmt php artisan key:generate --force"
+    if [[ "$KEY_SYNCED" != true ]]; then
+      warn "No se pudo sincronizar APP_KEY automáticamente."
     fi
 fi
 
@@ -151,6 +162,18 @@ for i in $(seq 1 20); do
     break
   fi
   sleep 2
+done
+
+# 1b) Esperar a que composer install termine (el entrypoint lo ejecuta en background)
+info "Esperando a que composer install termine..."
+for i in $(seq 1 30); do
+  if docker exec "$BACKEND_CONTAINER" test -f /var/www/html/vendor/autoload.php > /dev/null 2>&1; then
+    break
+  fi
+  if (( i % 5 == 0 )); then
+    info "  … composer install en curso ($((i * 3))s/90s)"
+  fi
+  sleep 3
 done
 
 # 2) Esperar conexión con la BD (PDO directo — sin bootstrap de Laravel)
