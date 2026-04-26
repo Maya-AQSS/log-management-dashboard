@@ -47,13 +47,28 @@ function AppWithLayout() {
   const navItems = useNavItems();
   const { i18n } = useTranslation();
 
-  const userName = profile?.name?.trim() ?? '';
-  const userInitials = profileDisplayInitials(profile);
+  // Prefer backend profile name; fall back to Keycloak token (same pattern as other apps)
+  const tokenDisplayName = ((user?.name ?? user?.preferred_username ?? '') as string).trim();
+  const userName = profile?.name?.trim() || tokenDisplayName;
+  const userInitials = profile
+    ? profileDisplayInitials(profile)
+    : tokenDisplayName
+      ? tokenDisplayName.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase() || 'U'
+      : 'U';
 
   // Sync Keycloak locale preference to i18next
   useEffect(() => {
     if (user?.locale) void i18n.changeLanguage(user.locale);
   }, [user?.locale, i18n]);
+
+  // Sync locale changes made in other browser tabs
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'locale' && e.newValue) void i18n.changeLanguage(e.newValue);
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [i18n]);
 
   return (
     <AppLayout
