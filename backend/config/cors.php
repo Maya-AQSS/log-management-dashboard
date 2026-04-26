@@ -8,12 +8,15 @@ return [
 
     'allowed_origins' => array_values(array_filter([
         env('FRONTEND_URL'),
-        'http://logs.localhost',
-        'https://logs.localhost',
+        'http://maya_logs.localhost',
+        'https://maya_logs.localhost',
         'http://localhost:5173',
+        'http://localhost:5174',
     ])),
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        '#^https?://maya_logs\.localhost(:\d+)?$#',
+    ],
 
     'allowed_headers' => ['*'],
 
