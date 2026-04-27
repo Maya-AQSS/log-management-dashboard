@@ -4,7 +4,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from '@maya/shared-layout-react';
 import { LocaleSelector, NotificationsBell, SidebarFavorites } from '@maya/shared-sidebar-react';
 import './App.css';
-import { useOidcSession } from './auth/useOidcSession';
+import { useOidcSession } from '@maya/shared-auth-react';
 import { useNavItems } from './components/layout';
 import { profileDisplayInitials, useUserProfile } from './features/user-profile';
 

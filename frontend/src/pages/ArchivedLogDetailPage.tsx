@@ -324,10 +324,10 @@ export function ArchivedLogDetailPage() {
       <ConfirmDialog
         open={confirmDelete}
         title={t('confirmations.delete.title')}
-        message={t('confirmations.delete.message')}
+        description={t('confirmations.delete.message')}
         confirmLabel={t('confirmations.delete.confirmLabel')}
-        confirmTone="danger"
-        busy={deleting}
+        variant="danger"
+        loading={deleting}
         onConfirm={onDelete}
         onCancel={() => !deleting && setConfirmDelete(false)}
       />

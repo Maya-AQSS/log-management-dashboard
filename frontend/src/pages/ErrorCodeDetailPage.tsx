@@ -294,10 +294,10 @@ export function ErrorCodeDetailPage() {
       <ConfirmDialog
         open={confirmDelete}
         title="Eliminar código de error"
-        message="¿Confirmas que quieres eliminar este código de error? Esta acción no se puede deshacer."
+        description="¿Confirmas que quieres eliminar este código de error? Esta acción no se puede deshacer."
         confirmLabel="Eliminar"
-        confirmTone="danger"
-        busy={deleting}
+        variant="danger"
+        loading={deleting}
         onConfirm={onDelete}
         onCancel={() => !deleting && setConfirmDelete(false)}
       />

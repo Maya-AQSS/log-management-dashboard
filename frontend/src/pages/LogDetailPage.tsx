@@ -171,18 +171,18 @@ export function LogDetailPage() {
       <ConfirmDialog
         open={dialog === 'archive'}
         title={t('confirmations.archive.title')}
-        message={t('confirmations.archive.message')}
+        description={t('confirmations.archive.message')}
         confirmLabel={t('confirmations.archive.confirmLabel')}
-        busy={busy}
+        loading={busy}
         onConfirm={onArchive}
         onCancel={() => !busy && setDialog('none')}
       />
       <ConfirmDialog
         open={dialog === 'resolve'}
         title={t('confirmations.resolve.title')}
-        message={t('confirmations.resolve.message')}
+        description={t('confirmations.resolve.message')}
         confirmLabel={t('confirmations.resolve.confirmLabel')}
-        busy={busy}
+        loading={busy}
         onConfirm={onResolve}
         onCancel={() => !busy && setDialog('none')}
       />
