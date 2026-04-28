@@ -1,13 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import {
+  Alert,
+  ColumnVisibilityMenu,
+  DataTable,
+  PageTitle,
+  Pagination,
+  type ColumnDef,
+} from '@maya/shared-ui-react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { fetchApplications } from '../api/applications';
 import { fetchErrorCodes, type ErrorCodesFilters as ApiErrorCodesFilters } from '../api/errorCodes';
-import {
-  ErrorCodesFilters,
-  ErrorCodesTable,
-  type ErrorCodesFiltersState,
-} from '../components/error-codes';
-import { Pagination } from '../components/table';
+import { ErrorCodesFilters, type ErrorCodesFiltersState } from '../components/error-codes';
 import type { PaginatedResponse } from '../types/api';
 import type { ApplicationRef, ErrorCode } from '../types/logs';
 
@@ -54,9 +58,13 @@ function toApiFilters(filters: ErrorCodesFiltersState, page: number): ApiErrorCo
 }
 
 export function ErrorCodesPage() {
+  const { t } = useTranslation('errorCodes');
+  const { t: tCommon } = useTranslation('common');
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [applications, setApplications] = useState<ApplicationRef[]>([]);
   const [state, setState] = useState<ListState>({ status: 'loading', data: null });
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
 
   const { filters, page } = useMemo(() => parseFiltersFromUrl(searchParams), [searchParams]);
 
@@ -114,22 +122,68 @@ export function ErrorCodesPage() {
     [filters, setSearchParams],
   );
 
+  const toggleHidden = useCallback((id: string) => {
+    setHiddenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const columns: ColumnDef<ErrorCode>[] = useMemo(
+    () => [
+      {
+        id: 'code',
+        header: t('columns.code'),
+        cell: (ec) => <span className="font-mono whitespace-nowrap">{ec.code}</span>,
+      },
+      {
+        id: 'application',
+        header: t('columns.application'),
+        cell: (ec) => ec.application?.name ?? '-',
+      },
+      {
+        id: 'name',
+        header: t('columns.name'),
+        cell: (ec) => <span className="break-words">{ec.name}</span>,
+      },
+      {
+        id: 'file',
+        header: t('columns.file'),
+        cell: (ec) => (
+          <span className="font-mono text-xs break-all">{ec.file ?? '-'}</span>
+        ),
+      },
+      {
+        id: 'line',
+        header: t('columns.line'),
+        cell: (ec) => <span className="whitespace-nowrap">{ec.line ?? '-'}</span>,
+      },
+    ],
+    [t],
+  );
+
   const pagination = state.data;
   const errorCodes = pagination?.data ?? [];
+  const meta = pagination?.meta;
+  const startIndex = meta && meta.from != null ? meta.from : 0;
+  const endIndex = meta && meta.to != null ? meta.to : 0;
+  const total = meta?.total ?? 0;
 
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
-      <header className="flex items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-text-primary dark:text-text-dark-primary">
-          Códigos de error
-        </h1>
-        <Link
-          to="/error-codes/create"
-          className="inline-flex items-center bg-odoo-purple dark:bg-odoo-dark-purple text-text-inverse border-odoo-purple dark:border-odoo-dark-purple hover:bg-odoo-purple-d dark:hover:bg-odoo-dark-purple-d hover:border-odoo-purple-d dark:hover:border-odoo-dark-purple-d px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer border shadow-sm"
-        >
-          Nuevo código
-        </Link>
-      </header>
+      <PageTitle
+        title="Códigos de error"
+        actions={
+          <Link
+            to="/error-codes/create"
+            className="inline-flex items-center bg-odoo-purple dark:bg-odoo-dark-purple text-text-inverse border-odoo-purple dark:border-odoo-dark-purple hover:bg-odoo-purple-d dark:hover:bg-odoo-dark-purple-d hover:border-odoo-purple-d dark:hover:border-odoo-dark-purple-d px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer border shadow-sm"
+          >
+            Nuevo código
+          </Link>
+        }
+      />
 
       <ErrorCodesFilters
         value={filters}
@@ -138,10 +192,17 @@ export function ErrorCodesPage() {
         onReset={resetFilters}
       />
 
+      <div className="mt-3 flex items-center justify-end">
+        <ColumnVisibilityMenu
+          columns={columns}
+          hiddenColumnIds={hiddenIds}
+          onToggle={toggleHidden}
+        />
+      </div>
+
       {state.status === 'error' && (
-        <div className="mt-4 rounded-lg border border-danger-light bg-danger-light/30 p-3 text-sm text-danger-dark dark:border-danger/40 dark:bg-danger/10 dark:text-danger">
-          No se pudieron cargar los códigos de error: {state.error}
-        </div>
+        <Alert tone="danger" className="mt-4">No se pudieron cargar los códigos de error: {state.error}
+        </Alert>
       )}
 
       {state.status === 'loading' && !pagination && (
@@ -152,8 +213,29 @@ export function ErrorCodesPage() {
 
       {pagination && (
         <>
-          <ErrorCodesTable errorCodes={errorCodes} />
-          <Pagination meta={pagination.meta} onChangePage={changePage} />
+          <div className="mt-3">
+            <DataTable
+              columns={columns}
+              rows={errorCodes}
+              rowKey={(ec) => ec.id}
+              hiddenColumnIds={hiddenIds}
+              onRowClick={(ec) => navigate(`/error-codes/${ec.id}`)}
+              emptyMessage={t('emptyFiltered')}
+            />
+          </div>
+          {meta && (
+            <div className="mt-4">
+              <Pagination
+                currentPage={meta.current_page}
+                totalPages={meta.last_page}
+                onChange={changePage}
+                ariaLabel={tCommon('pagination.ariaLabel')}
+                prevLabel={tCommon('pagination.previous')}
+                nextLabel={tCommon('pagination.next')}
+                info={tCommon('pagination.rangeOf', { from: startIndex, to: endIndex, total })}
+              />
+            </div>
+          )}
         </>
       )}
     </div>

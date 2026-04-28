@@ -62,8 +62,9 @@ export function LogsFilters({ value, applications, onChange, onReset }: LogsFilt
   return (
     <div className="bg-ui-card dark:bg-ui-dark-card border border-ui-border dark:border-ui-dark-border rounded-lg mb-6 shadow-sm">
       {/* Toggle visible solo en móvil */}
-      <button
-        type="button"
+      <Button
+        variant="unstyled"
+        size="sm"
         onClick={() => setIsOpen((v) => !v)}
         aria-expanded={isOpen}
         aria-controls="logs-filter-panel"
@@ -76,7 +77,7 @@ export function LogsFilters({ value, applications, onChange, onReset }: LogsFilt
           )}
         </span>
         <ChevronIcon open={isOpen} />
-      </button>
+      </Button>
 
       {/* Panel de filtros: colapsable en móvil, siempre visible en ≥ md */}
       <div

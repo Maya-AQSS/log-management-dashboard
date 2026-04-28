@@ -1,24 +1,42 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from '@maya/shared-layout-react';
-import { LocaleSelector, NotificationsBell, SidebarFavorites } from '@maya/shared-sidebar-react';
+import { NotificationsBell, SidebarFavorites } from '@maya/shared-sidebar-react';
+import { SkeletonPage } from '@maya/shared-ui-react';
 import './App.css';
 import { useOidcSession } from '@maya/shared-auth-react';
 import { useNavItems } from './components/layout';
 import { profileDisplayInitials, useUserProfile } from './features/user-profile';
 
-import {
-  ArchivedLogDetailPage,
-  ArchivedLogsPage,
-  DashboardPage,
-  ErrorCodeCreatePage,
-  ErrorCodeDetailPage,
-  ErrorCodesPage,
-  LogDetailPage,
-  LogsPage,
-  PlaceholderPage,
-} from './pages';
+// Code-splitting route-level: cada página carga en chunk separado bajo demanda.
+const ArchivedLogDetailPage = lazy(() =>
+  import('./pages/ArchivedLogDetailPage').then((m) => ({ default: m.ArchivedLogDetailPage })),
+);
+const ArchivedLogsPage = lazy(() =>
+  import('./pages/ArchivedLogsPage').then((m) => ({ default: m.ArchivedLogsPage })),
+);
+const DashboardPage = lazy(() =>
+  import('./pages/DashboardPage').then((m) => ({ default: m.DashboardPage })),
+);
+const ErrorCodeCreatePage = lazy(() =>
+  import('./pages/ErrorCodeCreatePage').then((m) => ({ default: m.ErrorCodeCreatePage })),
+);
+const ErrorCodeDetailPage = lazy(() =>
+  import('./pages/ErrorCodeDetailPage').then((m) => ({ default: m.ErrorCodeDetailPage })),
+);
+const ErrorCodesPage = lazy(() =>
+  import('./pages/ErrorCodesPage').then((m) => ({ default: m.ErrorCodesPage })),
+);
+const LogDetailPage = lazy(() =>
+  import('./pages/LogDetailPage').then((m) => ({ default: m.LogDetailPage })),
+);
+const LogsPage = lazy(() =>
+  import('./pages/LogsPage').then((m) => ({ default: m.LogsPage })),
+);
+const PlaceholderPage = lazy(() =>
+  import('./pages/PlaceholderPage').then((m) => ({ default: m.PlaceholderPage })),
+);
 
 const DASHBOARD_API_URL = (import.meta.env.VITE_DASHBOARD_API_URL as string | undefined)
   ?? 'http://maya_dashboard_api.localhost';
@@ -26,18 +44,20 @@ const DASHBOARD_API_URL = (import.meta.env.VITE_DASHBOARD_API_URL as string | un
 function AppRoutes() {
   const { t } = useTranslation('common');
   return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/logs" element={<LogsPage />} />
-      <Route path="/logs/:id" element={<LogDetailPage />} />
-      <Route path="/archived-logs" element={<ArchivedLogsPage />} />
-      <Route path="/archived-logs/:id" element={<ArchivedLogDetailPage />} />
-      <Route path="/error-codes" element={<ErrorCodesPage />} />
-      <Route path="/error-codes/create" element={<ErrorCodeCreatePage />} />
-      <Route path="/error-codes/:id" element={<ErrorCodeDetailPage />} />
-      <Route path="*" element={<PlaceholderPage title={t('notFound')} />} />
-    </Routes>
+    <Suspense fallback={<SkeletonPage />}>
+      <Routes>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/logs" element={<LogsPage />} />
+        <Route path="/logs/:id" element={<LogDetailPage />} />
+        <Route path="/archived-logs" element={<ArchivedLogsPage />} />
+        <Route path="/archived-logs/:id" element={<ArchivedLogDetailPage />} />
+        <Route path="/error-codes" element={<ErrorCodesPage />} />
+        <Route path="/error-codes/create" element={<ErrorCodeCreatePage />} />
+        <Route path="/error-codes/:id" element={<ErrorCodeDetailPage />} />
+        <Route path="*" element={<PlaceholderPage title={t('notFound')} />} />
+      </Routes>
+    </Suspense>
   );
 }
 
@@ -70,21 +90,25 @@ function AppWithLayout() {
     return () => window.removeEventListener('storage', onStorage);
   }, [i18n]);
 
+  const userEmail = (profile?.email ?? user?.email) as string | undefined;
+  const onProfile = () => {
+    const dashboardOrigin = (import.meta.env.VITE_DASHBOARD_URL as string | undefined)
+      ?? 'http://maya_dashboard.localhost';
+    window.location.assign(`${dashboardOrigin}/profile`);
+  };
+
   return (
     <AppLayout
       navItems={navItems}
       brandName="Maya Logs"
-      brandVersion="Maya Logs v1.0"
+      brandVersion="v1.0"
       userName={userName}
+      userEmail={userEmail}
       userInitials={userInitials}
       onLogout={logout}
-      topbarActions={
-        <>
-          <NotificationsBell dashboardApiUrl={DASHBOARD_API_URL} />
-          <LocaleSelector />
-        </>
-      }
-      sidebarFooter={<SidebarFavorites label="Favoritas" dashboardApiUrl={DASHBOARD_API_URL} />}
+      onProfile={onProfile}
+      favoritesSlot={<SidebarFavorites label="Favoritas" dashboardApiUrl={DASHBOARD_API_URL} />}
+      notificationsSlot={<NotificationsBell dashboardApiUrl={DASHBOARD_API_URL} />}
     >
       <AppRoutes />
     </AppLayout>

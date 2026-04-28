@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Alert, Button, PageTitle } from '@maya/shared-ui-react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { archiveLog, fetchLog, resolveLog, type LogDetailResponse } from '../api/logs';
 import { LogDetailView } from '../components/logs';
 import { ConfirmDialog } from '../components/ui';
@@ -91,12 +92,7 @@ export function LogDetailPage() {
   if (state.status === 'not-found') {
     return (
       <div className="px-4 py-6 sm:px-6 lg:px-8">
-        <Link
-          to="/logs"
-          className="inline-flex items-center bg-transparent text-text-secondary dark:text-text-dark-secondary border border-ui-border dark:border-ui-dark-border hover:text-text-primary dark:hover:text-text-dark-primary hover:border-text-secondary dark:hover:border-text-dark-secondary px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer"
-        >
-          {t('detail.back')}
-        </Link>
+        <PageTitle title={t('detail.title')} onBack={() => navigate(-1)} backLabel={t('detail.back')} />
         <div className="mt-4 rounded-lg border border-dashed border-ui-border bg-ui-card p-6 text-center text-sm text-text-muted dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-muted">
           {t('detail.notFound')}
         </div>
@@ -112,52 +108,33 @@ export function LogDetailPage() {
 
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
-      <div className="flex min-h-[2.5rem] items-start justify-between gap-3">
-        <Link
-          to="/logs"
-          className="bg-transparent text-text-secondary dark:text-text-dark-secondary border-ui-border dark:border-ui-dark-border hover:text-text-primary dark:hover:text-text-dark-primary hover:border-text-secondary dark:hover:border-text-dark-secondary px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer border"
-        >
-          {t('detail.back')}
-        </Link>
-
-        <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <h1 className="text-xl font-semibold leading-tight text-text-primary md:text-2xl dark:text-text-dark-primary">
-            {log ? t('detail.titleWithId', { id: log.id }) : t('detail.title')}
-          </h1>
-        </div>
-
-        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 sm:gap-3">
-          {log && archivedLogId === null && (
-            <button
-              type="button"
-              onClick={() => setDialog('archive')}
-              className="inline-flex items-center bg-odoo-purple dark:bg-odoo-dark-purple text-text-inverse border-odoo-purple dark:border-odoo-dark-purple hover:bg-odoo-purple-d dark:hover:bg-odoo-dark-purple-d hover:border-odoo-purple-d dark:hover:border-odoo-dark-purple-d px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer border shadow-sm"
-            >
-              {t('actions.archive')}
-            </button>
-          )}
-          {log && !log.resolved && (
-            <button
-              type="button"
-              onClick={() => setDialog('resolve')}
-              className="inline-flex items-center bg-odoo-purple dark:bg-odoo-dark-purple text-text-inverse border-odoo-purple dark:border-odoo-dark-purple hover:bg-odoo-purple-d dark:hover:bg-odoo-dark-purple-d hover:border-odoo-purple-d dark:hover:border-odoo-dark-purple-d px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer border shadow-sm"
-            >
-              {t('actions.resolve')}
-            </button>
-          )}
-        </div>
-      </div>
+      <PageTitle
+        title={log ? t('detail.titleWithId', { id: log.id }) : t('detail.title')}
+        onBack={() => navigate(-1)}
+        backLabel={t('detail.back')}
+        actions={
+          <>
+            {log && archivedLogId === null && (
+              <Button variant="primary" size="sm" onClick={() => setDialog('archive')}>
+                {t('actions.archive')}
+              </Button>
+            )}
+            {log && !log.resolved && (
+              <Button variant="teal" size="sm" onClick={() => setDialog('resolve')}>
+                {t('actions.resolve')}
+              </Button>
+            )}
+          </>
+        }
+      />
 
       {actionError && (
-        <div className="mt-4 rounded-lg border border-danger-light bg-danger-light/30 p-3 text-sm text-danger-dark dark:border-danger/40 dark:bg-danger/10 dark:text-danger">
-          {actionError}
-        </div>
+        <Alert tone="danger" className="mt-4">{actionError}</Alert>
       )}
 
       {state.status === 'error' && (
-        <div className="mt-4 rounded-lg border border-danger-light bg-danger-light/30 p-3 text-sm text-danger-dark dark:border-danger/40 dark:bg-danger/10 dark:text-danger">
-          {t('detail.loadError', { message: state.error })}
-        </div>
+        <Alert tone="danger" className="mt-4">{t('detail.loadError', { message: state.error })}
+        </Alert>
       )}
 
       {state.status === 'loading' && !log && (

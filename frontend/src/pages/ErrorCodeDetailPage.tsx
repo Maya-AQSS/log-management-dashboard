@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Alert, Button, PageTitle } from '@maya/shared-ui-react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { fetchApplications } from '../api/applications';
 import {
   deleteErrorCode,
@@ -171,12 +172,7 @@ export function ErrorCodeDetailPage() {
   if (state.status === 'not-found') {
     return (
       <div className="px-4 py-6 sm:px-6 lg:px-8">
-        <Link
-          to="/error-codes"
-          className="inline-flex items-center bg-transparent text-text-secondary dark:text-text-dark-secondary border border-ui-border dark:border-ui-dark-border hover:text-text-primary dark:hover:text-text-dark-primary hover:border-text-secondary dark:hover:border-text-dark-secondary px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer"
-        >
-          Volver
-        </Link>
+        <PageTitle title="Código de error" onBack={() => navigate(-1)} backLabel="Volver" />
         <div className="mt-4 rounded-lg border border-dashed border-ui-border bg-ui-card p-6 text-center text-sm text-text-muted dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-muted">
           No se encontró el código de error solicitado.
         </div>
@@ -186,52 +182,31 @@ export function ErrorCodeDetailPage() {
 
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
-      <div className="flex min-h-[2.5rem] items-start justify-between gap-3">
-        <Link
-          to="/error-codes"
-          className="bg-transparent text-text-secondary dark:text-text-dark-secondary border-ui-border dark:border-ui-dark-border hover:text-text-primary dark:hover:text-text-dark-primary hover:border-text-secondary dark:hover:border-text-dark-secondary px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer border"
-        >
-          Volver
-        </Link>
-
-        <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <h1 className="text-xl font-semibold leading-tight text-text-primary md:text-2xl dark:text-text-dark-primary">
-            {ec ? `Código de error: ${ec.code}` : 'Código de error'}
-          </h1>
-        </div>
-
-        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 sm:gap-3">
-          {ec && !editing && (
+      <PageTitle
+        title={ec ? `Código de error: ${ec.code}` : 'Código de error'}
+        onBack={() => navigate(-1)}
+        backLabel="Volver"
+        actions={
+          ec && !editing ? (
             <>
-              <button
-                type="button"
-                onClick={onStartEdit}
-                className="inline-flex items-center bg-odoo-purple dark:bg-odoo-dark-purple text-text-inverse border-odoo-purple dark:border-odoo-dark-purple hover:bg-odoo-purple-d dark:hover:bg-odoo-dark-purple-d hover:border-odoo-purple-d dark:hover:border-odoo-dark-purple-d px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer border shadow-sm"
-              >
+              <Button variant="outline" size="sm" onClick={onStartEdit}>
                 Editar
-              </button>
-              <button
-                type="button"
-                onClick={() => setConfirmDelete(true)}
-                className="inline-flex items-center bg-danger text-text-inverse border-danger hover:bg-danger-dark hover:border-danger-dark px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer border shadow-sm"
-              >
+              </Button>
+              <Button variant="danger" size="sm" onClick={() => setConfirmDelete(true)}>
                 Eliminar
-              </button>
+              </Button>
             </>
-          )}
-        </div>
-      </div>
+          ) : undefined
+        }
+      />
 
       {deleteError && (
-        <div className="mt-4 rounded-lg border border-danger-light bg-danger-light/30 p-3 text-sm text-danger-dark dark:border-danger/40 dark:bg-danger/10 dark:text-danger">
-          {deleteError}
-        </div>
+        <Alert tone="danger" className="mt-4">{deleteError}</Alert>
       )}
 
       {state.status === 'error' && (
-        <div className="mt-4 rounded-lg border border-danger-light bg-danger-light/30 p-3 text-sm text-danger-dark dark:border-danger/40 dark:bg-danger/10 dark:text-danger">
-          No se pudo cargar el código de error: {state.error}
-        </div>
+        <Alert tone="danger" className="mt-4">No se pudo cargar el código de error: {state.error}
+        </Alert>
       )}
 
       {state.status === 'loading' && !ec && (
@@ -253,29 +228,17 @@ export function ErrorCodeDetailPage() {
             />
 
             {editing && saveError && (
-              <div className="mt-4 rounded-lg border border-danger-light bg-danger-light/30 p-3 text-sm text-danger-dark dark:border-danger/40 dark:bg-danger/10 dark:text-danger">
-                {saveError}
-              </div>
+              <Alert tone="danger" className="mt-4">{saveError}</Alert>
             )}
 
             {editing && (
               <div className="mt-4 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={onCancelEdit}
-                  disabled={saving}
-                  className="inline-flex items-center bg-transparent text-text-secondary dark:text-text-dark-secondary border border-ui-border dark:border-ui-dark-border hover:text-text-primary dark:hover:text-text-dark-primary hover:border-text-secondary dark:hover:border-text-dark-secondary px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
-                >
+                <Button variant="secondary" size="sm" onClick={onCancelEdit} disabled={saving}>
                   Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={onSave}
-                  disabled={saving}
-                  className="inline-flex items-center bg-odoo-purple dark:bg-odoo-dark-purple text-text-inverse border-odoo-purple dark:border-odoo-dark-purple hover:bg-odoo-purple-d dark:hover:bg-odoo-dark-purple-d hover:border-odoo-purple-d dark:hover:border-odoo-dark-purple-d px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer border shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
-                >
+                </Button>
+                <Button variant="primary" size="sm" onClick={onSave} disabled={saving} loading={saving}>
                   {saving ? '…' : 'Guardar'}
-                </button>
+                </Button>
               </div>
             )}
           </div>

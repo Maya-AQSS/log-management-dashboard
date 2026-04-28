@@ -33,7 +33,9 @@
     "react-dom": "^19.2.5",
     "react-i18next": "^17.0.4",
     "react-router-dom": "^7.14.2",
-    "tailwindcss": "^4.2.2"
+    "tailwindcss": "^4.2.2",
+    "@maya/shared-dashboard-react": "file:../../maya_infra/packages/maya-shared-dashboard-react",
+    "react-grid-layout": "^1.5.3"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.13",

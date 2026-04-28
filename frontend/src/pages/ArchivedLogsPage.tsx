@@ -1,4 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Alert,
+  ColumnVisibilityMenu,
+  DataTable,
+  PageTitle,
+  Pagination,
+  type ColumnDef,
+  type SortState,
+} from '@maya/shared-ui-react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { fetchApplications } from '../api/applications';
@@ -7,16 +17,18 @@ import {
   type ArchivedLogsFilters as ApiArchivedLogsFilters,
   type ArchivedLogsSortBy,
 } from '../api/archivedLogs';
-import {
-  ArchivedLogsFilters,
-  ArchivedLogsTable,
-  type ArchivedLogsFiltersState,
-  type ArchivedLogsSortKey,
-} from '../components/archived-logs';
-import { Pagination } from '../components/table';
+import { ArchivedLogsFilters, type ArchivedLogsFiltersState } from '../components/archived-logs';
+import { SeverityBadge } from '../components/severity';
 import type { PaginatedResponse, SortDir } from '../types/api';
 import type { ApplicationRef, ArchivedLog } from '../types/logs';
 import { LOG_SEVERITY_KEYS } from '../types/logs';
+import { formatDateTime } from '../utils/date';
+
+export type ArchivedLogsSortKey =
+  | 'application'
+  | 'severity'
+  | 'archived_at'
+  | 'original_created_at';
 
 const VALID_SORT_COLUMNS: readonly ArchivedLogsSortKey[] = [
   'application',
@@ -30,6 +42,12 @@ type ListState =
   | { status: 'loading'; data: PaginatedResponse<ArchivedLog> | null }
   | { status: 'ready'; data: PaginatedResponse<ArchivedLog> }
   | { status: 'error'; error: string; data: PaginatedResponse<ArchivedLog> | null };
+
+function truncate(text: string | null | undefined, max = 120): string {
+  if (!text) return '-';
+  if (text.length <= max) return text;
+  return `${text.slice(0, max)}…`;
+}
 
 function parseFiltersFromUrl(params: URLSearchParams): {
   filters: ArchivedLogsFiltersState;
@@ -111,9 +129,12 @@ function toApiFilters(
 
 export function ArchivedLogsPage() {
   const { t } = useTranslation('archivedLogs');
+  const { t: tCommon } = useTranslation('common');
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [applications, setApplications] = useState<ApplicationRef[]>([]);
   const [state, setState] = useState<ListState>({ status: 'loading', data: null });
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
 
   const { filters, sortBy, sortDir, page } = useMemo(
     () => parseFiltersFromUrl(searchParams),
@@ -174,27 +195,70 @@ export function ArchivedLogsPage() {
     [filters, sortBy, sortDir, setSearchParams],
   );
 
-  const changeSort = useCallback(
-    (column: ArchivedLogsSortKey) => {
-      let nextDir: SortDir = 'desc';
-      if (sortBy === column) {
-        nextDir = sortDir === 'asc' ? 'desc' : 'asc';
-      }
-      setSearchParams(writeFiltersToUrl(filters, column, nextDir, 1));
+  const onSortChange = useCallback(
+    (next: SortState) => {
+      const column = next.columnId as ArchivedLogsSortKey;
+      if (!(VALID_SORT_COLUMNS as readonly string[]).includes(column)) return;
+      setSearchParams(writeFiltersToUrl(filters, column, next.direction, 1));
     },
-    [filters, sortBy, sortDir, setSearchParams],
+    [filters, setSearchParams],
+  );
+
+  const toggleHidden = useCallback((id: string) => {
+    setHiddenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const sortState: SortState | null = useMemo(
+    () => (sortBy && sortDir ? { columnId: sortBy, direction: sortDir } : null),
+    [sortBy, sortDir],
+  );
+
+  const columns: ColumnDef<ArchivedLog>[] = useMemo(
+    () => [
+      {
+        id: 'application',
+        header: t('columns.application'),
+        cell: (l) => l.application?.name ?? '-',
+        sortable: true,
+      },
+      {
+        id: 'severity',
+        header: t('columns.severity'),
+        cell: (l) => <SeverityBadge severity={l.severity} />,
+        sortable: true,
+      },
+      {
+        id: 'message',
+        header: t('columns.message'),
+        cell: (l) => (
+          <span className="block break-words max-w-md">{truncate(l.message, 120)}</span>
+        ),
+      },
+      {
+        id: 'archived_at',
+        header: t('columns.archived'),
+        cell: (l) => formatDateTime(l.archived_at),
+        sortable: true,
+      },
+    ],
+    [t],
   );
 
   const pagination = state.data;
   const logs = pagination?.data ?? [];
+  const meta = pagination?.meta;
+  const startIndex = meta && meta.from != null ? meta.from : 0;
+  const endIndex = meta && meta.to != null ? meta.to : 0;
+  const total = meta?.total ?? 0;
 
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
-      <header className="flex items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-text-primary dark:text-text-dark-primary">
-          {t('title')}
-        </h1>
-      </header>
+      <PageTitle title={t('title')} />
 
       <ArchivedLogsFilters
         value={filters}
@@ -203,10 +267,17 @@ export function ArchivedLogsPage() {
         onReset={resetFilters}
       />
 
+      <div className="mt-3 flex items-center justify-end">
+        <ColumnVisibilityMenu
+          columns={columns}
+          hiddenColumnIds={hiddenIds}
+          onToggle={toggleHidden}
+        />
+      </div>
+
       {state.status === 'error' && (
-        <div className="mt-4 rounded-lg border border-danger-light bg-danger-light/30 p-3 text-sm text-danger-dark dark:border-danger/40 dark:bg-danger/10 dark:text-danger">
-          {t('listLoadError', { message: state.error })}
-        </div>
+        <Alert tone="danger" className="mt-4">{t('listLoadError', { message: state.error })}
+        </Alert>
       )}
 
       {state.status === 'loading' && !pagination && (
@@ -217,13 +288,31 @@ export function ArchivedLogsPage() {
 
       {pagination && (
         <>
-          <ArchivedLogsTable
-            logs={logs}
-            sortBy={sortBy}
-            sortDir={sortDir}
-            onSort={changeSort}
-          />
-          <Pagination meta={pagination.meta} onChangePage={changePage} />
+          <div className="mt-3">
+            <DataTable
+              columns={columns}
+              rows={logs}
+              rowKey={(l) => l.id}
+              hiddenColumnIds={hiddenIds}
+              sortBy={sortState}
+              onSortChange={onSortChange}
+              onRowClick={(l) => navigate(`/archived-logs/${l.id}`)}
+              emptyMessage={t('columns.emptyText')}
+            />
+          </div>
+          {meta && (
+            <div className="mt-4">
+              <Pagination
+                currentPage={meta.current_page}
+                totalPages={meta.last_page}
+                onChange={changePage}
+                ariaLabel={tCommon('pagination.ariaLabel')}
+                prevLabel={tCommon('pagination.previous')}
+                nextLabel={tCommon('pagination.next')}
+                info={tCommon('pagination.rangeOf', { from: startIndex, to: endIndex, total })}
+              />
+            </div>
+          )}
         </>
       )}
     </div>

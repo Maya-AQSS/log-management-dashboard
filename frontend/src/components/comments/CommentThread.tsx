@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Alert, Button } from '@maya/shared-ui-react';
 import { useTranslation } from 'react-i18next';
 import {
   createComment,
@@ -208,27 +209,19 @@ export function CommentThread({ commentableType, commentableId }: CommentThreadP
           </p>
         )}
         <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={onCreate}
-            disabled={creating}
-            className="bg-odoo-purple dark:bg-odoo-dark-purple text-text-inverse border-odoo-purple dark:border-odoo-dark-purple hover:bg-odoo-purple-d dark:hover:bg-odoo-dark-purple-d hover:border-odoo-purple-d dark:hover:border-odoo-dark-purple-d px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer border disabled:cursor-not-allowed disabled:opacity-60"
-          >
+          <Button variant="primary" size="sm" onClick={onCreate} disabled={creating} loading={creating}>
             {creating ? t('busy') : t('save')}
-          </button>
+          </Button>
         </div>
       </div>
 
       {state.status === 'error' && state.error && (
-        <div className="rounded-lg border border-danger-light bg-danger-light/30 p-3 text-sm text-danger-dark dark:border-danger/40 dark:bg-danger/10 dark:text-danger">
-          {t('listLoadError', { message: state.error })}
-        </div>
+        <Alert tone="danger" className="mt-4">{t('listLoadError', { message: state.error })}
+        </Alert>
       )}
 
       {deleteError && (
-        <div className="rounded-lg border border-danger-light bg-danger-light/30 p-3 text-sm text-danger-dark dark:border-danger/40 dark:bg-danger/10 dark:text-danger">
-          {deleteError}
-        </div>
+        <Alert tone="danger" className="mt-4">{deleteError}</Alert>
       )}
 
       <div className="space-y-3">
@@ -263,22 +256,14 @@ export function CommentThread({ commentableType, commentableId }: CommentThreadP
                 {!isEditing && (comment.can_edit || comment.can_delete) && (
                   <div className="flex gap-2">
                     {comment.can_edit && (
-                      <button
-                        type="button"
-                        onClick={() => onStartEdit(comment)}
-                        className="text-sm font-medium text-odoo-purple hover:underline"
-                      >
+                      <Button variant="ghost" size="xs" onClick={() => onStartEdit(comment)}>
                         {t('edit')}
-                      </button>
+                      </Button>
                     )}
                     {comment.can_delete && (
-                      <button
-                        type="button"
-                        onClick={() => setDeleteTargetId(comment.id)}
-                        className="text-sm font-medium text-danger hover:underline"
-                      >
+                      <Button variant="danger" size="xs" onClick={() => setDeleteTargetId(comment.id)}>
                         {t('delete')}
-                      </button>
+                      </Button>
                     )}
                   </div>
                 )}
@@ -302,22 +287,18 @@ export function CommentThread({ commentableType, commentableId }: CommentThreadP
                     </p>
                   )}
                   <div className="flex gap-2">
-                    <button
-                      type="button"
+                    <Button
+                      variant="primary"
+                      size="sm"
                       onClick={onUpdate}
                       disabled={editingBusy}
-                      className="bg-odoo-purple dark:bg-odoo-dark-purple text-text-inverse border-odoo-purple dark:border-odoo-dark-purple hover:bg-odoo-purple-d dark:hover:bg-odoo-dark-purple-d hover:border-odoo-purple-d dark:hover:border-odoo-dark-purple-d px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer border disabled:cursor-not-allowed disabled:opacity-60"
+                      loading={editingBusy}
                     >
                       {editingBusy ? t('busy') : t('update')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={onCancelEdit}
-                      disabled={editingBusy}
-                      className="inline-flex items-center bg-transparent text-text-secondary dark:text-text-dark-secondary border border-ui-border dark:border-ui-dark-border hover:text-text-primary dark:hover:text-text-dark-primary hover:border-text-secondary dark:hover:border-text-dark-secondary px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
-                    >
+                    </Button>
+                    <Button variant="secondary" size="sm" onClick={onCancelEdit} disabled={editingBusy}>
                       {t('cancel')}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ) : (

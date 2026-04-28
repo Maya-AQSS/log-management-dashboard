@@ -1,19 +1,27 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Alert,
+  ColumnVisibilityMenu,
+  DataTable,
+  PageTitle,
+  Pagination,
+  type ColumnDef,
+  type SortState,
+} from '@maya/shared-ui-react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { fetchApplications } from '../api/applications';
 import { fetchLogs, type LogsFilters as ApiLogsFilters, type LogsSortBy } from '../api/logs';
-import {
-  LogsFilters,
-  LogsTable,
-  type LogsFiltersState,
-  type LogsSortKey,
-} from '../components/logs';
-import { Pagination } from '../components/table';
+import { LogsFilters, type LogsFiltersState } from '../components/logs';
+import { SeverityBadge } from '../components/severity';
 import { useLogStream } from '../hooks';
 import type { PaginatedResponse, SortDir } from '../types/api';
 import type { ApplicationRef, Log } from '../types/logs';
 import { LOG_SEVERITY_KEYS } from '../types/logs';
+import { formatDateTime } from '../utils/date';
+
+export type LogsSortKey = 'application' | 'severity' | 'created_at';
 
 const VALID_SORT_COLUMNS: readonly LogsSortKey[] = ['application', 'severity', 'created_at'];
 const VALID_SORT_DIRS: readonly SortDir[] = ['asc', 'desc'];
@@ -22,6 +30,12 @@ type ListState =
   | { status: 'loading'; data: PaginatedResponse<Log> | null }
   | { status: 'ready'; data: PaginatedResponse<Log> }
   | { status: 'error'; error: string; data: PaginatedResponse<Log> | null };
+
+function truncate(text: string | null | undefined, max = 120): string {
+  if (!text) return '-';
+  if (text.length <= max) return text;
+  return `${text.slice(0, max)}…`;
+}
 
 function parseFiltersFromUrl(params: URLSearchParams): {
   filters: LogsFiltersState;
@@ -114,10 +128,13 @@ function toApiFilters(
 
 export function LogsPage() {
   const { t } = useTranslation('logs');
+  const { t: tCommon } = useTranslation('common');
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [applications, setApplications] = useState<ApplicationRef[]>([]);
   const [state, setState] = useState<ListState>({ status: 'loading', data: null });
   const [refreshNonce, setRefreshNonce] = useState(0);
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const lastStreamIdRef = useRef<number | null>(null);
 
   const { filters, sortBy, sortDir, page } = useMemo(
@@ -194,27 +211,90 @@ export function LogsPage() {
     [filters, sortBy, sortDir, setSearchParams],
   );
 
-  const changeSort = useCallback(
-    (column: LogsSortKey) => {
-      let nextDir: SortDir = 'desc';
-      if (sortBy === column) {
-        nextDir = sortDir === 'asc' ? 'desc' : 'asc';
-      }
-      setSearchParams(writeFiltersToUrl(filters, column, nextDir, 1));
+  const onSortChange = useCallback(
+    (next: SortState) => {
+      const column = next.columnId as LogsSortKey;
+      if (!(VALID_SORT_COLUMNS as readonly string[]).includes(column)) return;
+      setSearchParams(writeFiltersToUrl(filters, column, next.direction, 1));
     },
-    [filters, sortBy, sortDir, setSearchParams],
+    [filters, setSearchParams],
+  );
+
+  const toggleHidden = useCallback((id: string) => {
+    setHiddenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const sortState: SortState | null = useMemo(
+    () => (sortBy && sortDir ? { columnId: sortBy, direction: sortDir } : null),
+    [sortBy, sortDir],
+  );
+
+  const columns: ColumnDef<Log>[] = useMemo(
+    () => [
+      {
+        id: 'application',
+        header: t('columns.application'),
+        cell: (l) => l.application?.name ?? '-',
+        sortable: true,
+      },
+      {
+        id: 'severity',
+        header: t('columns.severity'),
+        cell: (l) => <SeverityBadge severity={l.severity} />,
+        sortable: true,
+      },
+      {
+        id: 'message',
+        header: t('columns.message'),
+        cell: (l) => (
+          <span className="block break-words max-w-md">{truncate(l.message, 120)}</span>
+        ),
+      },
+      {
+        id: 'errorCode',
+        header: t('columns.errorCode'),
+        cell: (l) => l.error_code?.code ?? '-',
+      },
+      {
+        id: 'created_at',
+        header: t('columns.createdAt'),
+        cell: (l) => formatDateTime(l.created_at),
+        sortable: true,
+      },
+      {
+        id: 'resolved',
+        header: t('columns.resolved'),
+        cell: (l) => (
+          <span
+            className={
+              l.resolved
+                ? 'inline-flex items-center rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success ring-1 ring-inset ring-success/20'
+                : 'inline-flex items-center rounded-full bg-warning/10 px-2 py-0.5 text-xs font-medium text-warning ring-1 ring-inset ring-warning/20'
+            }
+          >
+            {l.resolved ? t('detail.fields.resolved') : t('detail.fields.unresolved')}
+          </span>
+        ),
+      },
+    ],
+    [t],
   );
 
   const pagination = state.data;
   const logs = pagination?.data ?? [];
+  const meta = pagination?.meta;
+  const startIndex = meta && meta.from != null ? meta.from : 0;
+  const endIndex = meta && meta.to != null ? meta.to : 0;
+  const total = meta?.total ?? 0;
 
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
-      <header className="flex items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-text-primary dark:text-text-dark-primary">
-          {t('title')}
-        </h1>
-      </header>
+      <PageTitle title={t('title')} />
 
       <LogsFilters
         value={filters}
@@ -223,10 +303,17 @@ export function LogsPage() {
         onReset={resetFilters}
       />
 
+      <div className="mt-3 flex items-center justify-end">
+        <ColumnVisibilityMenu
+          columns={columns}
+          hiddenColumnIds={hiddenIds}
+          onToggle={toggleHidden}
+        />
+      </div>
+
       {state.status === 'error' && (
-        <div className="mt-4 rounded-lg border border-danger-light bg-danger-light/30 p-3 text-sm text-danger-dark dark:border-danger/40 dark:bg-danger/10 dark:text-danger">
-          {t('loadError', { message: state.error })}
-        </div>
+        <Alert tone="danger" className="mt-4">{t('loadError', { message: state.error })}
+        </Alert>
       )}
 
       {state.status === 'loading' && !pagination && (
@@ -237,13 +324,31 @@ export function LogsPage() {
 
       {pagination && (
         <>
-          <LogsTable
-            logs={logs}
-            sortBy={sortBy}
-            sortDir={sortDir}
-            onSort={changeSort}
-          />
-          <Pagination meta={pagination.meta} onChangePage={changePage} />
+          <div className="mt-3">
+            <DataTable
+              columns={columns}
+              rows={logs}
+              rowKey={(l) => l.id}
+              hiddenColumnIds={hiddenIds}
+              sortBy={sortState}
+              onSortChange={onSortChange}
+              onRowClick={(l) => navigate(`/logs/${l.id}`)}
+              emptyMessage={t('table.emptyText')}
+            />
+          </div>
+          {meta && (
+            <div className="mt-4">
+              <Pagination
+                currentPage={meta.current_page}
+                totalPages={meta.last_page}
+                onChange={changePage}
+                ariaLabel={tCommon('pagination.ariaLabel')}
+                prevLabel={tCommon('pagination.previous')}
+                nextLabel={tCommon('pagination.next')}
+                info={tCommon('pagination.rangeOf', { from: startIndex, to: endIndex, total })}
+              />
+            </div>
+          )}
         </>
       )}
     </div>
