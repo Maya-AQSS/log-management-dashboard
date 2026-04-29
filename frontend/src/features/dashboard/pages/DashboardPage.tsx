@@ -1,8 +1,9 @@
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, PageTitle } from '@maya/shared-ui-react';
+import { PageTitle } from '@maya/shared-ui-react';
 import {
   DashboardEditToggleButton,
+  DashboardEditToolbar,
   WidgetGrid,
   useDashboardLayoutLocal,
   type LayoutItem,
@@ -23,7 +24,7 @@ function DashboardSkeleton() {
 
 /**
  * Customizable dashboard for maya_logs. Layout persists to localStorage under
- * `maya:logs:dashboard-layout`. Toggle edit mode to drag, resize, or remove
+ * `maya:logs:dashboard-layout`. Toggle edit mode to drag, resize, add or remove
  * widgets — changes are saved on exit.
  */
 export function DashboardPage() {
@@ -76,6 +77,28 @@ export function DashboardPage() {
     [layout],
   );
 
+  const handleAddWidget = useCallback(
+    (widgetId: string) => {
+      const def = WIDGET_REGISTRY[widgetId];
+      if (!def) return;
+      const current = draftLayout ?? layout;
+      const maxY = current.reduce((m, item) => Math.max(m, item.y + item.h), 0);
+      setDraftLayout([
+        ...current,
+        {
+          i: widgetId,
+          x: 0,
+          y: maxY,
+          w: def.defaultSize.w,
+          h: def.defaultSize.h,
+          minW: def.minSize.w,
+          minH: def.minSize.h,
+        },
+      ]);
+    },
+    [draftLayout, layout],
+  );
+
   const handleReset = useCallback(async () => {
     await resetToDefault();
     setDraftLayout(null);
@@ -87,32 +110,35 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="px-4 py-2">
-      <div className="flex items-center justify-between mb-3">
-        <PageTitle title={t('title')} />
-        <div className="flex items-center gap-2">
-          {editable && (
-            <>
-              <Button variant="secondary" size="sm" onClick={handleReset}>
-                {t('edit.reset')}
-              </Button>
-              <Button variant="secondary" size="sm" onClick={handleCancel}>
-                {t('edit.cancel')}
-              </Button>
-              <Button variant="primary" size="sm" onClick={handleSave}>
-                {t('edit.save')}
-              </Button>
-            </>
-          )}
-          {!editable && (
+    <>
+      <PageTitle
+        title={t('title')}
+        actions={
+          editable ? (
+            <DashboardEditToolbar
+              layout={activeLayout}
+              registry={WIDGET_REGISTRY}
+              t={t}
+              onSave={handleSave}
+              onCancel={handleCancel}
+              onReset={handleReset}
+              onAddWidget={handleAddWidget}
+              labels={{
+                save: t('edit.save'),
+                cancel: t('edit.cancel'),
+                reset: t('edit.reset'),
+                addWidget: t('edit.addWidget', { defaultValue: 'Añadir widget' }),
+              }}
+            />
+          ) : (
             <DashboardEditToggleButton
               editable={editable}
               onToggle={handleToggleEdit}
               editLabel={t('edit.toggle')}
             />
-          )}
-        </div>
-      </div>
+          )
+        }
+      />
 
       <WidgetGrid
         registry={WIDGET_REGISTRY}
@@ -124,7 +150,7 @@ export function DashboardPage() {
         emptyKey="widgets.empty"
         removeAriaLabel={t('edit.removeWidget')}
       />
-    </div>
+    </>
   );
 }
 
