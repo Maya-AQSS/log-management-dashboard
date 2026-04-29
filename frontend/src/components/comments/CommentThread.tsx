@@ -201,7 +201,7 @@ export function CommentThread({ commentableType, commentableId }: CommentThreadP
  />
  {createError && (<p
  role="alert"
- className="rounded-lg border border-danger-light bg-danger-light/30 px-3 py-2 text-sm text-danger-dark dark:border-danger/40 dark:bg-danger/10 dark:text-danger"
+ className="rounded-lg border border-error-container bg-error-container/30 px-3 py-2 text-sm text-error"
  >
  {createError}
  </p>
@@ -269,7 +269,7 @@ export function CommentThread({ commentableType, commentableId }: CommentThreadP
  />
  {editingError && (<p
  role="alert"
- className="rounded-lg border border-danger-light bg-danger-light/30 px-3 py-2 text-sm text-danger-dark dark:border-danger/40 dark:bg-danger/10 dark:text-danger"
+ className="rounded-lg border border-error-container bg-error-container/30 px-3 py-2 text-sm text-error"
  >
  {editingError}
  </p>

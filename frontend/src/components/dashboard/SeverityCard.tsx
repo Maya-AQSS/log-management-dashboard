@@ -23,7 +23,7 @@ export function SeverityCard({
  const palette = severityCardPaletteFor(severityKey);
  const cls = [
 'block rounded-lg border p-4 shadow-card transition',
-'hover:-translate-y-0.5 hover:shadow-card-md',
+'hover:-translate-y-0.5 hover:shadow-elevation-2',
 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
  palette.border,
  palette.background,

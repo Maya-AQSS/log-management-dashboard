@@ -60,7 +60,7 @@ function RecentLogsWidget() {
  }
 
  if (status ==='error') {
- return (<p className="text-sm text-danger-dark dark:text-danger text-center py-4">
+ return (<p className="text-sm text-error text-center py-4">
  {t('error')}
  </p>
  );

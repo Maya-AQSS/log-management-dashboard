@@ -10,19 +10,19 @@ export type SeverityCardPalette = {
 
 export const SEVERITY_BADGE_CLASSES: Record<LogSeverity, string> = {
  critical:
-'inline-flex items-center rounded-full bg-danger-light px-2 py-0.5 text-xs font-semibold text-danger-dark',
+'inline-flex items-center rounded-full bg-error-container px-2 py-0.5 text-xs font-semibold text-error',
  high:'inline-flex items-center rounded-full bg-warning-light px-2 py-0.5 text-xs font-semibold text-warning-dark',
  medium:
 'inline-flex items-center rounded-full bg-warning-light px-2 py-0.5 text-xs font-semibold text-warning-dark opacity-80',
- low:'inline-flex items-center rounded-full bg-success-light px-2 py-0.5 text-xs font-semibold text-success-dark',
+ low:'inline-flex items-center rounded-full bg-success-container px-2 py-0.5 text-xs font-semibold text-success',
  other:
 'inline-flex items-center rounded-full bg-surface px-2 py-0.5 text-xs font-semibold text-on-surface-variant',
 };
 
 export const SEVERITY_CARD_CLASSES: Record<LogSeverity, SeverityCardPalette> = {
  critical: {
- background:'bg-danger-light dark:bg-danger-dark/50',
- text:'text-danger-dark',
+ background:'bg-error-container dark:bg-error/50',
+ text:'text-error',
  border:'border-danger/20 dark:border-danger/50',
  },
  high: {
