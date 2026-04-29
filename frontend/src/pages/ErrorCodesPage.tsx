@@ -2,8 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   DataTable,
+  FilterField,
   PageTitle,
   Pagination,
+  Select,
+  TextInput,
   useTablePreferences,
   type ColumnDef,
 } from '@maya/shared-ui-react';
@@ -14,11 +17,6 @@ import { fetchErrorCodes, type ErrorCodesFilters as ApiErrorCodesFilters } from 
 import type { ErrorCodesFiltersState } from '../components/error-codes';
 import type { PaginatedResponse } from '../types/api';
 import type { ApplicationRef, ErrorCode } from '../types/logs';
-
-const inputClass =
-  'w-full bg-ui-card dark:bg-ui-dark-card border border-ui-border dark:border-ui-dark-border rounded-md text-text-primary dark:text-text-dark-primary px-3 py-2 text-sm outline-none focus:border-odoo-purple dark:focus:border-odoo-dark-purple transition-colors';
-const fieldLabelClass =
-  'text-text-secondary dark:text-text-dark-secondary text-xs font-medium uppercase tracking-wide';
 
 type ListState =
   | { status: 'loading'; data: PaginatedResponse<ErrorCode> | null }
@@ -184,31 +182,23 @@ export function ErrorCodesPage() {
 
   const filtersPanel = (
     <>
-      <div className="flex flex-col gap-1.5 min-w-0">
-        <label className={fieldLabelClass} htmlFor="error-codes-filter-search">
-          {tCommon('filters.searchLabel')}
-        </label>
-        <input
+      <FilterField label={tCommon('filters.searchLabel')} htmlFor="error-codes-filter-search">
+        <TextInput
           id="error-codes-filter-search"
           type="search"
           value={filters.search}
           placeholder={t('filters.searchPlaceholder')}
           onChange={(e) => updateFilters({ search: e.target.value })}
-          className={inputClass}
         />
-      </div>
-      <div className="flex flex-col gap-1.5 min-w-0">
-        <label className={fieldLabelClass} htmlFor="error-codes-filter-application">
-          {tCommon('filters.applicationLabel')}
-        </label>
-        <select
+      </FilterField>
+      <FilterField label={tCommon('filters.applicationLabel')} htmlFor="error-codes-filter-application">
+        <Select
           id="error-codes-filter-application"
           value={filters.applicationId ?? ''}
           onChange={(e) => {
             const v = e.target.value;
             updateFilters({ applicationId: v === '' ? null : Number(v) });
           }}
-          className={inputClass}
         >
           <option value="">{t('filters.applicationAll')}</option>
           {applications.map((app) => (
@@ -216,8 +206,8 @@ export function ErrorCodesPage() {
               {app.name}
             </option>
           ))}
-        </select>
-      </div>
+        </Select>
+      </FilterField>
     </>
   );
 

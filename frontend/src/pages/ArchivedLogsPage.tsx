@@ -4,9 +4,11 @@ import {
   Alert,
   DataTable,
   DatePicker,
+  FilterField,
   MultiSelect,
   PageTitle,
   Pagination,
+  Select,
   useTablePreferences,
   type ColumnDef,
   type SortState,
@@ -39,11 +41,6 @@ const VALID_SORT_COLUMNS: readonly ArchivedLogsSortKey[] = [
   'original_created_at',
 ];
 const VALID_SORT_DIRS: readonly SortDir[] = ['asc', 'desc'];
-
-const inputClass =
-  'w-full bg-ui-card dark:bg-ui-dark-card border border-ui-border dark:border-ui-dark-border rounded-md text-text-primary dark:text-text-dark-primary px-3 py-2 text-sm outline-none focus:border-odoo-purple dark:focus:border-odoo-dark-purple transition-colors';
-const fieldLabelClass =
-  'text-text-secondary dark:text-text-dark-secondary text-xs font-medium uppercase tracking-wide';
 
 type ListState =
   | { status: 'loading'; data: PaginatedResponse<ArchivedLog> | null }
@@ -276,8 +273,7 @@ export function ArchivedLogsPage() {
 
   const filtersPanel = (
     <>
-      <div className="flex flex-col gap-1.5 min-w-0">
-        <label className={fieldLabelClass}>{tCommon('filters.dateFrom')}</label>
+      <FilterField label={tCommon('filters.dateFrom')}>
         <DatePicker
           value={filters.dateFrom}
           onChange={(d) => updateFilters({ dateFrom: d })}
@@ -285,9 +281,8 @@ export function ArchivedLogsPage() {
           ariaLabel={tCommon('filters.dateFrom')}
           max={filters.dateTo ?? undefined}
         />
-      </div>
-      <div className="flex flex-col gap-1.5 min-w-0">
-        <label className={fieldLabelClass}>{tCommon('filters.dateTo')}</label>
+      </FilterField>
+      <FilterField label={tCommon('filters.dateTo')}>
         <DatePicker
           value={filters.dateTo}
           onChange={(d) => updateFilters({ dateTo: d })}
@@ -295,19 +290,15 @@ export function ArchivedLogsPage() {
           ariaLabel={tCommon('filters.dateTo')}
           min={filters.dateFrom ?? undefined}
         />
-      </div>
-      <div className="flex flex-col gap-1.5 min-w-0">
-        <label className={fieldLabelClass} htmlFor="archived-logs-filter-application">
-          {tCommon('filters.applicationLabel')}
-        </label>
-        <select
+      </FilterField>
+      <FilterField label={tCommon('filters.applicationLabel')} htmlFor="archived-logs-filter-application">
+        <Select
           id="archived-logs-filter-application"
           value={filters.applicationId ?? ''}
           onChange={(e) => {
             const v = e.target.value;
             updateFilters({ applicationId: v === '' ? null : Number(v) });
           }}
-          className={inputClass}
         >
           <option value="">{t('filters.applicationAll')}</option>
           {applications.map((app) => (
@@ -315,10 +306,9 @@ export function ArchivedLogsPage() {
               {app.name}
             </option>
           ))}
-        </select>
-      </div>
-      <div className="flex flex-col gap-1.5 min-w-0">
-        <label className={fieldLabelClass}>{tCommon('filters.severityLabel')}</label>
+        </Select>
+      </FilterField>
+      <FilterField label={tCommon('filters.severityLabel')}>
         <MultiSelect
           options={LOG_SEVERITY_KEYS.map((key) => ({ value: key, label: severityLabel(key) }))}
           value={filters.severity}
@@ -326,7 +316,7 @@ export function ArchivedLogsPage() {
           placeholder={t('filters.severityAll', { defaultValue: 'Todas' })}
           ariaLabel={tCommon('filters.severityLabel')}
         />
-      </div>
+      </FilterField>
     </>
   );
 
