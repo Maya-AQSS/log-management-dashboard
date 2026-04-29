@@ -15,6 +15,8 @@ rm -f bootstrap/cache/packages.php bootstrap/cache/services.php
 # Composer dependencies (volumen bind monta packages/ en runtime)
 if [ ! -f "vendor/autoload.php" ] || [ "composer.json" -nt "vendor/autoload.php" ]; then
     echo "[entrypoint] Installing composer dependencies..."
+    # Sync only maya/* path packages in lock (handles stale lock when new shared package is added)
+    composer update "maya/*" --no-install --no-interaction --ignore-platform-reqs --no-scripts 2>/dev/null || true
     composer install --optimize-autoloader --no-interaction
 else
     echo "[entrypoint] Composer deps up to date"
