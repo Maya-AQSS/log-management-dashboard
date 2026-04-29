@@ -1,123 +1,120 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import type { ApplicationRef } from '../../types/logs';
-import { Button } from '../ui';
-import { ApplicationSelect, SeverityFilterCheckboxes } from '../filters';
+import { useState } from'react';
+import { useTranslation } from'react-i18next';
+import type { ApplicationRef } from'../../types/logs';
+import { Button } from'../ui';
+import { ApplicationSelect, SeverityFilterCheckboxes } from'../filters';
 
-const ChevronIcon = ({ open }: { open: boolean }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 20 20"
-    fill="currentColor"
-    aria-hidden="true"
-    className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`}
-  >
-    <path
-      fillRule="evenodd"
-      d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
-      clipRule="evenodd"
-    />
-  </svg>
+const ChevronIcon = ({ open }: { open: boolean }) => (<svg
+ xmlns="http://www.w3.org/2000/svg"
+ viewBox="0 0 20 20"
+ fill="currentColor"
+ aria-hidden="true"
+ className={`w-4 h-4 transition-transform ${open ?'rotate-180' :''}`}
+ >
+ <path
+ fillRule="evenodd"
+ d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+ clipRule="evenodd"
+ />
+ </svg>
 );
 
 const dateInputClass =
-  'w-full rounded-lg border border-ui-border bg-ui-card px-3 py-2 text-sm shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-primary focus:border-odoo-purple focus:outline-none focus:ring-2 focus:ring-odoo-purple/20';
+'w-full rounded-lg border border-outline bg-surface-container-low px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20';
 const labelClass =
-  'mb-1 block text-xs font-semibold text-text-secondary dark:text-text-dark-secondary';
+'mb-1 block text-xs font-semibold text-on-surface-variant';
 
 export type ArchivedLogsFiltersState = {
-  severity: string[];
-  applicationId: number | null;
-  dateFrom: string | null;
-  dateTo: string | null;
+ severity: string[];
+ applicationId: number | null;
+ dateFrom: string | null;
+ dateTo: string | null;
 };
 
 type ArchivedLogsFiltersProps = {
-  value: ArchivedLogsFiltersState;
-  applications: ApplicationRef[];
-  onChange: (patch: Partial<ArchivedLogsFiltersState>) => void;
-  onReset: () => void;
+ value: ArchivedLogsFiltersState;
+ applications: ApplicationRef[];
+ onChange: (patch: Partial<ArchivedLogsFiltersState>) => void;
+ onReset: () => void;
 };
 
 export function ArchivedLogsFilters({
-  value,
-  applications,
-  onChange,
-  onReset,
+ value,
+ applications,
+ onChange,
+ onReset,
 }: ArchivedLogsFiltersProps) {
-  const { t } = useTranslation('archivedLogs');
-  const { t: tCommon } = useTranslation('common');
-  const [isOpen, setIsOpen] = useState(false);
+ const { t } = useTranslation('archivedLogs');
+ const { t: tCommon } = useTranslation('common');
+ const [isOpen, setIsOpen] = useState(false);
 
-  const hasActiveFilters =
-    value.severity.length > 0 || value.applicationId !== null || value.dateFrom || value.dateTo;
+ const hasActiveFilters =
+ value.severity.length > 0 || value.applicationId !== null || value.dateFrom || value.dateTo;
 
-  return (
-    <div className="bg-ui-card dark:bg-ui-dark-card border border-ui-border dark:border-ui-dark-border rounded-lg mb-6 shadow-sm">
-      {/* Toggle visible solo en móvil */}
-      <Button
-        variant="unstyled"
-        size="sm"
-        onClick={() => setIsOpen((v) => !v)}
-        aria-expanded={isOpen}
-        aria-controls="archived-logs-filter-panel"
-        className="md:hidden w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-text-primary dark:text-text-dark-primary"
-      >
-        <span>
-          {t('filters.title')}
-          {hasActiveFilters && (
-            <span className="ml-2 inline-flex items-center justify-center w-2 h-2 rounded-full bg-odoo-purple" aria-hidden="true" />
-          )}
-        </span>
-        <ChevronIcon open={isOpen} />
-      </Button>
+ return (<div className="bg-surface-container-low border border-outline rounded-lg mb-6 shadow-sm">
+ {/* Toggle visible solo en móvil */}
+ <Button
+ variant="unstyled"
+ size="sm"
+ onClick={() => setIsOpen((v) => !v)}
+ aria-expanded={isOpen}
+ aria-controls="archived-logs-filter-panel"
+ className="md:hidden w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-on-surface"
+ >
+ <span>
+ {t('filters.title')}
+ {hasActiveFilters && (<span className="ml-2 inline-flex items-center justify-center w-2 h-2 rounded-full bg-primary" aria-hidden="true" />
+ )}
+ </span>
+ <ChevronIcon open={isOpen} />
+ </Button>
 
-      {/* Panel de filtros: colapsable en móvil, siempre visible en ≥ md */}
-      <div
-        id="archived-logs-filter-panel"
-        className={`${isOpen ? 'flex' : 'hidden'} md:flex flex-col gap-3 p-4`}
-      >
-        {/* Fila 1: fechas + aplicación */}
-        <div className="flex flex-wrap items-end gap-2">
-          <div className="flex-1 min-w-[110px]">
-            <label className={labelClass}>{tCommon('filters.dateFrom')}</label>
-            <input
-              type="date"
-              value={value.dateFrom ?? ''}
-              onChange={(e) => onChange({ dateFrom: e.target.value || null })}
-              className={dateInputClass}
-            />
-          </div>
-          <div className="flex-1 min-w-[110px]">
-            <label className={labelClass}>{tCommon('filters.dateTo')}</label>
-            <input
-              type="date"
-              value={value.dateTo ?? ''}
-              onChange={(e) => onChange({ dateTo: e.target.value || null })}
-              className={dateInputClass}
-            />
-          </div>
-          <div className="flex-1 min-w-[150px]">
-            <ApplicationSelect
-              applications={applications}
-              value={value.applicationId}
-              placeholder={t('filters.applicationAll')}
-              onChange={(applicationId) => onChange({ applicationId })}
-            />
-          </div>
-        </div>
+ {/* Panel de filtros: colapsable en móvil, siempre visible en ≥ md */}
+ <div
+ id="archived-logs-filter-panel"
+ className={`${isOpen ?'flex' :'hidden'} md:flex flex-col gap-3 p-4`}
+ >
+ {/* Fila 1: fechas + aplicación */}
+ <div className="flex flex-wrap items-end gap-2">
+ <div className="flex-1 min-w-[110px]">
+ <label className={labelClass}>{tCommon('filters.dateFrom')}</label>
+ <input
+ type="date"
+ value={value.dateFrom ??''}
+ onChange={(e) => onChange({ dateFrom: e.target.value || null })}
+ className={dateInputClass}
+ />
+ </div>
+ <div className="flex-1 min-w-[110px]">
+ <label className={labelClass}>{tCommon('filters.dateTo')}</label>
+ <input
+ type="date"
+ value={value.dateTo ??''}
+ onChange={(e) => onChange({ dateTo: e.target.value || null })}
+ className={dateInputClass}
+ />
+ </div>
+ <div className="flex-1 min-w-[150px]">
+ <ApplicationSelect
+ applications={applications}
+ value={value.applicationId}
+ placeholder={t('filters.applicationAll')}
+ onChange={(applicationId) => onChange({ applicationId })}
+ />
+ </div>
+ </div>
 
-        {/* Fila 2: severidad + botón reset */}
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <SeverityFilterCheckboxes
-            selected={value.severity}
-            onChange={(severity) => onChange({ severity })}
-          />
-          <Button type="button" variant="secondary" size="sm" onClick={onReset}>
-            {t('filters.reset')}
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
+ {/* Fila 2: severidad + botón reset */}
+ <div className="flex flex-wrap items-end justify-between gap-3">
+ <SeverityFilterCheckboxes
+ selected={value.severity}
+ onChange={(severity) => onChange({ severity })}
+ />
+ <Button type="button" variant="secondary" size="sm" onClick={onReset}>
+ {t('filters.reset')}
+ </Button>
+ </div>
+ </div>
+ </div>
+ );
 }

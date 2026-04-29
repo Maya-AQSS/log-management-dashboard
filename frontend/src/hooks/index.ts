@@ -1,6 +1,6 @@
-export { useLogStream } from './useLogStream';
+export { useLogStream } from'./useLogStream';
 export type {
-  LogStreamStatus,
-  UseLogStreamOptions,
-  UseLogStreamResult,
-} from './useLogStream';
+ LogStreamStatus,
+ UseLogStreamOptions,
+ UseLogStreamResult,
+} from'./useLogStream';

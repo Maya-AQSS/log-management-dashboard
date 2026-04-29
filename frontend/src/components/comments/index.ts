@@ -1,1 +1,1 @@
-export { CommentThread } from './CommentThread';
+export { CommentThread } from'./CommentThread';
