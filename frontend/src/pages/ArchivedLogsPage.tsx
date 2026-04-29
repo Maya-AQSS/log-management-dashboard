@@ -122,6 +122,7 @@ function toApiFilters(
   sortBy: ArchivedLogsSortKey | null,
   sortDir: SortDir | null,
   page: number,
+  perPage?: number,
 ): ApiArchivedLogsFilters {
   return {
     severity: filters.severity.length > 0 ? filters.severity : null,
@@ -131,6 +132,7 @@ function toApiFilters(
     sort_by: sortBy ? (sortBy as ArchivedLogsSortBy) : null,
     sort_dir: sortDir,
     page,
+    per_page: perPage ?? null,
   };
 }
 
@@ -150,7 +152,7 @@ export function ArchivedLogsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [applications, setApplications] = useState<ApplicationRef[]>([]);
   const [state, setState] = useState<ListState>({ status: 'loading', data: null });
-  const { hiddenIds, toggleHidden } = useTablePreferences({
+  const { hiddenIds, toggleHidden, pageSize, setPageSize } = useTablePreferences({
     storageKey: 'maya:logs:archived-logs-table',
   });
 
@@ -176,7 +178,7 @@ export function ArchivedLogsPage() {
   useEffect(() => {
     let cancelled = false;
     setState((prev) => ({ status: 'loading', data: prev.data }));
-    fetchArchivedLogs(toApiFilters(filters, sortBy, sortDir, page))
+    fetchArchivedLogs(toApiFilters(filters, sortBy, sortDir, page, pageSize))
       .then((data) => {
         if (!cancelled) setState({ status: 'ready', data });
       })
@@ -192,7 +194,7 @@ export function ArchivedLogsPage() {
     return () => {
       cancelled = true;
     };
-  }, [filters, sortBy, sortDir, page]);
+  }, [filters, sortBy, sortDir, page, pageSize]);
 
   const updateFilters = useCallback(
     (patch: Partial<ArchivedLogsFiltersState>) => {
@@ -361,6 +363,11 @@ export function ArchivedLogsPage() {
               filtersDefaultOpen={false}
               sortBy={sortState}
               onSortChange={onSortChange}
+              pageSize={pageSize}
+              onPageSizeChange={(size) => {
+                setPageSize(size)
+                setSearchParams(writeFiltersToUrl(filters, sortBy, sortDir, 1))
+              }}
               onRowClick={(l) => navigate(`/archived-logs/${l.id}`)}
               emptyMessage={t('columns.emptyText')}
             />

@@ -54,11 +54,12 @@ function writeFiltersToUrl(filters: ErrorCodesFiltersState, page: number): URLSe
   return qs;
 }
 
-function toApiFilters(filters: ErrorCodesFiltersState, page: number): ApiErrorCodesFilters {
+function toApiFilters(filters: ErrorCodesFiltersState, page: number, perPage?: number): ApiErrorCodesFilters {
   return {
     search: filters.search.trim() === '' ? null : filters.search,
     application_id: filters.applicationId ?? null,
     page,
+    per_page: perPage ?? null,
   };
 }
 
@@ -76,7 +77,7 @@ export function ErrorCodesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [applications, setApplications] = useState<ApplicationRef[]>([]);
   const [state, setState] = useState<ListState>({ status: 'loading', data: null });
-  const { hiddenIds, toggleHidden } = useTablePreferences({
+  const { hiddenIds, toggleHidden, pageSize, setPageSize } = useTablePreferences({
     storageKey: 'maya:logs:error-codes-table',
   });
 
@@ -99,7 +100,7 @@ export function ErrorCodesPage() {
   useEffect(() => {
     let cancelled = false;
     setState((prev) => ({ status: 'loading', data: prev.data }));
-    fetchErrorCodes(toApiFilters(filters, page))
+    fetchErrorCodes(toApiFilters(filters, page, pageSize))
       .then((data) => {
         if (!cancelled) setState({ status: 'ready', data });
       })
@@ -115,7 +116,7 @@ export function ErrorCodesPage() {
     return () => {
       cancelled = true;
     };
-  }, [filters, page]);
+  }, [filters, page, pageSize]);
 
   const updateFilters = useCallback(
     (patch: Partial<ErrorCodesFiltersState>) => {
@@ -261,6 +262,11 @@ export function ErrorCodesPage() {
               filtersActiveCount={activeCount}
               onClearFilters={resetFilters}
               filtersDefaultOpen={false}
+              pageSize={pageSize}
+              onPageSizeChange={(size) => {
+                setPageSize(size)
+                setSearchParams(writeFiltersToUrl(filters, 1))
+              }}
               onRowClick={(ec) => navigate(`/error-codes/${ec.id}`)}
               emptyMessage={t('emptyFiltered')}
             />

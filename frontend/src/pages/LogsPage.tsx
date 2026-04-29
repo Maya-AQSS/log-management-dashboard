@@ -118,6 +118,7 @@ function toApiFilters(
   sortBy: LogsSortKey | null,
   sortDir: SortDir | null,
   page: number,
+  perPage?: number,
 ): ApiLogsFilters {
   return {
     search: filters.search.trim() || null,
@@ -130,6 +131,7 @@ function toApiFilters(
     sort_by: sortBy ? (sortBy as LogsSortBy) : null,
     sort_dir: sortDir,
     page,
+    per_page: perPage ?? null,
   };
 }
 
@@ -152,7 +154,7 @@ export function LogsPage() {
   const [applications, setApplications] = useState<ApplicationRef[]>([]);
   const [state, setState] = useState<ListState>({ status: 'loading', data: null });
   const [refreshNonce, setRefreshNonce] = useState(0);
-  const { hiddenIds, toggleHidden } = useTablePreferences({
+  const { hiddenIds, toggleHidden, pageSize, setPageSize } = useTablePreferences({
     storageKey: 'maya:logs:logs-table',
   });
   const lastStreamIdRef = useRef<number | null>(null);
@@ -179,7 +181,7 @@ export function LogsPage() {
   useEffect(() => {
     let cancelled = false;
     setState((prev) => ({ status: 'loading', data: prev.data }));
-    fetchLogs(toApiFilters(filters, sortBy, sortDir, page))
+    fetchLogs(toApiFilters(filters, sortBy, sortDir, page, pageSize))
       .then((data) => {
         if (!cancelled) setState({ status: 'ready', data });
       })
@@ -195,7 +197,7 @@ export function LogsPage() {
     return () => {
       cancelled = true;
     };
-  }, [filters, sortBy, sortDir, page, refreshNonce]);
+  }, [filters, sortBy, sortDir, page, pageSize, refreshNonce]);
 
   const { payload: streamPayload } = useLogStream({ intervalMs: 5000 });
 
@@ -423,6 +425,11 @@ export function LogsPage() {
           filtersDefaultOpen={false}
           sortBy={sortState}
           onSortChange={onSortChange}
+          pageSize={pageSize}
+          onPageSizeChange={(size) => {
+            setPageSize(size)
+            setSearchParams(writeFiltersToUrl(filters, sortBy, sortDir, 1))
+          }}
           onRowClick={(l) => navigate(`/logs/${l.id}`)}
           emptyMessage={t('table.emptyText')}
         />
