@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { DatePicker } from '@maya/shared-ui-react';
 import type { ApplicationRef } from '../../types/logs';
 import { Button } from '../ui';
 import { ApplicationSelect, SeverityFilterCheckboxes } from '../filters';
@@ -81,20 +82,20 @@ export function ArchivedLogsFilters({
         <div className="flex flex-wrap items-end gap-2">
           <div className="flex-1 min-w-[110px]">
             <label className={labelClass}>{tCommon('filters.dateFrom')}</label>
-            <input
-              type="date"
-              value={value.dateFrom ?? ''}
-              onChange={(e) => onChange({ dateFrom: e.target.value || null })}
-              className={dateInputClass}
+            <DatePicker
+              value={value.dateFrom ?? null}
+              onChange={(d) => onChange({ dateFrom: d })}
+              placeholder={tCommon('filters.dateFrom')}
+              ariaLabel={tCommon('filters.dateFrom')}
             />
           </div>
           <div className="flex-1 min-w-[110px]">
             <label className={labelClass}>{tCommon('filters.dateTo')}</label>
-            <input
-              type="date"
-              value={value.dateTo ?? ''}
-              onChange={(e) => onChange({ dateTo: e.target.value || null })}
-              className={dateInputClass}
+            <DatePicker
+              value={value.dateTo ?? null}
+              onChange={(d) => onChange({ dateTo: d })}
+              placeholder={tCommon('filters.dateTo')}
+              ariaLabel={tCommon('filters.dateTo')}
             />
           </div>
           <div className="flex-1 min-w-[150px]">
