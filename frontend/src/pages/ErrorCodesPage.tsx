@@ -1,19 +1,24 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Alert,
-  ColumnVisibilityMenu,
   DataTable,
   PageTitle,
   Pagination,
+  useTablePreferences,
   type ColumnDef,
 } from '@maya/shared-ui-react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { fetchApplications } from '../api/applications';
 import { fetchErrorCodes, type ErrorCodesFilters as ApiErrorCodesFilters } from '../api/errorCodes';
-import { ErrorCodesFilters, type ErrorCodesFiltersState } from '../components/error-codes';
+import type { ErrorCodesFiltersState } from '../components/error-codes';
 import type { PaginatedResponse } from '../types/api';
 import type { ApplicationRef, ErrorCode } from '../types/logs';
+
+const inputClass =
+  'w-full bg-ui-card dark:bg-ui-dark-card border border-ui-border dark:border-ui-dark-border rounded-md text-text-primary dark:text-text-dark-primary px-3 py-2 text-sm outline-none focus:border-odoo-purple dark:focus:border-odoo-dark-purple transition-colors';
+const fieldLabelClass =
+  'text-text-secondary dark:text-text-dark-secondary text-xs font-medium uppercase tracking-wide';
 
 type ListState =
   | { status: 'loading'; data: PaginatedResponse<ErrorCode> | null }
@@ -57,6 +62,13 @@ function toApiFilters(filters: ErrorCodesFiltersState, page: number): ApiErrorCo
   };
 }
 
+function countActiveFilters(f: ErrorCodesFiltersState): number {
+  let n = 0;
+  if (f.search.trim() !== '') n += 1;
+  if (f.applicationId != null) n += 1;
+  return n;
+}
+
 export function ErrorCodesPage() {
   const { t } = useTranslation('errorCodes');
   const { t: tCommon } = useTranslation('common');
@@ -64,7 +76,9 @@ export function ErrorCodesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [applications, setApplications] = useState<ApplicationRef[]>([]);
   const [state, setState] = useState<ListState>({ status: 'loading', data: null });
-  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+  const { hiddenIds, toggleHidden } = useTablePreferences({
+    storageKey: 'maya:logs:error-codes-table',
+  });
 
   const { filters, page } = useMemo(() => parseFiltersFromUrl(searchParams), [searchParams]);
 
@@ -112,7 +126,11 @@ export function ErrorCodesPage() {
   );
 
   const resetFilters = useCallback(() => {
-    setSearchParams(new URLSearchParams());
+    const emptyFilters: ErrorCodesFiltersState = {
+      search: '',
+      applicationId: null,
+    };
+    setSearchParams(writeFiltersToUrl(emptyFilters, 1));
   }, [setSearchParams]);
 
   const changePage = useCallback(
@@ -121,15 +139,6 @@ export function ErrorCodesPage() {
     },
     [filters, setSearchParams],
   );
-
-  const toggleHidden = useCallback((id: string) => {
-    setHiddenIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
 
   const columns: ColumnDef<ErrorCode>[] = useMemo(
     () => [
@@ -170,6 +179,46 @@ export function ErrorCodesPage() {
   const startIndex = meta && meta.from != null ? meta.from : 0;
   const endIndex = meta && meta.to != null ? meta.to : 0;
   const total = meta?.total ?? 0;
+  const activeCount = countActiveFilters(filters);
+
+  const filtersPanel = (
+    <>
+      <div className="flex flex-col gap-1.5 min-w-0">
+        <label className={fieldLabelClass} htmlFor="error-codes-filter-search">
+          {tCommon('filters.searchLabel')}
+        </label>
+        <input
+          id="error-codes-filter-search"
+          type="search"
+          value={filters.search}
+          placeholder={t('filters.searchPlaceholder')}
+          onChange={(e) => updateFilters({ search: e.target.value })}
+          className={inputClass}
+        />
+      </div>
+      <div className="flex flex-col gap-1.5 min-w-0">
+        <label className={fieldLabelClass} htmlFor="error-codes-filter-application">
+          {tCommon('filters.applicationLabel')}
+        </label>
+        <select
+          id="error-codes-filter-application"
+          value={filters.applicationId ?? ''}
+          onChange={(e) => {
+            const v = e.target.value;
+            updateFilters({ applicationId: v === '' ? null : Number(v) });
+          }}
+          className={inputClass}
+        >
+          <option value="">{t('filters.applicationAll')}</option>
+          {applications.map((app) => (
+            <option key={app.id} value={app.id}>
+              {app.name}
+            </option>
+          ))}
+        </select>
+      </div>
+    </>
+  );
 
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
@@ -184,21 +233,6 @@ export function ErrorCodesPage() {
           </Link>
         }
       />
-
-      <ErrorCodesFilters
-        value={filters}
-        applications={applications}
-        onChange={updateFilters}
-        onReset={resetFilters}
-      />
-
-      <div className="mt-3 flex items-center justify-end">
-        <ColumnVisibilityMenu
-          columns={columns}
-          hiddenColumnIds={hiddenIds}
-          onToggle={toggleHidden}
-        />
-      </div>
 
       {state.status === 'error' && (
         <Alert tone="danger" className="mt-4">No se pudieron cargar los códigos de error: {state.error}
@@ -215,10 +249,18 @@ export function ErrorCodesPage() {
         <>
           <div className="mt-3">
             <DataTable
+              title="Códigos de error"
               columns={columns}
               rows={errorCodes}
               rowKey={(ec) => ec.id}
+              loading={state.status === 'loading'}
               hiddenColumnIds={hiddenIds}
+              onToggleHiddenColumn={toggleHidden}
+              filtersStorageKey="maya:logs:error-codes-table"
+              filtersPanel={filtersPanel}
+              filtersActiveCount={activeCount}
+              onClearFilters={resetFilters}
+              filtersDefaultOpen={false}
               onRowClick={(ec) => navigate(`/error-codes/${ec.id}`)}
               emptyMessage={t('emptyFiltered')}
             />

@@ -2,10 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Alert,
-  ColumnVisibilityMenu,
   DataTable,
+  DatePicker,
+  MultiSelect,
   PageTitle,
   Pagination,
+  useTablePreferences,
   type ColumnDef,
   type SortState,
 } from '@maya/shared-ui-react';
@@ -13,8 +15,8 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { fetchApplications } from '../api/applications';
 import { fetchLogs, type LogsFilters as ApiLogsFilters, type LogsSortBy } from '../api/logs';
-import { LogsFilters, type LogsFiltersState } from '../components/logs';
-import { SeverityBadge } from '../components/severity';
+import type { LogsFiltersState } from '../components/logs';
+import { SeverityBadge, severityLabel } from '../components/severity';
 import { useLogStream } from '../hooks';
 import type { PaginatedResponse, SortDir } from '../types/api';
 import type { ApplicationRef, Log } from '../types/logs';
@@ -25,6 +27,11 @@ export type LogsSortKey = 'application' | 'severity' | 'created_at';
 
 const VALID_SORT_COLUMNS: readonly LogsSortKey[] = ['application', 'severity', 'created_at'];
 const VALID_SORT_DIRS: readonly SortDir[] = ['asc', 'desc'];
+
+const inputClass =
+  'w-full bg-ui-card dark:bg-ui-dark-card border border-ui-border dark:border-ui-dark-border rounded-md text-text-primary dark:text-text-dark-primary px-3 py-2 text-sm outline-none focus:border-odoo-purple dark:focus:border-odoo-dark-purple transition-colors';
+const fieldLabelClass =
+  'text-text-secondary dark:text-text-dark-secondary text-xs font-medium uppercase tracking-wide';
 
 type ListState =
   | { status: 'loading'; data: PaginatedResponse<Log> | null }
@@ -126,6 +133,17 @@ function toApiFilters(
   };
 }
 
+function countActiveFilters(f: LogsFiltersState): number {
+  let n = 0;
+  if (f.search.trim() !== '') n += 1;
+  if (f.severity.length > 0) n += 1;
+  if (f.applicationId != null) n += 1;
+  if (f.dateFrom) n += 1;
+  if (f.dateTo) n += 1;
+  if (f.resolved !== 'all') n += 1;
+  return n;
+}
+
 export function LogsPage() {
   const { t } = useTranslation('logs');
   const { t: tCommon } = useTranslation('common');
@@ -134,7 +152,9 @@ export function LogsPage() {
   const [applications, setApplications] = useState<ApplicationRef[]>([]);
   const [state, setState] = useState<ListState>({ status: 'loading', data: null });
   const [refreshNonce, setRefreshNonce] = useState(0);
-  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+  const { hiddenIds, toggleHidden } = useTablePreferences({
+    storageKey: 'maya:logs:logs-table',
+  });
   const lastStreamIdRef = useRef<number | null>(null);
 
   const { filters, sortBy, sortDir, page } = useMemo(
@@ -201,8 +221,16 @@ export function LogsPage() {
   );
 
   const resetFilters = useCallback(() => {
-    setSearchParams(new URLSearchParams());
-  }, [setSearchParams]);
+    const emptyFilters: LogsFiltersState = {
+      search: '',
+      severity: [],
+      applicationId: null,
+      dateFrom: null,
+      dateTo: null,
+      resolved: 'all',
+    };
+    setSearchParams(writeFiltersToUrl(emptyFilters, sortBy, sortDir, 1));
+  }, [setSearchParams, sortBy, sortDir]);
 
   const changePage = useCallback(
     (nextPage: number) => {
@@ -219,15 +247,6 @@ export function LogsPage() {
     },
     [filters, setSearchParams],
   );
-
-  const toggleHidden = useCallback((id: string) => {
-    setHiddenIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
 
   const sortState: SortState | null = useMemo(
     () => (sortBy && sortDir ? { columnId: sortBy, direction: sortDir } : null),
@@ -291,65 +310,135 @@ export function LogsPage() {
   const startIndex = meta && meta.from != null ? meta.from : 0;
   const endIndex = meta && meta.to != null ? meta.to : 0;
   const total = meta?.total ?? 0;
+  const activeCount = countActiveFilters(filters);
+
+  const filtersPanel = (
+    <>
+      <div className="flex flex-col gap-1.5 min-w-0">
+        <label className={fieldLabelClass} htmlFor="logs-filter-search">
+          {tCommon('filters.searchLabel')}
+        </label>
+        <input
+          id="logs-filter-search"
+          type="search"
+          value={filters.search}
+          placeholder={t('filters.searchPlaceholder')}
+          onChange={(e) => updateFilters({ search: e.target.value })}
+          className={inputClass}
+        />
+      </div>
+      <div className="flex flex-col gap-1.5 min-w-0">
+        <label className={fieldLabelClass}>{t('filters.dateFrom')}</label>
+        <DatePicker
+          value={filters.dateFrom}
+          onChange={(d) => updateFilters({ dateFrom: d })}
+          placeholder={t('filters.dateFrom')}
+          ariaLabel={t('filters.dateFrom')}
+          max={filters.dateTo ?? undefined}
+        />
+      </div>
+      <div className="flex flex-col gap-1.5 min-w-0">
+        <label className={fieldLabelClass}>{t('filters.dateTo')}</label>
+        <DatePicker
+          value={filters.dateTo}
+          onChange={(d) => updateFilters({ dateTo: d })}
+          placeholder={t('filters.dateTo')}
+          ariaLabel={t('filters.dateTo')}
+          min={filters.dateFrom ?? undefined}
+        />
+      </div>
+      <div className="flex flex-col gap-1.5 min-w-0">
+        <label className={fieldLabelClass} htmlFor="logs-filter-application">
+          {tCommon('filters.applicationLabel')}
+        </label>
+        <select
+          id="logs-filter-application"
+          value={filters.applicationId ?? ''}
+          onChange={(e) => {
+            const v = e.target.value;
+            updateFilters({ applicationId: v === '' ? null : Number(v) });
+          }}
+          className={inputClass}
+        >
+          <option value="">{t('filters.applicationAll')}</option>
+          {applications.map((app) => (
+            <option key={app.id} value={app.id}>
+              {app.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="flex flex-col gap-1.5 min-w-0">
+        <label className={fieldLabelClass} htmlFor="logs-filter-resolved">
+          {t('filters.resolved')}
+        </label>
+        <select
+          id="logs-filter-resolved"
+          value={filters.resolved}
+          onChange={(e) =>
+            updateFilters({ resolved: e.target.value as LogsFiltersState['resolved'] })
+          }
+          className={inputClass}
+        >
+          <option value="all">{tCommon('resolved.all')}</option>
+          <option value="unresolved">{tCommon('resolved.unresolved')}</option>
+          <option value="only">{tCommon('resolved.only')}</option>
+        </select>
+      </div>
+      <div className="flex flex-col gap-1.5 min-w-0">
+        <label className={fieldLabelClass}>{tCommon('filters.severityLabel')}</label>
+        <MultiSelect
+          options={LOG_SEVERITY_KEYS.map((key) => ({ value: key, label: severityLabel(key) }))}
+          value={filters.severity}
+          onChange={(next) => updateFilters({ severity: next })}
+          placeholder={t('filters.severityAll', { defaultValue: 'Todas' })}
+          ariaLabel={tCommon('filters.severityLabel')}
+        />
+      </div>
+    </>
+  );
 
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
       <PageTitle title={t('title')} />
-
-      <LogsFilters
-        value={filters}
-        applications={applications}
-        onChange={updateFilters}
-        onReset={resetFilters}
-      />
-
-      <div className="mt-3 flex items-center justify-end">
-        <ColumnVisibilityMenu
-          columns={columns}
-          hiddenColumnIds={hiddenIds}
-          onToggle={toggleHidden}
-        />
-      </div>
 
       {state.status === 'error' && (
         <Alert tone="danger" className="mt-4">{t('loadError', { message: state.error })}
         </Alert>
       )}
 
-      {state.status === 'loading' && !pagination && (
-        <div className="mt-4 rounded-lg border border-ui-border bg-ui-card p-6 text-center text-sm text-text-muted dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-muted">
-          {t('loading')}
+      <div className="mt-3">
+        <DataTable
+          title={t('table.activeTitle', { defaultValue: 'Logs activos' })}
+          columns={columns}
+          rows={logs}
+          rowKey={(l) => l.id}
+          loading={state.status === 'loading'}
+          hiddenColumnIds={hiddenIds}
+          onToggleHiddenColumn={toggleHidden}
+          filtersStorageKey="maya:logs:logs-table"
+          filtersPanel={filtersPanel}
+          filtersActiveCount={activeCount}
+          onClearFilters={resetFilters}
+          filtersDefaultOpen={false}
+          sortBy={sortState}
+          onSortChange={onSortChange}
+          onRowClick={(l) => navigate(`/logs/${l.id}`)}
+          emptyMessage={t('table.emptyText')}
+        />
+      </div>
+      {meta && (
+        <div className="mt-4">
+          <Pagination
+            currentPage={meta.current_page}
+            totalPages={meta.last_page}
+            onChange={changePage}
+            ariaLabel={tCommon('pagination.ariaLabel')}
+            prevLabel={tCommon('pagination.previous')}
+            nextLabel={tCommon('pagination.next')}
+            info={tCommon('pagination.rangeOf', { from: startIndex, to: endIndex, total })}
+          />
         </div>
-      )}
-
-      {pagination && (
-        <>
-          <div className="mt-3">
-            <DataTable
-              columns={columns}
-              rows={logs}
-              rowKey={(l) => l.id}
-              hiddenColumnIds={hiddenIds}
-              sortBy={sortState}
-              onSortChange={onSortChange}
-              onRowClick={(l) => navigate(`/logs/${l.id}`)}
-              emptyMessage={t('table.emptyText')}
-            />
-          </div>
-          {meta && (
-            <div className="mt-4">
-              <Pagination
-                currentPage={meta.current_page}
-                totalPages={meta.last_page}
-                onChange={changePage}
-                ariaLabel={tCommon('pagination.ariaLabel')}
-                prevLabel={tCommon('pagination.previous')}
-                nextLabel={tCommon('pagination.next')}
-                info={tCommon('pagination.rangeOf', { from: startIndex, to: endIndex, total })}
-              />
-            </div>
-          )}
-        </>
       )}
     </div>
   );
