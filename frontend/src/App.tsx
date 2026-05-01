@@ -4,7 +4,6 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from '@maya/shared-layout-react';
 import { NotificationsBell, SidebarFavorites } from '@maya/shared-sidebar-react';
 import { SkeletonPage } from '@maya/shared-ui-react';
-import './App.css';
 import { useOidcSession } from '@maya/shared-auth-react';
 import { useNavItems } from './components/layout';
 import { profileDisplayInitials, useUserProfile } from './features/user-profile';
@@ -102,6 +101,7 @@ function AppWithLayout() {
       navItems={navItems}
       brandName="Maya Logs"
       brandVersion="v1.0"
+      brandLogoUrl="/favicon.png"
       userName={userName}
       userEmail={userEmail}
       userInitials={userInitials}
