@@ -20,7 +20,6 @@
     "@maya/shared-i18n-react": "file:../../maya_infra/packages/maya-shared-i18n-react",
     "@maya/shared-layout-react": "file:../../maya_infra/packages/maya-shared-layout-react",
     "@maya/shared-sidebar-react": "file:../../maya_infra/packages/maya-shared-sidebar-react",
-    "@maya/shared-data-react": "file:../../maya_infra/packages/maya-shared-data-react",
     "@maya/shared-ui-react": "file:../../maya_infra/packages/maya-shared-ui-react",
     "@tailwindcss/vite": "^4.2.2",
     "axios": "^1.15.0",

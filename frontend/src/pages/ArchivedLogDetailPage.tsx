@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Button, PageTitle } from '@maya/shared-ui-react';
+import {
+  Alert,
+  Button,
+  ConfirmDialog,
+  FieldLabel,
+  PageTitle,
+  TextArea,
+  TextInput,
+} from '@maya/shared-ui-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
@@ -9,7 +17,6 @@ import {
 } from '../api/archivedLogs';
 import { ArchivedLogDetailView } from '../components/archived-logs';
 import { CommentThread } from '../components/comments';
-import { ConfirmDialog } from '../components/ui';
 import type { ArchivedLog } from '../types/logs';
 
 type State =
@@ -185,37 +192,31 @@ export function ArchivedLogDetailPage() {
             {editing ? (
               <div className="mt-3 space-y-4">
                 <div>
-                  <label
-                    htmlFor="archived-log-description"
-                    className="block text-sm font-medium text-text-secondary dark:text-text-dark-secondary"
-                  >
+                  <FieldLabel htmlFor="archived-log-description">
                     {t('detail.fields.description')}
-                  </label>
-                  <textarea
+                  </FieldLabel>
+                  <TextArea
                     id="archived-log-description"
+                    fieldSize="comfortable"
                     value={form.description}
                     onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                     rows={4}
                     disabled={saving}
-                    className="mt-1 w-full rounded-lg border border-ui-border bg-ui-body px-3 py-2.5 text-sm text-text-primary shadow-inner focus:border-odoo-purple focus:outline-none dark:border-ui-dark-border dark:bg-ui-dark-bg dark:text-text-dark-primary dark:focus:border-odoo-dark-purple"
                   />
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="archived-log-url-tutorial"
-                    className="block text-sm font-medium text-text-secondary dark:text-text-dark-secondary"
-                  >
+                  <FieldLabel htmlFor="archived-log-url-tutorial">
                     {t('detail.fields.urlTutorial')}
-                  </label>
-                  <input
+                  </FieldLabel>
+                  <TextInput
                     id="archived-log-url-tutorial"
                     type="url"
+                    fieldSize="comfortable"
                     value={form.url_tutorial}
                     onChange={(e) => setForm((f) => ({ ...f, url_tutorial: e.target.value }))}
                     disabled={saving}
                     placeholder="https://…"
-                    className="mt-1 w-full rounded-lg border border-ui-border bg-ui-body px-3 py-2.5 text-sm text-text-primary shadow-inner focus:border-odoo-purple focus:outline-none dark:border-ui-dark-border dark:bg-ui-dark-bg dark:text-text-dark-primary dark:focus:border-odoo-dark-purple"
                   />
                 </div>
 

@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Button, PageTitle } from '@maya/shared-ui-react';
+import { Alert, Button, ConfirmDialog, PageTitle } from '@maya/shared-ui-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { archiveLog, fetchLog, resolveLog, type LogDetailResponse } from '../api/logs';
 import { LogDetailView } from '../components/logs';
-import { ConfirmDialog } from '../components/ui';
 
 type State =
   | { status: 'loading'; data: LogDetailResponse | null }

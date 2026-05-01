@@ -9,7 +9,7 @@ import {
   type CommentableKind,
 } from '../../api/comments';
 import type { Comment } from '../../types/logs';
-import { ConfirmDialog } from '../ui';
+import { ConfirmDialog } from '@maya/shared-ui-react';
 
 type CommentThreadProps = {
   commentableType: CommentableKind;

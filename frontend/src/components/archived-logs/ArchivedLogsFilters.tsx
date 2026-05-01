@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DatePicker } from '@maya/shared-ui-react';
 import type { ApplicationRef } from '../../types/logs';
-import { Button } from '../ui';
+import { Button } from '@maya/shared-ui-react';
 import { ApplicationSelect, SeverityFilterCheckboxes } from '../filters';
 
 const ChevronIcon = ({ open }: { open: boolean }) => (

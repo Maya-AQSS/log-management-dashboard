@@ -10,7 +10,7 @@ import {
 } from '../api/errorCodes';
 import { CommentThread } from '../components/comments';
 import { ErrorCodeForm, type ErrorCodeFormState } from '../components/error-codes';
-import { ConfirmDialog } from '../components/ui';
+import { ConfirmDialog } from '@maya/shared-ui-react';
 import type { ApplicationRef, ErrorCode } from '../types/logs';
 
 type State =

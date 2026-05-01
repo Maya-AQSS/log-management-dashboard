@@ -45,7 +45,7 @@ export function ApplicationTile({
       </span>
 
       <span className="flex shrink-0 items-center pr-2 sm:pr-3">
-        <span className="inline-flex min-w-[2.75rem] items-center justify-center rounded-full bg-gradient-to-b from-odoo-warning to-amber-600 px-3 py-1.5 text-lg font-bold tabular-nums text-text-primary shadow-sm ring-1 ring-amber-900/10 dark:from-amber-500 dark:to-amber-600 dark:text-text-primary">
+        <span className="inline-flex min-w-[2.75rem] items-center justify-center rounded-full bg-gradient-to-b from-warning to-warning-dark px-3 py-1.5 text-lg font-bold tabular-nums text-text-primary shadow-sm ring-1 ring-warning-dark/20 dark:from-warning dark:to-warning-dark dark:text-text-primary">
           {total}
         </span>
       </span>
