@@ -62,15 +62,9 @@ class ConsumeLogs extends Command
             return null;
         }
 
-        // Auto-registra apps nuevas para que los logs no se pierdan. Si quieres
-        // un control estricto de que solo las apps conocidas puedan emitir,
-        // reemplaza esto por ->first()?->id con early return.
-        $app = Application::firstOrCreate(
-            ['name' => $name],
-            ['description' => 'Auto-registered from logs.ingest', 'created_at' => now()],
-        );
-
-        return $app->id;
+        // applications es ahora una vista sobre FDW → maya_auth.applications (read-only).
+        // Solo se aceptan logs de apps registradas en maya_auth (por slug).
+        return Application::where('name', $name)->value('id');
     }
 
     private function resolveErrorCodeId(?string $code, int $applicationId, ?string $file, ?int $line): ?int

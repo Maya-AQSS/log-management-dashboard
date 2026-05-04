@@ -12,7 +12,8 @@ class Application extends Model
 
     public const UPDATED_AT = null;
 
-    protected $fillable = ['name', 'description'];
+    // applications es una vista sobre FDW → maya_auth — solo lectura
+    protected $guarded = ['*'];
 
     protected function casts(): array
     {
