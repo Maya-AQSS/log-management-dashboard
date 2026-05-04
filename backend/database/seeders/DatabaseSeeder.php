@@ -11,6 +11,7 @@ class DatabaseSeeder extends Seeder
 
     /**
      * Seed the application's database.
+     * UserSeeder omitido: 'users' es una vista FDW de solo lectura sobre v_app_users (Odoo).
      */
     public function run(): void
     {
