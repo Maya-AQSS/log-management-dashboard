@@ -56,15 +56,15 @@ class ConsumeLogs extends Command
         return self::SUCCESS;
     }
 
-    private function resolveApplicationId(?string $name): ?int
+    private function resolveApplicationId(?string $slug): ?int
     {
-        if ($name === null || $name === '') {
+        if ($slug === null || $slug === '') {
             return null;
         }
 
-        // applications es ahora una vista sobre FDW → maya_auth.applications (read-only).
+        // applications es una vista sobre FDW → maya_auth.applications (read-only).
         // Solo se aceptan logs de apps registradas en maya_auth (por slug).
-        return Application::where('name', $name)->value('id');
+        return Application::where('slug', $slug)->value('id');
     }
 
     private function resolveErrorCodeId(?string $code, int $applicationId, ?string $file, ?int $line): ?int

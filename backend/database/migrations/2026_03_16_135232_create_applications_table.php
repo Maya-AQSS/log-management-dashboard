@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\DB;
  * El servidor FDW (maya_auth_server) y el user mapping se crean en init-databases.sh
  * como superuser (maya), porque log_mgmt_user no es superuser.
  *
- * La vista 'applications' expone 'slug' como 'name' para que el worker
- * ConsumeLogs identifique apps por su slug técnico.
+ * La vista 'applications' expone tanto 'name' (nombre legible) como 'slug' (técnico).
+ * ConsumeLogs identifica apps por slug; el frontend puede mostrar el name real.
  */
 return new class extends Migration
 {
@@ -41,9 +41,8 @@ return new class extends Migration
 
         DB::statement("
             CREATE VIEW " . self::VIEW . " AS
-            SELECT id, slug AS name, description, created_at
+            SELECT id, name, slug, description, is_active, created_at
             FROM " . self::FDW_TBL . "
-            WHERE is_active = true
         ");
 
         DB::statement("GRANT SELECT ON " . self::FDW_TBL . " TO \"{$dbUser}\"");
