@@ -12,11 +12,11 @@ class DatabaseSeeder extends Seeder
     /**
      * Seed the application's database.
      * UserSeeder omitido: 'users' es una vista FDW de solo lectura sobre v_app_users (Odoo).
+     * ApplicationSeeder omitido: 'applications' es una vista FDW de solo lectura sobre maya_auth.applications.
      */
     public function run(): void
     {
         $this->call([
-            ApplicationSeeder::class,
             ErrorCodeSeeder::class,
             LogSeeder::class,
             ArchivedLogSeeder::class,
