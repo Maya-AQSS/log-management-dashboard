@@ -17,10 +17,15 @@ if [ ! -f "vendor/autoload.php" ] || [ "composer.json" -nt "vendor/autoload.php"
     echo "[entrypoint] Installing composer dependencies..."
     # Sync only maya/* path packages in lock (handles stale lock when new shared package is added)
     composer update "maya/*" --no-install --no-interaction --ignore-platform-reqs --no-scripts 2>/dev/null || true
-    composer install --optimize-autoloader --no-interaction
+    composer install --optimize-autoloader --no-interaction --no-scripts
 else
     echo "[entrypoint] Composer deps up to date"
 fi
+
+# Fix laravel-queue-rabbitmq Consumer::$currentJob visibility (Laravel 13 compat)
+# Worker::$currentJob is public in Laravel 13; the package declares it protected → FatalError.
+sed -i 's/protected \$currentJob;/public \$currentJob;/' \
+  vendor/vladimir-yuldashev/laravel-queue-rabbitmq/src/Consumer.php 2>/dev/null || true
 
 # Storage y permisos
 mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs
