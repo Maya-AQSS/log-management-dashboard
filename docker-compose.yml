@@ -121,8 +121,10 @@ services:
         done
         sed -i 's/protected \$currentJob;/public \$currentJob;/' \
           vendor/vladimir-yuldashev/laravel-queue-rabbitmq/src/Consumer.php 2>/dev/null || true
-        echo "[worker] migrations ready — starting logs:consume"
-        exec php artisan logs:consume
+        echo "[worker] migrations ready — starting logs:consume + queue:work"
+        php artisan logs:consume &
+        php artisan queue:work --connection=database --tries=5 --backoff=30 --queue=default &
+        wait
     command: []
     volumes:
       - ./backend:/var/www/html
