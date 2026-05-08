@@ -58,7 +58,6 @@ services:
     volumes:
       - ./backend:/var/www/html
       - ../maya_infra/packages:/var/maya_infra/packages
-      - /var/www/html/vendor
       - /var/www/html/node_modules
     ports:
       - "${BACKEND_PORT:-8002}:8000"
@@ -104,18 +103,16 @@ services:
       LOG_CHANNEL: stack
       LOG_STACK: "daily"
       LOG_LEVEL: info
-    # Override del ENTRYPOINT del Dockerfile (que hace exec php artisan serve
-    # hardcoded e ignora CMD). Cada servicio tiene su propio volumen anonymous
-    # para vendor/, asi que el worker instala sus deps tambien (rapido en el
-    # segundo run porque composer cache de paquetes existe en la imagen).
+    # Override del ENTRYPOINT del Dockerfile. Vendor es bind-mount compartido
+    # con el backend; el worker espera a que el backend instale las deps.
     entrypoint:
       - /bin/sh
       - -c
       - |
         cd /var/www/html
         if [ ! -f vendor/autoload.php ]; then
-          echo "[worker] vendor missing, running composer install..."
-          composer install --optimize-autoloader --no-interaction --no-ansi
+          echo "[worker] waiting for vendor (backend composer install)..."
+          while [ ! -f vendor/autoload.php ]; do sleep 3; done
         fi
         echo "[worker] vendor ready — waiting for backend migrations (logs table)..."
         until php -r "exit(is_file('vendor/autoload.php') ? 0 : 1);" 2>/dev/null && \
@@ -128,7 +125,6 @@ services:
     volumes:
       - ./backend:/var/www/html
       - ../maya_infra/packages:/var/maya_infra/packages
-      - /var/www/html/vendor
       - /var/www/html/node_modules
     networks:
       - maya_network
