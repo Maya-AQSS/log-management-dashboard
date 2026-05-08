@@ -119,6 +119,8 @@ services:
               php artisan migrate:status --no-interaction 2>/dev/null | grep -q "create_logs_table"; do
           sleep 3
         done
+        sed -i 's/protected \$currentJob;/public \$currentJob;/' \
+          vendor/vladimir-yuldashev/laravel-queue-rabbitmq/src/Consumer.php 2>/dev/null || true
         echo "[worker] migrations ready — starting logs:consume"
         exec php artisan logs:consume
     command: []
