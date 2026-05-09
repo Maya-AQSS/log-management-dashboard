@@ -1,7 +1,9 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Usuarios: FDW → Odoo.v_app_users.
@@ -9,6 +11,9 @@ use Illuminate\Support\Facades\DB;
  * El servidor FDW (odoo_server) y el user mapping se crean en init-databases.sh
  * como superuser (maya), porque log_mgmt_user no es superuser.
  * Esta migración solo crea la foreign table y la vista.
+ *
+ * En entorno testing (SQLite) se crea una tabla regular con el mismo schema
+ * para que los tests puedan ejecutarse sin FDW configurado.
  */
 return new class extends Migration
 {
@@ -18,6 +23,22 @@ return new class extends Migration
 
     public function up(): void
     {
+        if (app()->environment('testing')) {
+            Schema::create(self::VIEW, function (Blueprint $table) {
+                $table->string('id')->primary();
+                $table->string('name')->nullable();
+                $table->string('email');
+                $table->string('first_name')->nullable();
+                $table->string('last_name')->nullable();
+                $table->string('username')->nullable();
+                $table->string('employee_id')->nullable();
+                $table->string('dni')->nullable();
+                $table->string('employee_type')->nullable();
+                $table->boolean('is_active')->default(true);
+            });
+            return;
+        }
+
         $dbUser = config('database.connections.pgsql.username', 'log_mgmt_user');
 
         // Idempotente: drop primero para que migrate:fresh no falle
@@ -62,6 +83,11 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (app()->environment('testing')) {
+            Schema::dropIfExists(self::VIEW);
+            return;
+        }
+
         DB::statement('DROP VIEW IF EXISTS ' . self::VIEW . ' CASCADE');
         DB::statement('DROP FOREIGN TABLE IF EXISTS ' . self::FDW_TBL . ' CASCADE');
     }
