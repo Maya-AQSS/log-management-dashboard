@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { fetchDashboard } from '../../../api/dashboard';
 import type { DashboardPayload } from '../../../types/dashboard';
 import { ApplicationTile } from '../../../components/dashboard';
-import { useLogStream } from '../../../hooks';
+
+const REFRESH_INTERVAL_MS = 30_000;
 
 function hrefForApplication(id: number): string {
   return `/logs?application_id=${id}`;
@@ -15,24 +16,17 @@ function ApplicationTotalsWidget() {
   const [data, setData] = useState<DashboardPayload | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
 
-  const { payload: streamPayload } = useLogStream({ intervalMs: 5000 });
-
   useEffect(() => {
     let cancelled = false;
-    fetchDashboard()
-      .then((d) => {
-        if (!cancelled) {
-          setData(d);
-          setStatus('ready');
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setStatus('error');
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [streamPayload]);
+    function load() {
+      fetchDashboard()
+        .then((d) => { if (!cancelled) { setData(d); setStatus('ready'); } })
+        .catch(() => { if (!cancelled) setStatus('error'); });
+    }
+    load();
+    const id = setInterval(load, REFRESH_INTERVAL_MS);
+    return () => { cancelled = true; clearInterval(id); };
+  }, []);
 
   if (status === 'loading') {
     return (

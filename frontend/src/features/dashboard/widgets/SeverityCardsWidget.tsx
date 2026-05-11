@@ -4,12 +4,13 @@ import { fetchDashboard } from '../../../api/dashboard';
 import type { DashboardPayload } from '../../../types/dashboard';
 import { SeverityCard } from '../../../components/dashboard';
 import { severityLabel } from '../../../components/severity';
-import { useLogStream } from '../../../hooks';
 
 function hrefForSeverity(key: string): string {
   if (key === 'all') return '/logs';
   return `/logs?severity=${encodeURIComponent(key)}`;
 }
+
+const REFRESH_INTERVAL_MS = 30_000;
 
 /** Severity grid widget — preserves the legacy SeverityCard set. */
 function SeverityCardsWidget() {
@@ -17,24 +18,17 @@ function SeverityCardsWidget() {
   const [data, setData] = useState<DashboardPayload | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
 
-  const { payload: streamPayload } = useLogStream({ intervalMs: 5000 });
-
   useEffect(() => {
     let cancelled = false;
-    fetchDashboard()
-      .then((d) => {
-        if (!cancelled) {
-          setData(d);
-          setStatus('ready');
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setStatus('error');
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [streamPayload]);
+    function load() {
+      fetchDashboard()
+        .then((d) => { if (!cancelled) { setData(d); setStatus('ready'); } })
+        .catch(() => { if (!cancelled) setStatus('error'); });
+    }
+    load();
+    const id = setInterval(load, REFRESH_INTERVAL_MS);
+    return () => { cancelled = true; clearInterval(id); };
+  }, []);
 
   if (status === 'loading') {
     return (
