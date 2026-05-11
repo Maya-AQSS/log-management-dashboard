@@ -14,8 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
 
         $middleware->alias([
-            'jwt'  => \Maya\Auth\Middleware\JwtMiddleware::class,
-            'role' => \App\Http\Middleware\RequireRole::class,
+            'jwt'        => \Maya\Auth\Middleware\JwtMiddleware::class,
+            'permission' => \App\Http\Middleware\RequirePermission::class,
+            'role'       => \App\Http\Middleware\RequireRole::class,
         ]);
         $middleware->api(prepend: [\Illuminate\Http\Middleware\HandleCors::class]);
     })
