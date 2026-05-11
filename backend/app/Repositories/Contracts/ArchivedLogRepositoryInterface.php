@@ -28,5 +28,8 @@ interface ArchivedLogRepositoryInterface
 
     public function delete(ArchivedLog $archivedLog): void;
 
-    public function archiveFromLogId(int $logId, int $archivedById): ArchivedLog;
+    /**
+     * @param  string  $archivedByUserId  Subject JWT (UUID Keycloak) → `archived_logs.archived_by_id`.
+     */
+    public function archiveFromLogId(int $logId, string $archivedByUserId): ArchivedLog;
 }

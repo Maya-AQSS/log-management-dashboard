@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LogResource;
-use App\Models\User;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use App\Services\Contracts\LogServiceInterface;
 use Illuminate\Http\JsonResponse;
@@ -79,22 +78,18 @@ class LogController extends Controller
         try {
             /** @var array<string, mixed>|null $jwtUser */
             $jwtUser = $request->attributes->get('jwt_user');
-            $externalId = is_array($jwtUser) ? ($jwtUser['id'] ?? null) : null;
+            $jwtSubject = is_array($jwtUser) ? ($jwtUser['id'] ?? null) : null;
 
-            $user = is_string($externalId) && $externalId !== ''
-                ? User::where('external_id', $externalId)->first()
-                : null;
-
-            if ($user === null) {
+            if (! is_string($jwtSubject) || $jwtSubject === '') {
                 return response()->json([
                     'error' => [
-                        'code' => 'user_not_found',
+                        'code' => 'actor_missing',
                         'message' => __('logs.not_authorized'),
                     ],
                 ], 403);
             }
 
-            $archivedLog = $this->archivedLogService->archiveFromLogId($id, $user->id);
+            $archivedLog = $this->archivedLogService->archiveFromLogId($id, $jwtSubject);
 
             return response()->json([
                 'data' => ['archived_log_id' => $archivedLog->id],
