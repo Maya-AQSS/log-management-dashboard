@@ -1,34 +1,22 @@
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { fetchDashboard } from '../../../api/dashboard';
-import type { DashboardPayload } from '../../../types/dashboard';
 import { ApplicationTile } from '../../../components/dashboard';
-
-const REFRESH_INTERVAL_MS = 30_000;
 
 function hrefForApplication(id: number): string {
   return `/logs?application_id=${id}`;
 }
 
-/** Per-application totals widget — preserves the legacy "By application" section. */
+/** Per-application totals widget — uses shared React Query cache to avoid duplicate fetches. */
 function ApplicationTotalsWidget() {
   const { t } = useTranslation('dashboard');
-  const [data, setData] = useState<DashboardPayload | null>(null);
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const { data, status } = useQuery({
+    queryKey: ['logs', 'dashboard'],
+    queryFn: fetchDashboard,
+    refetchInterval: 30_000,
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-    function load() {
-      fetchDashboard()
-        .then((d) => { if (!cancelled) { setData(d); setStatus('ready'); } })
-        .catch(() => { if (!cancelled) setStatus('error'); });
-    }
-    load();
-    const id = setInterval(load, REFRESH_INTERVAL_MS);
-    return () => { cancelled = true; clearInterval(id); };
-  }, []);
-
-  if (status === 'loading') {
+  if (status === 'pending') {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {[1, 2].map((n) => (

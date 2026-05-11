@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { fetchDashboard } from '../../../api/dashboard';
-import type { DashboardPayload } from '../../../types/dashboard';
 import { SeverityCard } from '../../../components/dashboard';
 import { severityLabel } from '../../../components/severity';
 
@@ -10,27 +9,16 @@ function hrefForSeverity(key: string): string {
   return `/logs?severity=${encodeURIComponent(key)}`;
 }
 
-const REFRESH_INTERVAL_MS = 30_000;
-
-/** Severity grid widget — preserves the legacy SeverityCard set. */
+/** Severity grid widget — uses shared React Query cache to avoid duplicate fetches. */
 function SeverityCardsWidget() {
   const { t } = useTranslation('dashboard');
-  const [data, setData] = useState<DashboardPayload | null>(null);
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const { data, status } = useQuery({
+    queryKey: ['logs', 'dashboard'],
+    queryFn: fetchDashboard,
+    refetchInterval: 30_000,
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-    function load() {
-      fetchDashboard()
-        .then((d) => { if (!cancelled) { setData(d); setStatus('ready'); } })
-        .catch(() => { if (!cancelled) setStatus('error'); });
-    }
-    load();
-    const id = setInterval(load, REFRESH_INTERVAL_MS);
-    return () => { cancelled = true; clearInterval(id); };
-  }, []);
-
-  if (status === 'loading') {
+  if (status === 'pending') {
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {[1, 2, 3].map((n) => (
