@@ -7,6 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: maya_log_mgmt
     restart: unless-stopped
+    mem_limit: 512m
     environment:
       APP_NAME: ${APP_NAME:-Log Management}
       APP_ENV: ${APP_ENV:-local}
@@ -82,6 +83,7 @@ services:
       dockerfile: Dockerfile
     container_name: maya_log_mgmt_worker
     restart: unless-stopped
+    mem_limit: 256m
     depends_on:
       backend:
         condition: service_healthy
@@ -132,6 +134,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: maya_log_mgmt_frontend
     restart: unless-stopped
+    mem_limit: 512m
     environment:
       VITE_API_URL: ${VITE_API_URL:-http://maya_logs_api.localhost/api/v1}
       VITE_KEYCLOAK_URL: ${VITE_KEYCLOAK_URL:-http://keycloak.localhost}
