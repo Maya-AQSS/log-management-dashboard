@@ -17,7 +17,6 @@ export type UserProfileContextValue = {
   error: Error | null;
   /** Recarga el perfil desde GET /api/v1/me (p. ej. tras cambios de rol). */
   reload: () => Promise<void>;
-  hasRole: (role: string) => boolean;
 };
 
 const UserProfileContext = createContext<UserProfileContextValue | undefined>(undefined);
@@ -57,20 +56,14 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
     void load();
   }, [isOidcSignedIn, load]);
 
-  const hasRole = useCallback(
-    (role: string) => profile?.roles.includes(role) ?? false,
-    [profile],
-  );
-
   const value = useMemo(
     (): UserProfileContextValue => ({
       profile,
       loading,
       error,
       reload: load,
-      hasRole,
     }),
-    [profile, loading, error, load, hasRole],
+    [profile, loading, error, load],
   );
 
   return <UserProfileContext.Provider value={value}>{children}</UserProfileContext.Provider>;
