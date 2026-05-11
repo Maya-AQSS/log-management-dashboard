@@ -101,7 +101,7 @@ class ArchivedLogController extends Controller
         $externalId = is_array($jwtUser) ? ($jwtUser['id'] ?? null) : null;
 
         $user = is_string($externalId) && $externalId !== ''
-            ? User::where('external_id', $externalId)->first()
+            ? User::find($externalId)
             : null;
 
         abort_if($user === null, 403);

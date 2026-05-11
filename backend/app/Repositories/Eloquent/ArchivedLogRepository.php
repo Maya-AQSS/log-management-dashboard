@@ -134,7 +134,7 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
 
             $archivedLog = ArchivedLog::query()->create([
                 'application_id' => (int) $log->application_id,
-                'archived_by_id' => (int) $archivedById,
+                'archived_by_id' => $archivedById,
                 'error_code_id' => $log->error_code_id,
                 'severity' => $log->severity,
                 'message' => $log->message,

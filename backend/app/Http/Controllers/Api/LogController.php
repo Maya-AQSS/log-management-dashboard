@@ -82,7 +82,7 @@ class LogController extends Controller
             $externalId = is_array($jwtUser) ? ($jwtUser['id'] ?? null) : null;
 
             $user = is_string($externalId) && $externalId !== ''
-                ? User::where('external_id', $externalId)->first()
+                ? User::find($externalId)
                 : null;
 
             if ($user === null) {
