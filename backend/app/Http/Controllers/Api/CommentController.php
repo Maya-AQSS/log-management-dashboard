@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Gate as GateFacade;
 use Illuminate\Validation\ValidationException;
 use Mews\Purifier\Facades\Purifier;
 
@@ -76,7 +76,7 @@ class CommentController extends Controller
         $comment = Comment::query()->findOrFail($id);
         $user = $this->panelUserService->resolveFromJwtRequest($request);
 
-        Gate::forUser($user)->authorize('update', $comment);
+        GateFacade::forUser($user)->authorize('update', $comment);
 
         $validated = $request->validate([
             'content' => ['required', 'string', 'min:3'],
@@ -98,7 +98,7 @@ class CommentController extends Controller
         $comment = Comment::query()->findOrFail($id);
         $user = $this->panelUserService->resolveFromJwtRequest($request);
 
-        Gate::forUser($user)->authorize('delete', $comment);
+        GateFacade::forUser($user)->authorize('delete', $comment);
 
         $comment->delete();
 

@@ -20,25 +20,40 @@ return Application::configure(basePath: dirname(__DIR__))
             'jwt'  => \Maya\Auth\Middleware\JwtMiddleware::class,
             'role' => \App\Http\Middleware\RequireRole::class,
         ]);
+
         $middleware->api(prepend: [
             \Illuminate\Http\Middleware\HandleCors::class,
             \App\Http\Middleware\SetLocaleFromAcceptLanguage::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (AuthorizationException $e, Request $request) {
-            if (! $request->expectsJson()) {
+        /**
+         * El Handler convierte {@see AuthorizationException} en HttpException antes de los
+         * renderables; resolvemos la excepción original con {@see Throwable::getPrevious()}.
+         * Solo actuamos en rutas `api/*` o cuando el cliente espera JSON.
+         */
+        $exceptions->renderable(function (\Throwable $e, Request $request) {
+            if (! $request->is('api/*') && ! $request->expectsJson()) {
                 return null;
             }
 
-            $gateResponse = $e->response();
+            $auth = $e instanceof AuthorizationException
+                ? $e
+                : $e->getPrevious();
+
+            if (! $auth instanceof AuthorizationException) {
+                return null;
+            }
+
+            $gateResponse = $auth->response();
+
             if ($gateResponse instanceof GateResponse && is_string($gateResponse->code())) {
                 return response()->json([
                     'error' => [
                         'code' => $gateResponse->code(),
-                        'message' => $e->getMessage(),
+                        'message' => $auth->getMessage(),
                     ],
-                ], $e->status() ?? 403);
+                ], $auth->status() ?? 403);
             }
 
             return response()->json([
@@ -46,6 +61,6 @@ return Application::configure(basePath: dirname(__DIR__))
                     'code' => 'forbidden',
                     'message' => __('api.auth.forbidden'),
                 ],
-            ], $e->status() ?? 403);
+            ], $auth->status() ?? 403);
         });
     })->create();
