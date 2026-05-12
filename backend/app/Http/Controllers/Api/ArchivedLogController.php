@@ -61,14 +61,14 @@ class ArchivedLogController extends Controller
     {
         $archivedLog = $this->archivedLogService->findOrFail($id);
 
-        $this->authorizeOwner($request, $archivedLog, 'update');
+        $actor = $this->authorizeOwner($request, $archivedLog, 'update');
 
         $validated = $request->validate([
             'description' => ['nullable', 'string', 'max:5000'],
             'url_tutorial' => ['nullable', 'url', 'max:2048'],
         ]);
 
-        $this->archivedLogService->updateArchivedFields($archivedLog, $validated);
+        $this->archivedLogService->updateArchivedFields($archivedLog, $validated, $actor->id);
 
         $archivedLog->refresh();
         $archivedLog->loadMissing(['application', 'archivedBy', 'errorCode']);
@@ -84,17 +84,17 @@ class ArchivedLogController extends Controller
     {
         $archivedLog = $this->archivedLogService->findOrFail($id);
 
-        $this->authorizeOwner($request, $archivedLog, 'delete');
+        $actor = $this->authorizeOwner($request, $archivedLog, 'delete');
 
-        $this->archivedLogService->delete($archivedLog);
+        $this->archivedLogService->delete($archivedLog, $actor->id);
 
         return response()->json(null, 204);
     }
 
     /**
-     * Autoriza que el usuario del JWT sea el propietario del recurso.
+     * Autoriza que el usuario del JWT sea el propietario del recurso y devuelve ese usuario (actor).
      */
-    private function authorizeOwner(Request $request, ArchivedLog $archivedLog, string $action): void
+    private function authorizeOwner(Request $request, ArchivedLog $archivedLog, string $action): User
     {
         /** @var array<string, mixed>|null $jwtUser */
         $jwtUser = $request->attributes->get('jwt_user');
@@ -107,5 +107,7 @@ class ArchivedLogController extends Controller
         abort_if($user === null, 403);
 
         Gate::forUser($user)->authorize($action, $archivedLog);
+
+        return $user;
     }
 }
