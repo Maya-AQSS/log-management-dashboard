@@ -2,19 +2,22 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Concerns\ResolvesJwtUser;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LogResource;
-use App\Models\User;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use App\Services\Contracts\LogServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Throwable;
 
 class LogController extends Controller
 {
+    use ResolvesJwtUser;
+
     public function __construct(
         private LogServiceInterface $logService,
         private ArchivedLogServiceInterface $archivedLogService,
@@ -77,22 +80,7 @@ class LogController extends Controller
         }
 
         try {
-            /** @var array<string, mixed>|null $jwtUser */
-            $jwtUser = $request->attributes->get('jwt_user');
-            $externalId = is_array($jwtUser) ? ($jwtUser['id'] ?? null) : null;
-
-            $user = is_string($externalId) && $externalId !== ''
-                ? User::find($externalId)
-                : null;
-
-            if ($user === null) {
-                return response()->json([
-                    'error' => [
-                        'code' => 'user_not_found',
-                        'message' => __('logs.not_authorized'),
-                    ],
-                ], 403);
-            }
+            $user = $this->resolveJwtUserOrFail($request);
 
             $archivedLog = $this->archivedLogService->archiveFromLogId($id, $user->id);
 
@@ -100,6 +88,13 @@ class LogController extends Controller
                 'data' => ['archived_log_id' => $archivedLog->id],
                 'meta' => ['already_archived' => false],
             ], 201);
+        } catch (AccessDeniedHttpException $e) {
+            return response()->json([
+                'error' => [
+                    'code' => 'user_not_found',
+                    'message' => __('logs.not_authorized'),
+                ],
+            ], 403);
         } catch (Throwable $e) {
             report($e);
 

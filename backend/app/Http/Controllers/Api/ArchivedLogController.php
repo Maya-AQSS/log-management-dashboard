@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Concerns\ResolvesJwtUser;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ArchivedLogResource;
 use App\Models\ArchivedLog;
-use App\Models\User;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Gate;
 
 class ArchivedLogController extends Controller
 {
+    use ResolvesJwtUser;
+
     public function __construct(
         private ArchivedLogServiceInterface $archivedLogService,
     ) {}
@@ -96,15 +98,7 @@ class ArchivedLogController extends Controller
      */
     private function authorizeOwner(Request $request, ArchivedLog $archivedLog, string $action): void
     {
-        /** @var array<string, mixed>|null $jwtUser */
-        $jwtUser = $request->attributes->get('jwt_user');
-        $externalId = is_array($jwtUser) ? ($jwtUser['id'] ?? null) : null;
-
-        $user = is_string($externalId) && $externalId !== ''
-            ? User::find($externalId)
-            : null;
-
-        abort_if($user === null, 403);
+        $user = $this->resolveJwtUserOrFail($request);
 
         Gate::forUser($user)->authorize($action, $archivedLog);
     }
