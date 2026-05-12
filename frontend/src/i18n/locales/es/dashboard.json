@@ -9,7 +9,7 @@
   "logsTotalLabel": "Logs en el sistema",
   "openFilteredLogs": "Ver logs filtrados por {{app}}",
   "edit": {
-    "toggle": "Editar panel",
+    "toggle": "Editar",
     "save": "Guardar",
     "cancel": "Cancelar",
     "reset": "Restaurar",
