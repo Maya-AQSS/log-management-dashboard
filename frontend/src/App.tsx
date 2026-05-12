@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from '@maya/shared-layout-react';
 import { NotificationsBell, SidebarFavorites } from '@maya/shared-sidebar-react';
-import { SkeletonPage } from '@maya/shared-ui-react';
+import { PlaceholderPage, SkeletonPage } from '@maya/shared-ui-react';
 import { useKeycloakLocaleSync } from '@maya/shared-i18n-react';
 import { useOidcSession } from '@maya/shared-auth-react';
 import { useNavItems } from './components/layout';
@@ -34,10 +34,6 @@ const LogDetailPage = lazy(() =>
 const LogsPage = lazy(() =>
   import('./pages/LogsPage').then((m) => ({ default: m.LogsPage })),
 );
-const PlaceholderPage = lazy(() =>
-  import('./pages/PlaceholderPage').then((m) => ({ default: m.PlaceholderPage })),
-);
-
 const DASHBOARD_API_URL = (import.meta.env.VITE_DASHBOARD_API_URL as string | undefined)
   ?? 'http://maya_dashboard_api.localhost';
 
