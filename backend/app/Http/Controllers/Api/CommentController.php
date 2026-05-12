@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreCommentRequest;
+use App\Http\Requests\UpdateCommentRequest;
 use App\Http\Resources\CommentResource;
-use App\Models\Comment;
 use App\Services\Contracts\ArchivedLogServiceInterface;
+use App\Services\Contracts\CommentServiceInterface;
 use App\Services\Contracts\ErrorCodeServiceInterface;
 use App\Services\PanelUserService;
 use Illuminate\Database\Eloquent\Model;
@@ -13,19 +15,14 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate as GateFacade;
-use Illuminate\Validation\ValidationException;
-use Mews\Purifier\Facades\Purifier;
 
 class CommentController extends Controller
 {
-    private const MAX_COMMENT_BYTES = 10 * 1024 * 1024;
-
-    private const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
-
     public function __construct(
         private readonly PanelUserService $panelUserService,
         private readonly ArchivedLogServiceInterface $archivedLogService,
         private readonly ErrorCodeServiceInterface $errorCodeService,
+        private readonly CommentServiceInterface $commentService,
     ) {}
 
     /**
@@ -51,7 +48,7 @@ class CommentController extends Controller
     /**
      * Crea un nuevo comentario para un log archivado.
      */
-    public function storeForArchivedLog(Request $request, int $archivedLogId): JsonResponse
+    public function storeForArchivedLog(StoreCommentRequest $request, int $archivedLogId): JsonResponse
     {
         $archivedLog = $this->archivedLogService->findOrFail($archivedLogId);
 
@@ -61,7 +58,7 @@ class CommentController extends Controller
     /**
      * Crea un nuevo comentario para un código de error.
      */
-    public function storeForErrorCode(Request $request, int $errorCodeId): JsonResponse
+    public function storeForErrorCode(StoreCommentRequest $request, int $errorCodeId): JsonResponse
     {
         $errorCode = $this->errorCodeService->findOrFail($errorCodeId);
 
@@ -71,21 +68,14 @@ class CommentController extends Controller
     /**
      * Actualiza un comentario.
      */
-    public function update(Request $request, int $id): CommentResource
+    public function update(UpdateCommentRequest $request, int $id): CommentResource
     {
-        $comment = Comment::query()->findOrFail($id);
+        $comment = $this->commentService->findOrFail($id);
         $user = $this->panelUserService->resolveFromJwtRequest($request);
 
         GateFacade::forUser($user)->authorize('update', $comment);
 
-        $validated = $request->validate([
-            'content' => ['required', 'string', 'min:3'],
-        ]);
-
-        $sanitized = $this->sanitizeAndValidateContent($validated['content']);
-
-        $comment->update(['content' => $sanitized]);
-        $comment->refresh()->loadMissing('user');
+        $comment = $this->commentService->updateContent($comment, $request->validated('content'));
 
         return new CommentResource($comment);
     }
@@ -95,12 +85,12 @@ class CommentController extends Controller
      */
     public function destroy(Request $request, int $id): JsonResponse
     {
-        $comment = Comment::query()->findOrFail($id);
+        $comment = $this->commentService->findOrFail($id);
         $user = $this->panelUserService->resolveFromJwtRequest($request);
 
         GateFacade::forUser($user)->authorize('delete', $comment);
 
-        $comment->delete();
+        $this->commentService->delete($comment);
 
         return response()->json(null, 204);
     }
@@ -110,136 +100,26 @@ class CommentController extends Controller
      */
     private function indexFor(Model $commentable): AnonymousResourceCollection
     {
-        $comments = $commentable->comments()
-            ->with('user')
-            ->latest()
-            ->get();
-
-        return CommentResource::collection($comments);
+        return CommentResource::collection(
+            $this->commentService->listForCommentable($commentable)
+        );
     }
 
     /**
      * Crea un nuevo comentario para un modelo comentable.
      */
-    private function storeFor(Request $request, Model $commentable): JsonResponse
+    private function storeFor(StoreCommentRequest $request, Model $commentable): JsonResponse
     {
         $user = $this->panelUserService->resolveFromJwtRequest($request);
 
-        $validated = $request->validate([
-            'content' => ['required', 'string', 'min:3'],
-        ]);
-
-        $sanitized = $this->sanitizeAndValidateContent($validated['content']);
-
-        $comment = $commentable->comments()->create([
-            'user_id' => $user->id,
-            'content' => $sanitized,
-        ]);
-
-        $comment->loadMissing('user');
+        $comment = $this->commentService->createForCommentable(
+            $commentable,
+            $user->id,
+            $request->validated('content')
+        );
 
         return (new CommentResource($comment))
             ->response()
             ->setStatusCode(201);
-    }
-
-    /**
-     * Sanitiza y valida el contenido de un comentario.
-     */
-    private function sanitizeAndValidateContent(string $rawContent): string
-    {
-        $sanitized = Purifier::clean($rawContent, 'rich_comment');
-
-        $this->validateNotBlank($sanitized);
-        $this->validateContentSize($sanitized);
-        $this->validateEmbeddedImages($sanitized);
-
-        return $sanitized;
-    }
-
-    /**
-     * Valida que el contenido no esté en blanco.
-     */
-    private function validateNotBlank(string $html): void
-    {
-        $textOnly = trim(strip_tags(str_ireplace(['<br>', '<br/>', '<br />'], ' ', $html)));
-
-        if ($textOnly !== '' || str_contains($html, '<img')) {
-            return;
-        }
-
-        throw ValidationException::withMessages([
-            'content' => __('validation.required', ['attribute' => 'content']),
-        ]);
-    }
-
-    /**
-     * Valida que el contenido no sea demasiado grande.
-     */
-    private function validateContentSize(string $html): void
-    {
-        if (strlen($html) <= self::MAX_COMMENT_BYTES) {
-            return;
-        }
-
-        throw ValidationException::withMessages([
-            'content' => __('comments.editor.comment_too_large'),
-        ]);
-    }
-
-    /**
-     * Valida que las imágenes incrustadas no sean demasiado grandes.
-     */
-    private function validateEmbeddedImages(string $html): void
-    {
-        preg_match_all('/<img[^>]+src=["\']([^"\']+)["\']/i', $html, $matches);
-        $sources = $matches[1] ?? [];
-
-        foreach ($sources as $src) {
-            if (preg_match('/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/s', $src, $parts) !== 1) {
-                continue;
-            }
-
-            $decoded = base64_decode($parts[2], true);
-            if ($decoded === false) {
-                throw ValidationException::withMessages([
-                    'content' => __('comments.editor.image_invalid_type'),
-                ]);
-            }
-
-            if (strlen($decoded) > self::MAX_IMAGE_BYTES) {
-                throw ValidationException::withMessages([
-                    'content' => __('comments.editor.image_too_large'),
-                ]);
-            }
-
-            if (! $this->isAllowedImageByMagicBytes($decoded)) {
-                throw ValidationException::withMessages([
-                    'content' => __('comments.editor.image_invalid_type'),
-                ]);
-            }
-        }
-    }
-
-    /**
-     * Valida que las imágenes incrustadas sean de un tipo permitido.
-     */
-    private function isAllowedImageByMagicBytes(string $binary): bool
-    {
-        $header = substr($binary, 0, 12);
-
-        if (str_starts_with($header, "\x89PNG")) {
-            return true;
-        }
-
-        if (str_starts_with($header, "\xFF\xD8\xFF")) {
-            return true;
-        }
-
-        if (str_starts_with($header, 'GIF8')) {
-            return true;
-        }
-
-        return str_starts_with($header, 'RIFF') && substr($header, 8, 4) === 'WEBP';
     }
 }

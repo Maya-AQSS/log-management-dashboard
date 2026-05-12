@@ -4,18 +4,22 @@ namespace App\Providers;
 
 use App\Repositories\Contracts\ApplicationRepositoryInterface;
 use App\Repositories\Contracts\ArchivedLogRepositoryInterface;
+use App\Repositories\Contracts\CommentRepositoryInterface;
 use App\Repositories\Contracts\ErrorCodeRepositoryInterface;
 use App\Repositories\Contracts\LogRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Eloquent\ApplicationRepository;
 use App\Repositories\Eloquent\ArchivedLogRepository;
+use App\Repositories\Eloquent\CommentRepository;
 use App\Repositories\Eloquent\ErrorCodeRepository;
 use App\Repositories\Eloquent\LogRepository;
 use App\Repositories\Eloquent\UserRepository;
 use App\Services\ApplicationService;
 use App\Services\ArchivedLogService;
+use App\Services\CommentService;
 use App\Services\Contracts\ApplicationServiceInterface;
 use App\Services\Contracts\ArchivedLogServiceInterface;
+use App\Services\Contracts\CommentServiceInterface;
 use App\Services\Contracts\ErrorCodeServiceInterface;
 use App\Services\Contracts\LogServiceInterface;
 use App\Services\ErrorCodeService;
@@ -39,6 +43,9 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(UserRepositoryInterface::class, UserRepository::class);
         $this->app->singleton(PanelUserService::class, PanelUserService::class);
+
+        $this->app->singleton(CommentRepositoryInterface::class, CommentRepository::class);
+        $this->app->singleton(CommentServiceInterface::class, CommentService::class);
 
         $this->app->singleton(ErrorCodeRepositoryInterface::class, ErrorCodeRepository::class);
         $this->app->singleton(ErrorCodeServiceInterface::class, ErrorCodeService::class);
