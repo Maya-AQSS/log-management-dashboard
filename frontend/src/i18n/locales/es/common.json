@@ -53,5 +53,11 @@
     "dateTo": "Hasta",
     "reset": "Limpiar"
   },
-  "notFound": "404 — No encontrado"
+  "notFound": "404 — No encontrado",
+  "userMenu": {
+    "darkMode": "Modo oscuro",
+    "lightMode": "Modo claro",
+    "profile": "Perfil",
+    "logout": "Cerrar sesión"
+  }
 }

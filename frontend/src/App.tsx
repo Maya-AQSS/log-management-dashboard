@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from '@maya/shared-layout-react';
 import { NotificationsBell, SidebarFavorites } from '@maya/shared-sidebar-react';
 import { SkeletonPage } from '@maya/shared-ui-react';
+import { useKeycloakLocaleSync } from '@maya/shared-i18n-react';
 import { useOidcSession } from '@maya/shared-auth-react';
 import { useNavItems } from './components/layout';
 import { profileDisplayInitials, useUserProfile } from './features/user-profile';
@@ -64,7 +65,7 @@ function AppWithLayout() {
   const { logout, user } = useOidcSession();
   const { profile } = useUserProfile();
   const navItems = useNavItems();
-  const { i18n } = useTranslation();
+  useKeycloakLocaleSync();
 
   // Prefer backend profile name; fall back to Keycloak token (same pattern as other apps)
   const tokenDisplayName = ((user?.name ?? user?.preferred_username ?? '') as string).trim();
@@ -74,20 +75,6 @@ function AppWithLayout() {
     : tokenDisplayName
       ? tokenDisplayName.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase() || 'U'
       : 'U';
-
-  // Sync Keycloak locale preference to i18next
-  useEffect(() => {
-    if (user?.locale) void i18n.changeLanguage(user.locale);
-  }, [user?.locale, i18n]);
-
-  // Sync locale changes made in other browser tabs
-  useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === 'locale' && e.newValue) void i18n.changeLanguage(e.newValue);
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, [i18n]);
 
   const userEmail = (profile?.email ?? user?.email) as string | undefined;
   const onProfile = () => {
