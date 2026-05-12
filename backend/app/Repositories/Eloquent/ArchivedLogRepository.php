@@ -94,6 +94,8 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
 
     /**
      * @param  array<string, mixed>  $fields
+     *
+     * No valida actor; debe haberse pasado {@see \App\Policies\ArchivedLogPolicy} (p. ej. vía `authorize` en el controlador).
      */
     public function updateArchivedFields(ArchivedLog $archivedLog, array $fields): void
     {
@@ -101,7 +103,7 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
     }
 
     /**
-     * Elimina un log archivado.
+     * Soft delete. La autorización la define {@see \App\Policies\ArchivedLogPolicy}.
      */
     public function delete(ArchivedLog $archivedLog): void
     {

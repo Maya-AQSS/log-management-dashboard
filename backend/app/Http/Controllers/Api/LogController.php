@@ -84,7 +84,7 @@ class LogController extends Controller
                 return response()->json([
                     'error' => [
                         'code' => 'actor_missing',
-                        'message' => __('logs.not_authorized'),
+                        'message' => __('logs.actor_missing'),
                     ],
                 ], 403);
             }

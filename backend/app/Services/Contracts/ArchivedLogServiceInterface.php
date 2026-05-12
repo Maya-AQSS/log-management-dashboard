@@ -23,9 +23,14 @@ interface ArchivedLogServiceInterface
 
     /**
      * @param  array<string, mixed>  $fields
+     *
+     * La autorización (subject JWT === `archived_by_id`) la define {@see \App\Policies\ArchivedLogPolicy}.
      */
     public function updateArchivedFields(ArchivedLog $archivedLog, array $fields): void;
 
+    /**
+     * Soft delete. Quién puede invocarlo lo define {@see \App\Policies\ArchivedLogPolicy}.
+     */
     public function delete(ArchivedLog $archivedLog): void;
 
     /**
