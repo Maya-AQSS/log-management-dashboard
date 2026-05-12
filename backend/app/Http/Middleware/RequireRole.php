@@ -19,6 +19,11 @@ class RequireRole
             }
         }
 
-        return response()->json(['message' => 'Forbidden.'], 403);
+        return response()->json([
+            'error' => [
+                'code' => 'required_role_missing',
+                'message' => __('api.require_role.forbidden'),
+            ],
+        ], 403);
     }
 }

@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CommentResource;
-use App\Models\ArchivedLog;
 use App\Models\Comment;
-use App\Models\ErrorCode;
-use App\Models\User;
+use App\Services\Contracts\ArchivedLogServiceInterface;
+use App\Services\Contracts\ErrorCodeServiceInterface;
+use App\Services\PanelUserService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,12 +22,18 @@ class CommentController extends Controller
 
     private const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 
+    public function __construct(
+        private readonly PanelUserService $panelUserService,
+        private readonly ArchivedLogServiceInterface $archivedLogService,
+        private readonly ErrorCodeServiceInterface $errorCodeService,
+    ) {}
+
     /**
      * Listado de comentarios para un log archivado.
      */
     public function indexForArchivedLog(int $archivedLogId): AnonymousResourceCollection
     {
-        $archivedLog = ArchivedLog::query()->findOrFail($archivedLogId);
+        $archivedLog = $this->archivedLogService->findOrFail($archivedLogId);
 
         return $this->indexFor($archivedLog);
     }
@@ -37,7 +43,7 @@ class CommentController extends Controller
      */
     public function indexForErrorCode(int $errorCodeId): AnonymousResourceCollection
     {
-        $errorCode = ErrorCode::query()->findOrFail($errorCodeId);
+        $errorCode = $this->errorCodeService->findOrFail($errorCodeId);
 
         return $this->indexFor($errorCode);
     }
@@ -47,7 +53,7 @@ class CommentController extends Controller
      */
     public function storeForArchivedLog(Request $request, int $archivedLogId): JsonResponse
     {
-        $archivedLog = ArchivedLog::query()->findOrFail($archivedLogId);
+        $archivedLog = $this->archivedLogService->findOrFail($archivedLogId);
 
         return $this->storeFor($request, $archivedLog);
     }
@@ -57,7 +63,7 @@ class CommentController extends Controller
      */
     public function storeForErrorCode(Request $request, int $errorCodeId): JsonResponse
     {
-        $errorCode = ErrorCode::query()->findOrFail($errorCodeId);
+        $errorCode = $this->errorCodeService->findOrFail($errorCodeId);
 
         return $this->storeFor($request, $errorCode);
     }
@@ -68,7 +74,7 @@ class CommentController extends Controller
     public function update(Request $request, int $id): CommentResource
     {
         $comment = Comment::query()->findOrFail($id);
-        $user = $this->resolveUserOrFail($request);
+        $user = $this->panelUserService->resolveFromJwtRequest($request);
 
         Gate::forUser($user)->authorize('update', $comment);
 
@@ -90,7 +96,7 @@ class CommentController extends Controller
     public function destroy(Request $request, int $id): JsonResponse
     {
         $comment = Comment::query()->findOrFail($id);
-        $user = $this->resolveUserOrFail($request);
+        $user = $this->panelUserService->resolveFromJwtRequest($request);
 
         Gate::forUser($user)->authorize('delete', $comment);
 
@@ -117,7 +123,7 @@ class CommentController extends Controller
      */
     private function storeFor(Request $request, Model $commentable): JsonResponse
     {
-        $user = $this->resolveUserOrFail($request);
+        $user = $this->panelUserService->resolveFromJwtRequest($request);
 
         $validated = $request->validate([
             'content' => ['required', 'string', 'min:3'],
@@ -135,25 +141,6 @@ class CommentController extends Controller
         return (new CommentResource($comment))
             ->response()
             ->setStatusCode(201);
-    }
-
-    /**
-     * Resuelve el {@see User} de la vista FDW `users` (Odoo) usando el mismo identificador
-     * que el JWT (`jwt_user['id']`) → columna `users.id` (UUID Keycloak), no `external_id`.
-     */
-    private function resolveUserOrFail(Request $request): User
-    {
-        /** @var array<string, mixed>|null $jwtUser */
-        $jwtUser = $request->attributes->get('jwt_user');
-        $jwtSubject = is_array($jwtUser) ? ($jwtUser['id'] ?? null) : null;
-
-        $user = is_string($jwtSubject) && $jwtSubject !== ''
-            ? User::query()->whereKey($jwtSubject)->first()
-            : null;
-
-        abort_if($user === null, 403);
-
-        return $user;
     }
 
     /**

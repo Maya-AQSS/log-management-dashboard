@@ -20,7 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'jwt'  => \Maya\Auth\Middleware\JwtMiddleware::class,
             'role' => \App\Http\Middleware\RequireRole::class,
         ]);
-        $middleware->api(prepend: [\Illuminate\Http\Middleware\HandleCors::class]);
+        $middleware->api(prepend: [
+            \Illuminate\Http\Middleware\HandleCors::class,
+            \App\Http\Middleware\SetLocaleFromAcceptLanguage::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (AuthorizationException $e, Request $request) {
@@ -38,6 +41,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], $e->status() ?? 403);
             }
 
-            return null;
+            return response()->json([
+                'error' => [
+                    'code' => 'forbidden',
+                    'message' => __('api.auth.forbidden'),
+                ],
+            ], $e->status() ?? 403);
         });
     })->create();
