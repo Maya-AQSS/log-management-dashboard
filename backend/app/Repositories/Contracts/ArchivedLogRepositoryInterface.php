@@ -28,5 +28,5 @@ interface ArchivedLogRepositoryInterface
 
     public function delete(ArchivedLog $archivedLog): void;
 
-    public function archiveFromLogId(int $logId, int $archivedById): ArchivedLog;
+    public function archiveFromLogId(int $logId, string $archivedById): ArchivedLog;
 }

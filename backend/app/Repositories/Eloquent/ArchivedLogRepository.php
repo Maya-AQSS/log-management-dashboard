@@ -111,7 +111,7 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
     /**
      * Archiva un log por su id.
      */
-    public function archiveFromLogId(int $logId, int $archivedById): ArchivedLog
+    public function archiveFromLogId(int $logId, string $archivedById): ArchivedLog
     {
         return DB::transaction(function () use ($logId, $archivedById): ArchivedLog {
             $log = Log::query()
