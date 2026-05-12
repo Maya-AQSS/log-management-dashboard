@@ -2,13 +2,13 @@
 
 use App\Http\Controllers\Api\ApplicationController;
 use App\Http\Controllers\Api\ArchivedLogController;
-use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\ErrorCodeController;
 use App\Http\Controllers\Api\HealthCheckController;
 use App\Http\Controllers\Api\LogController;
 use Illuminate\Support\Facades\Route;
+use Maya\Profile\Routing\MeRoutes;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,8 +28,8 @@ Route::prefix('v1')->group(function () {
     // ── Rutas protegidas por JWT ───────────────────────────────
     Route::middleware('jwt')->group(function () {
 
-        // Autenticación y sesión
-        Route::get('/me', [AuthController::class, 'me']);
+        // Perfil del usuario autenticado — endpoints en maya/shared-profile-laravel.
+        MeRoutes::register();
 
         // Dashboard (BFF): cards de severidad + totales por aplicación
         Route::get('/dashboard', [DashboardController::class, 'index']);
