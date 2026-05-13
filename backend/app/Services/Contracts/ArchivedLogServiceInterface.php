@@ -7,8 +7,16 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface ArchivedLogServiceInterface
 {
+    /**
+     * Devuelve una página de logs archivados.
+     */
     public function paginate(int $perPage = 15): LengthAwarePaginator;
 
+    /**
+     * Busca y filtra logs archivados por diferentes criterios:
+     * - tipo de severidad de error
+     * - si tiene tutorial o no
+     */
     public function searchAndFilter(
         ?array $severities,
         ?int $applicationId,
@@ -19,9 +27,14 @@ interface ArchivedLogServiceInterface
         int $perPage = 15
     ): LengthAwarePaginator;
 
+    /**
+     * Busca un log archivado por su id.
+     */
     public function findOrFail(int $id): ArchivedLog;
 
     /**
+     * Actualiza los campos editables del log archivado.
+     *
      * @param  array<string, mixed>  $fields
      *
      * La autorización (subject JWT === `archived_by_id`) la define {@see \App\Policies\ArchivedLogPolicy}.
