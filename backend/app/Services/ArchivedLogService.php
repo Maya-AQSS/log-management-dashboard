@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\ArchivedLogWasDeleted;
 use App\Events\LogWasArchived;
 use App\Models\ArchivedLog;
 use App\Repositories\Contracts\ArchivedLogRepositoryInterface;
@@ -124,14 +125,12 @@ class ArchivedLogService implements ArchivedLogServiceInterface
     public function delete(ArchivedLog $archivedLog): void
     {
         try {
-            $this->auditPublisher->publish(
-                applicationSlug: $this->messagingAppSlug(),
-                entityType: 'archived_log',
-                entityId: (string) $archivedLog->id,
-                action: 'delete',
-                userId: (string) $archivedLog->archived_by_id,
-            );
+            $archivedLogId = $archivedLog->id;
+            $archivedByUserId = (string) $archivedLog->archived_by_id;
+
             $this->archivedLogRepository->delete($archivedLog);
+
+            ArchivedLogWasDeleted::dispatch($archivedLogId, $archivedByUserId);
         } catch (Throwable $e) {
             $this->resilientLogPublisher->publishFromThrowable(
                 $e,
