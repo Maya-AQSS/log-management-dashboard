@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\ArchivedLogFieldsWereUpdated;
 use App\Events\ArchivedLogWasDeleted;
 use App\Events\LogWasArchived;
 use App\Models\ArchivedLog;
@@ -9,14 +10,12 @@ use App\Repositories\Contracts\ArchivedLogRepositoryInterface;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use App\Support\ResilientLogPublisher;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Maya\Messaging\Publishers\AuditPublisher;
 use Throwable;
 
 class ArchivedLogService implements ArchivedLogServiceInterface
 {
     public function __construct(
         private ArchivedLogRepositoryInterface $archivedLogRepository,
-        private AuditPublisher $auditPublisher,
         private ResilientLogPublisher $resilientLogPublisher,
     ) {}
 
@@ -98,14 +97,12 @@ class ArchivedLogService implements ArchivedLogServiceInterface
             }
 
             $this->archivedLogRepository->updateArchivedFields($archivedLog, $sanitized);
-            $this->auditPublisher->publish(
-                applicationSlug: $this->messagingAppSlug(),
-                entityType: 'archived_log',
-                entityId: (string) $archivedLog->id,
-                action: 'update',
-                userId: (string) $archivedLog->archived_by_id,
-                previousValue: $previousValue !== [] ? $previousValue : null,
-                newValue: $sanitized !== [] ? $sanitized : null,
+
+            ArchivedLogFieldsWereUpdated::dispatch(
+                $archivedLog->id,
+                (string) $archivedLog->archived_by_id,
+                $previousValue,
+                $sanitized,
             );
         } catch (Throwable $e) {
             $this->resilientLogPublisher->publishFromThrowable(
