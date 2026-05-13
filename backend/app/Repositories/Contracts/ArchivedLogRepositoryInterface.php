@@ -23,10 +23,18 @@ interface ArchivedLogRepositoryInterface
 
     /**
      * @param  array<string, mixed>  $fields
+     *
+     * La autorización la define {@see \App\Policies\ArchivedLogPolicy} (subject JWT === `archived_by_id`).
      */
     public function updateArchivedFields(ArchivedLog $archivedLog, array $fields): void;
 
+    /**
+     * Soft delete. No valida actor; debe haberse pasado {@see \App\Policies\ArchivedLogPolicy}.
+     */
     public function delete(ArchivedLog $archivedLog): void;
 
-    public function archiveFromLogId(int $logId, int $archivedById): ArchivedLog;
+    /**
+     * @param  string  $archivedByUserId  Subject JWT (UUID Keycloak) → `archived_logs.archived_by_id`.
+     */
+    public function archiveFromLogId(int $logId, string $archivedByUserId): ArchivedLog;
 }

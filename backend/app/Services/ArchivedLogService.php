@@ -66,7 +66,6 @@ class ArchivedLogService implements ArchivedLogServiceInterface
         try {
             return $this->archivedLogRepository->findOrFail($id);
         } catch (Throwable $e) {
-            // Medium: visible en paneles que agrupan critical/high/medium (sondas, correlación API).
             $this->resilientLogPublisher->publishFromThrowable(
                 $e,
                 'medium',
@@ -80,8 +79,10 @@ class ArchivedLogService implements ArchivedLogServiceInterface
 
     /**
      * Actualiza los campos de un log archivado.
+     *
+     * El actor en auditoría es `archived_by_id` (subject JWT), coherente con {@see ArchivedLogPolicy}.
      */
-    public function updateArchivedFields(ArchivedLog $archivedLog, array $fields, int $actorUserId): void
+    public function updateArchivedFields(ArchivedLog $archivedLog, array $fields): void
     {
         try {
             $sanitized = array_map(
@@ -100,7 +101,7 @@ class ArchivedLogService implements ArchivedLogServiceInterface
                 entityType: 'archived_log',
                 entityId: (string) $archivedLog->id,
                 action: 'update',
-                userId: (string) $actorUserId,
+                userId: (string) $archivedLog->archived_by_id,
                 previousValue: $previousValue !== [] ? $previousValue : null,
                 newValue: $sanitized !== [] ? $sanitized : null,
             );
@@ -119,7 +120,7 @@ class ArchivedLogService implements ArchivedLogServiceInterface
     /**
      * Elimina un log archivado.
      */
-    public function delete(ArchivedLog $archivedLog, int $actorUserId): void
+    public function delete(ArchivedLog $archivedLog): void
     {
         try {
             $this->auditPublisher->publish(
@@ -127,7 +128,7 @@ class ArchivedLogService implements ArchivedLogServiceInterface
                 entityType: 'archived_log',
                 entityId: (string) $archivedLog->id,
                 action: 'delete',
-                userId: (string) $actorUserId,
+                userId: (string) $archivedLog->archived_by_id,
             );
             $this->archivedLogRepository->delete($archivedLog);
         } catch (Throwable $e) {
@@ -145,16 +146,16 @@ class ArchivedLogService implements ArchivedLogServiceInterface
     /**
      * Archiva un log por su id.
      */
-    public function archiveFromLogId(int $logId, int $archivedById): ArchivedLog
+    public function archiveFromLogId(int $logId, string $archivedByUserId): ArchivedLog
     {
         try {
-            $archivedLog = $this->archivedLogRepository->archiveFromLogId($logId, $archivedById);
+            $archivedLog = $this->archivedLogRepository->archiveFromLogId($logId, $archivedByUserId);
             $this->auditPublisher->publish(
                 applicationSlug: $this->messagingAppSlug(),
                 entityType: 'archived_log',
                 entityId: (string) $archivedLog->id,
                 action: 'archive',
-                userId: (string) $archivedById,
+                userId: $archivedByUserId,
             );
 
             return $archivedLog;
