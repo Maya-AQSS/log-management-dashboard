@@ -7,17 +7,17 @@ cd "$SCRIPT_DIR"
 
 SERVICE_LABEL="maya-logs"
 BACKEND_CONTAINER="maya_log_mgmt"
-FRONTEND_URL="http://maya-logs.localhost"
-BACKEND_API_URL="http://maya-logs-api.localhost/api/v1"
+FRONTEND_URL="http://maya-logs.maya.test"
+BACKEND_API_URL="http://maya-logs-api.maya.test/api/v1"
 DEFAULT_BACKEND_PORT="8002"
 DEFAULT_FRONTEND_PORT="5176"
 
 setup_frontend_env() {
-    upsert_env_var frontend/.env VITE_API_URL            "${VITE_API_URL:-http://maya-logs-api.localhost/api/v1}"
-    upsert_env_var frontend/.env VITE_KEYCLOAK_URL       "${VITE_KEYCLOAK_URL:-http://keycloak.localhost}"
+    upsert_env_var frontend/.env VITE_API_URL            "${VITE_API_URL:-http://maya-logs-api.maya.test/api/v1}"
+    upsert_env_var frontend/.env VITE_KEYCLOAK_URL       "${VITE_KEYCLOAK_URL:-http://keycloak.maya.test}"
     upsert_env_var frontend/.env VITE_KEYCLOAK_REALM     "${VITE_KEYCLOAK_REALM:-maya}"
     upsert_env_var frontend/.env VITE_KEYCLOAK_CLIENT_ID "${VITE_KEYCLOAK_CLIENT_ID:-maya-logs}"
-    upsert_env_var frontend/.env VITE_DASHBOARD_API_URL  "${VITE_DASHBOARD_API_URL:-http://maya-dashboard-api.localhost}"
+    upsert_env_var frontend/.env VITE_DASHBOARD_API_URL  "${VITE_DASHBOARD_API_URL:-http://maya-dashboard-api.maya.test}"
 }
 
 # shellcheck source=../maya_infra/scripts/up-common.sh

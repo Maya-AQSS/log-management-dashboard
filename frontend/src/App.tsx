@@ -35,7 +35,7 @@ const LogsPage = lazy(() =>
   import('./pages/LogsPage').then((m) => ({ default: m.LogsPage })),
 );
 const DASHBOARD_API_URL = (import.meta.env.VITE_DASHBOARD_API_URL as string | undefined)
-  ?? 'http://maya-dashboard-api.localhost';
+  ?? 'http://maya-dashboard-api.maya.test';
 
 function AppRoutes() {
   const { t } = useTranslation('common');
@@ -75,7 +75,7 @@ function AppWithLayout() {
   const userEmail = (profile?.email ?? user?.email) as string | undefined;
   const onProfile = () => {
     const dashboardOrigin = (import.meta.env.VITE_DASHBOARD_URL as string | undefined)
-      ?? 'http://maya-dashboard.localhost';
+      ?? 'http://maya-dashboard.maya.test';
     window.location.assign(`${dashboardOrigin}/profile`);
   };
 
