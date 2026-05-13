@@ -71,7 +71,7 @@ class ArchivedLogService implements ArchivedLogServiceInterface
             $this->resilientLogPublisher->publishFromThrowable(
                 $e,
                 'medium',
-                'archived_log_not_found',
+                'LAR-LOG-004',
                 ['archived_log_id' => $id],
                 $this->messagingAppSlug(),
             );
@@ -109,7 +109,7 @@ class ArchivedLogService implements ArchivedLogServiceInterface
             $this->resilientLogPublisher->publishFromThrowable(
                 $e,
                 'medium',
-                'archived_log_update_failed',
+                'LAR-LOG-001',
                 ['archived_log_id' => $archivedLog->id],
                 $this->messagingAppSlug(),
             );
@@ -133,7 +133,7 @@ class ArchivedLogService implements ArchivedLogServiceInterface
             $this->resilientLogPublisher->publishFromThrowable(
                 $e,
                 'medium',
-                'archived_log_delete_failed',
+                'LAR-LOG-002',
                 ['archived_log_id' => $archivedLog->id],
                 $this->messagingAppSlug(),
             );
@@ -155,7 +155,7 @@ class ArchivedLogService implements ArchivedLogServiceInterface
             $this->resilientLogPublisher->publishFromThrowable(
                 $e,
                 'medium',
-                'archived_log_archive_failed',
+                'LAR-LOG-003',
                 ['log_id' => $logId],
                 $this->messagingAppSlug(),
             );
