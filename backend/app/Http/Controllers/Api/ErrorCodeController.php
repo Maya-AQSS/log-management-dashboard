@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreErrorCodeRequest;
 use App\Http\Requests\Api\UpdateErrorCodeRequest;
 use App\Http\Resources\ErrorCodeResource;
+use App\Models\ErrorCode;
 use App\Services\Contracts\ErrorCodeServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -44,6 +45,8 @@ class ErrorCodeController extends Controller
 
     public function store(StoreErrorCodeRequest $request): JsonResponse
     {
+        $this->authorize('create', ErrorCode::class);
+
         $errorCode = $this->errorCodeService->create($request->validated());
         $errorCode->loadMissing('application');
 
@@ -55,6 +58,9 @@ class ErrorCodeController extends Controller
     public function update(UpdateErrorCodeRequest $request, int $id): ErrorCodeResource
     {
         $errorCode = $this->errorCodeService->findOrFail($id);
+
+        $this->authorize('update', $errorCode);
+
         $errorCode = $this->errorCodeService->update($errorCode, $request->validated());
         $errorCode->loadMissing('application');
         $errorCode->loadCount('comments');
@@ -65,6 +71,9 @@ class ErrorCodeController extends Controller
     public function destroy(int $id): JsonResponse
     {
         $errorCode = $this->errorCodeService->findOrFail($id);
+
+        $this->authorize('delete', $errorCode);
+
         $this->errorCodeService->delete($errorCode);
 
         return response()->json(null, 204);

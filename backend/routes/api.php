@@ -47,8 +47,8 @@ Route::prefix('v1')->group(function () {
         // Archived logs
         Route::get('/archived-logs', [ArchivedLogController::class, 'index']);
         Route::get('/archived-logs/{id}', [ArchivedLogController::class, 'show'])->whereNumber('id');
-        Route::match(['put', 'patch'], '/archived-logs/{id}', [ArchivedLogController::class, 'update'])->whereNumber('id')->middleware('role:admin,super-admin');
-        Route::delete('/archived-logs/{id}', [ArchivedLogController::class, 'destroy'])->whereNumber('id')->middleware('role:admin,super-admin');
+        Route::match(['put', 'patch'], '/archived-logs/{id}', [ArchivedLogController::class, 'update'])->whereNumber('id');
+        Route::delete('/archived-logs/{id}', [ArchivedLogController::class, 'destroy'])->whereNumber('id');
 
         // Comments sobre ArchivedLogs
         Route::get('/archived-logs/{id}/comments', [CommentController::class, 'indexForArchivedLog'])->whereNumber('id');
@@ -58,8 +58,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/error-codes', [ErrorCodeController::class, 'index']);
         Route::post('/error-codes', [ErrorCodeController::class, 'store']);
         Route::get('/error-codes/{id}', [ErrorCodeController::class, 'show'])->whereNumber('id');
-        Route::match(['put', 'patch'], '/error-codes/{id}', [ErrorCodeController::class, 'update'])->whereNumber('id')->middleware('role:admin,super-admin');
-        Route::delete('/error-codes/{id}', [ErrorCodeController::class, 'destroy'])->whereNumber('id')->middleware('role:admin,super-admin');
+        Route::match(['put', 'patch'], '/error-codes/{id}', [ErrorCodeController::class, 'update'])->whereNumber('id');
+        Route::delete('/error-codes/{id}', [ErrorCodeController::class, 'destroy'])->whereNumber('id');
 
         // Comments sobre ErrorCodes
         Route::get('/error-codes/{id}/comments', [CommentController::class, 'indexForErrorCode'])->whereNumber('id');

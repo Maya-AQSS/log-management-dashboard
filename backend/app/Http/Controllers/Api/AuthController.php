@@ -9,9 +9,8 @@ use Illuminate\Http\Request;
 class AuthController extends Controller
 {
     /**
-     * Devuelve el perfil del usuario autenticado desde el JWT.
-     * En Fase 1 se proyecta el payload del token directamente; en futuras
-     * fases se enriquecerá con permisos/equipos del servicio central.
+     * Devuelve el perfil del usuario autenticado desde el JWT (incluye `permissions`
+     * normalizados desde el claim del token; ver {@see \Maya\Auth\Middleware\JwtMiddleware}).
      */
     public function me(Request $request): JsonResponse
     {

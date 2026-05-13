@@ -5,8 +5,8 @@ return [
         'forbidden' => 'You are not allowed to perform this action.',
     ],
 
-    'require_role' => [
-        'forbidden' => 'You do not have the required role for this action.',
+    'error_codes' => [
+        'forbidden' => 'You do not have permission to manage error codes in this application.',
     ],
 
     'comments' => [

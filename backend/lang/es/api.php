@@ -11,8 +11,8 @@ return [
         'forbidden' => 'No tienes permiso para realizar esta acción.',
     ],
 
-    'require_role' => [
-        'forbidden' => 'No tienes el rol necesario para esta acción.',
+    'error_codes' => [
+        'forbidden' => 'No tienes permiso para gestionar códigos de error en esta aplicación.',
     ],
 
     'comments' => [

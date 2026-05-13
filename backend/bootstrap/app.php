@@ -17,8 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
 
         $middleware->alias([
-            'jwt'  => \Maya\Auth\Middleware\JwtMiddleware::class,
-            'role' => \App\Http\Middleware\RequireRole::class,
+            'jwt' => \Maya\Auth\Middleware\JwtMiddleware::class,
         ]);
 
         $middleware->api(prepend: [
