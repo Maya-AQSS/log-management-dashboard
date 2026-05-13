@@ -4,13 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ArchivedLogResource;
-use App\Models\ArchivedLog;
-use App\Models\User;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\Gate;
 
 class ArchivedLogController extends Controller
 {
@@ -61,7 +58,7 @@ class ArchivedLogController extends Controller
     {
         $archivedLog = $this->archivedLogService->findOrFail($id);
 
-        $this->authorizeOwner($request, $archivedLog, 'update');
+        $this->authorize('update', $archivedLog);
 
         $validated = $request->validate([
             'description' => ['nullable', 'string', 'max:5000'],
@@ -80,32 +77,14 @@ class ArchivedLogController extends Controller
     /**
      * Elimina (soft delete) un log archivado.
      */
-    public function destroy(Request $request, int $id): JsonResponse
+    public function destroy(int $id): JsonResponse
     {
         $archivedLog = $this->archivedLogService->findOrFail($id);
 
-        $this->authorizeOwner($request, $archivedLog, 'delete');
+        $this->authorize('delete', $archivedLog);
 
         $this->archivedLogService->delete($archivedLog);
 
         return response()->json(null, 204);
-    }
-
-    /**
-     * Autoriza que el usuario del JWT sea el propietario del recurso.
-     */
-    private function authorizeOwner(Request $request, ArchivedLog $archivedLog, string $action): void
-    {
-        /** @var array<string, mixed>|null $jwtUser */
-        $jwtUser = $request->attributes->get('jwt_user');
-        $externalId = is_array($jwtUser) ? ($jwtUser['id'] ?? null) : null;
-
-        $user = is_string($externalId) && $externalId !== ''
-            ? User::where('external_id', $externalId)->first()
-            : null;
-
-        abort_if($user === null, 403);
-
-        Gate::forUser($user)->authorize($action, $archivedLog);
     }
 }

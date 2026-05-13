@@ -63,8 +63,8 @@ class ArchivedLogService implements ArchivedLogServiceInterface
         $this->archivedLogRepository->delete($archivedLog);
     }
 
-    public function archiveFromLogId(int $logId, int $archivedById): ArchivedLog
+    public function archiveFromLogId(int $logId, string $archivedByUserId): ArchivedLog
     {
-        return $this->archivedLogRepository->archiveFromLogId($logId, $archivedById);
+        return $this->archivedLogRepository->archiveFromLogId($logId, $archivedByUserId);
     }
 }

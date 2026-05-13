@@ -23,10 +23,19 @@ interface ArchivedLogServiceInterface
 
     /**
      * @param  array<string, mixed>  $fields
+     *
+     * La autorización (subject JWT === `archived_by_id`) la define {@see \App\Policies\ArchivedLogPolicy}.
      */
     public function updateArchivedFields(ArchivedLog $archivedLog, array $fields): void;
 
+    /**
+     * Soft delete. Quién puede invocarlo lo define {@see \App\Policies\ArchivedLogPolicy}.
+     */
     public function delete(ArchivedLog $archivedLog): void;
 
-    public function archiveFromLogId(int $logId, int $archivedById): ArchivedLog;
+    /**
+     * Archiva un log activo. `$archivedByUserId` es el subject del JWT (UUID Keycloak),
+     * que se persiste en `archived_logs.archived_by_id` (no exige fila en la vista FDW `users`).
+     */
+    public function archiveFromLogId(int $logId, string $archivedByUserId): ArchivedLog;
 }

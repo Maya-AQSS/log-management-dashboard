@@ -15,9 +15,10 @@ export type UserProfileContextValue = {
   profile: MeProfile | null;
   loading: boolean;
   error: Error | null;
-  /** Recarga el perfil desde GET /api/v1/me (p. ej. tras cambios de rol). */
+  /** Recarga el perfil desde GET /api/v1/me (p. ej. tras cambios de permisos en IdP). */
   reload: () => Promise<void>;
-  hasRole: (role: string) => boolean;
+  /** Comprueba un código de permiso devuelto en `GET /api/v1/me` (maya_authorization). */
+  hasPermission: (permission: string) => boolean;
 };
 
 const UserProfileContext = createContext<UserProfileContextValue | undefined>(undefined);
@@ -57,8 +58,8 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
     void load();
   }, [isOidcSignedIn, load]);
 
-  const hasRole = useCallback(
-    (role: string) => profile?.roles.includes(role) ?? false,
+  const hasPermission = useCallback(
+    (permission: string) => profile?.permissions.includes(permission) ?? false,
     [profile],
   );
 
@@ -68,9 +69,9 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
       loading,
       error,
       reload: load,
-      hasRole,
+      hasPermission,
     }),
-    [profile, loading, error, load, hasRole],
+    [profile, loading, error, load, hasPermission],
   );
 
   return <UserProfileContext.Provider value={value}>{children}</UserProfileContext.Provider>;
