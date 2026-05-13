@@ -2,34 +2,22 @@
 
 namespace App\Services\Contracts;
 
-use App\Models\ArchivedLog;
 use App\Models\Comment;
-use App\Models\ErrorCode;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 interface CommentServiceInterface
 {
-    /**
-     * @return Collection<int, Comment>
-     */
-    public function listForArchivedLog(int $archivedLogId): Collection;
+    public function findOrFail(int $id): Comment;
 
     /**
      * @return Collection<int, Comment>
      */
-    public function listForErrorCode(int $errorCodeId): Collection;
+    public function listForCommentable(Model $commentable): Collection;
 
-    public function storeForArchivedLog(int $archivedLogId, User $author, string $rawContent): Comment;
+    public function createForCommentable(Model $commentable, string $userId, string $rawContent): Comment;
 
-    public function storeForErrorCode(int $errorCodeId, User $author, string $rawContent): Comment;
-
-    /**
-     * Localiza el comentario; la autorización se aplica en el controlador via Policy.
-     */
-    public function findOrFail(int $commentId): Comment;
-
-    public function update(Comment $comment, string $rawContent): Comment;
+    public function updateContent(Comment $comment, string $rawContent): Comment;
 
     public function delete(Comment $comment): void;
 }

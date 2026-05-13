@@ -5,12 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Concerns\ResolvesJwtUser;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ArchivedLogResource;
-use App\Models\ArchivedLog;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\Gate;
 
 class ArchivedLogController extends Controller
 {
@@ -18,7 +16,8 @@ class ArchivedLogController extends Controller
 
     public function __construct(
         private ArchivedLogServiceInterface $archivedLogService,
-    ) {}
+    ) {
+    }
 
     /**
      * Listado paginado y filtrado de logs archivados.
@@ -28,7 +27,7 @@ class ArchivedLogController extends Controller
         $perPage = (int) $request->integer('per_page', 15);
         $severity = $request->input('severity');
         if (is_string($severity)) {
-            $severity = array_filter(array_map('trim', explode(',', $severity)), fn (string $v): bool => $v !== '');
+            $severity = array_filter(array_map('trim', explode(',', $severity)), fn(string $v): bool => $v !== '');
         }
 
         $paginator = $this->archivedLogService->searchAndFilter(
@@ -63,7 +62,7 @@ class ArchivedLogController extends Controller
     {
         $archivedLog = $this->archivedLogService->findOrFail($id);
 
-        $this->authorizeOwner($request, $archivedLog, 'update');
+        $this->authorize('update', $archivedLog);
 
         $validated = $request->validate([
             'description' => ['nullable', 'string', 'max:5000'],
@@ -82,24 +81,14 @@ class ArchivedLogController extends Controller
     /**
      * Elimina (soft delete) un log archivado.
      */
-    public function destroy(Request $request, int $id): JsonResponse
+    public function destroy(int $id): JsonResponse
     {
         $archivedLog = $this->archivedLogService->findOrFail($id);
 
-        $this->authorizeOwner($request, $archivedLog, 'delete');
+        $this->authorize('delete', $archivedLog);
 
         $this->archivedLogService->delete($archivedLog);
 
         return response()->json(null, 204);
-    }
-
-    /**
-     * Autoriza que el usuario del JWT sea el propietario del recurso.
-     */
-    private function authorizeOwner(Request $request, ArchivedLog $archivedLog, string $action): void
-    {
-        $user = $this->resolveJwtUserOrFail($request);
-
-        Gate::forUser($user)->authorize($action, $archivedLog);
     }
 }

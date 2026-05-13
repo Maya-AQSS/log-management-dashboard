@@ -45,10 +45,10 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
 
         $query = ArchivedLog::query()
             ->withStandardRelations()
-            ->when($severities !== null && $severities !== [], fn ($q) => $q->whereIn('severity', $severities))
-            ->when($applicationId !== null, fn ($q) => $q->where('application_id', $applicationId))
-            ->when($dateFrom !== null, fn ($q) => $q->where('archived_at', '>=', $dateFrom))
-            ->when($dateTo !== null, fn ($q) => $q->where('archived_at', '<=', $dateTo));
+            ->when($severities !== null && $severities !== [], fn($q) => $q->whereIn('severity', $severities))
+            ->when($applicationId !== null, fn($q) => $q->where('application_id', $applicationId))
+            ->when($dateFrom !== null, fn($q) => $q->where('archived_at', '>=', $dateFrom))
+            ->when($dateTo !== null, fn($q) => $q->where('archived_at', '<=', $dateTo));
 
         $query = match ($sortBy) {
             'archived_at' => $query
@@ -73,7 +73,7 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
     {
         $dir = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
         $query->orderByRaw(
-            'CASE severity WHEN ? THEN 1 WHEN ? THEN 2 WHEN ? THEN 3 WHEN ? THEN 4 WHEN ? THEN 5 ELSE 99 END '.$dir,
+            'CASE severity WHEN ? THEN 1 WHEN ? THEN 2 WHEN ? THEN 3 WHEN ? THEN 4 WHEN ? THEN 5 ELSE 99 END ' . $dir,
             ['critical', 'high', 'medium', 'low', 'other']
         );
         $query->orderByDesc('archived_at');
@@ -94,6 +94,8 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
 
     /**
      * @param  array<string, mixed>  $fields
+     *
+     * No valida actor; debe haberse pasado {@see \App\Policies\ArchivedLogPolicy} (p. ej. vía `authorize` en el controlador).
      */
     public function updateArchivedFields(ArchivedLog $archivedLog, array $fields): void
     {
@@ -101,7 +103,7 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
     }
 
     /**
-     * Elimina un log archivado.
+     * Soft delete. La autorización la define {@see \App\Policies\ArchivedLogPolicy}.
      */
     public function delete(ArchivedLog $archivedLog): void
     {
@@ -111,9 +113,9 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
     /**
      * Archiva un log por su id.
      */
-    public function archiveFromLogId(int $logId, string $archivedById): ArchivedLog
+    public function archiveFromLogId(int $logId, string $archivedByUserId): ArchivedLog
     {
-        return DB::transaction(function () use ($logId, $archivedById): ArchivedLog {
+        return DB::transaction(function () use ($logId, $archivedByUserId): ArchivedLog {
             $log = Log::query()
                 ->with(['errorCode'])
                 ->whereKey($logId)
@@ -134,7 +136,7 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
 
             $archivedLog = ArchivedLog::query()->create([
                 'application_id' => (int) $log->application_id,
-                'archived_by_id' => $archivedById,
+                'archived_by_id' => $archivedByUserId,
                 'error_code_id' => $log->error_code_id,
                 'severity' => $log->severity,
                 'message' => $log->message,

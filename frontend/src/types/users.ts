@@ -10,6 +10,9 @@ export type MeProfile = BaseMeProfile & {
   username: string | null;
   department: string | null;
   organization_id: string | null;
+  /** @deprecated Preferir `permissions` (maya_authorization); se mantiene por compatibilidad con tokens antiguos. */
   roles: string[];
+  /** Códigos de permiso (claim JWT `permissions`). */
+  permissions: string[];
   scope: string;
 };

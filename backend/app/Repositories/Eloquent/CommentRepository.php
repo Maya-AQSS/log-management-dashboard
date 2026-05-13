@@ -7,22 +7,36 @@ use App\Repositories\Contracts\CommentRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
-final class CommentRepository implements CommentRepositoryInterface
+class CommentRepository implements CommentRepositoryInterface
 {
+    /**
+     * Busca un comentario por su id.
+     */
+    public function findOrFail(int $id): Comment
+    {
+        return Comment::query()->findOrFail($id);
+    }
+
+    /**
+     * Lista los comentarios para un modelo comentable.
+     */
     public function listForCommentable(Model $commentable): Collection
     {
+        /** @var Collection<int, Comment> */
         return $commentable->comments()
             ->with('user')
             ->latest()
             ->get();
     }
 
-    public function createFor(Model $commentable, string $userId, string $content): Comment
+    /**
+     * Crea un comentario para un modelo comentable.
+     */
+    public function createForCommentable(Model $commentable, string $userId, string $sanitizedContent): Comment
     {
-        /** @var Comment $comment */
         $comment = $commentable->comments()->create([
             'user_id' => $userId,
-            'content' => $content,
+            'content' => $sanitizedContent,
         ]);
 
         $comment->loadMissing('user');
@@ -30,19 +44,19 @@ final class CommentRepository implements CommentRepositoryInterface
         return $comment;
     }
 
-    public function findOrFail(int $id): Comment
+    /**
+     * Actualiza el contenido de un comentario.
+     */
+    public function updateContent(Comment $comment, string $sanitizedContent): Comment
     {
-        return Comment::query()->findOrFail($id);
+        $comment->update(['content' => $sanitizedContent]);
+
+        return $comment->refresh()->loadMissing('user');
     }
 
-    public function updateContent(Comment $comment, string $content): Comment
-    {
-        $comment->update(['content' => $content]);
-        $comment->refresh()->loadMissing('user');
-
-        return $comment;
-    }
-
+    /**
+     * Elimina un comentario.
+     */
     public function delete(Comment $comment): void
     {
         $comment->delete();

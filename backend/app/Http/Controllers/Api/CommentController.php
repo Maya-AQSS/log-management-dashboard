@@ -7,52 +7,62 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreCommentRequest;
 use App\Http\Requests\Api\UpdateCommentRequest;
 use App\Http\Resources\CommentResource;
+use App\Services\Contracts\ArchivedLogServiceInterface;
 use App\Services\Contracts\CommentServiceInterface;
+use App\Services\Contracts\ErrorCodeServiceInterface;
+use App\Services\PanelUserService;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Gate as GateFacade;
 
 class CommentController extends Controller
 {
-    use ResolvesJwtUser;
-
     public function __construct(
-        private readonly CommentServiceInterface $comments,
-    ) {}
+        private readonly PanelUserService $panelUserService,
+        private readonly ArchivedLogServiceInterface $archivedLogService,
+        private readonly ErrorCodeServiceInterface $errorCodeService,
+        private readonly CommentServiceInterface $commentService,
+    ) {
+    }
 
+    /**
+     * Listado de comentarios para un log archivado.
+     */
     public function indexForArchivedLog(int $archivedLogId): AnonymousResourceCollection
     {
-        return CommentResource::collection(
-            $this->comments->listForArchivedLog($archivedLogId),
-        );
+        $archivedLog = $this->archivedLogService->findOrFail($archivedLogId);
+
+        return $this->indexFor($archivedLog);
     }
 
+    /**
+     * Listado de comentarios para un código de error.
+     */
     public function indexForErrorCode(int $errorCodeId): AnonymousResourceCollection
     {
-        return CommentResource::collection(
-            $this->comments->listForErrorCode($errorCodeId),
-        );
+        $errorCode = $this->errorCodeService->findOrFail($errorCodeId);
+
+        return $this->indexFor($errorCode);
     }
 
+    /**
+     * Crea un nuevo comentario para un log archivado.
+     */
     public function storeForArchivedLog(StoreCommentRequest $request, int $archivedLogId): JsonResponse
     {
-        $author = $this->resolveJwtUserOrFail($request);
+        $archivedLog = $this->archivedLogService->findOrFail($archivedLogId);
 
-        $comment = $this->comments->storeForArchivedLog(
-            $archivedLogId,
-            $author,
-            (string) $request->validated('content'),
-        );
-
-        return (new CommentResource($comment))
-            ->response()
-            ->setStatusCode(201);
+        return $this->storeFor($request, $archivedLog);
     }
 
+    /**
+     * Crea un nuevo comentario para un código de error.
+     */
     public function storeForErrorCode(StoreCommentRequest $request, int $errorCodeId): JsonResponse
     {
-        $author = $this->resolveJwtUserOrFail($request);
+        $errorCode = $this->errorCodeService->findOrFail($errorCodeId);
 
         $comment = $this->comments->storeForErrorCode(
             $errorCodeId,
@@ -65,30 +75,61 @@ class CommentController extends Controller
             ->setStatusCode(201);
     }
 
+    /**
+     * Actualiza un comentario.
+     */
     public function update(UpdateCommentRequest $request, int $id): CommentResource
     {
-        $comment = $this->comments->findOrFail($id);
-        $user = $this->resolveJwtUserOrFail($request);
+        $comment = $this->commentService->findOrFail($id);
+        $user = $this->panelUserService->resolveFromJwtRequest($request);
 
-        Gate::forUser($user)->authorize('update', $comment);
+        GateFacade::forUser($user)->authorize('update', $comment);
 
-        $comment = $this->comments->update(
-            $comment,
-            (string) $request->validated('content'),
-        );
+        $comment = $this->commentService->updateContent($comment, $request->validated('content'));
 
         return new CommentResource($comment);
     }
 
+    /**
+     * Elimina un comentario.
+     */
     public function destroy(Request $request, int $id): JsonResponse
     {
-        $comment = $this->comments->findOrFail($id);
-        $user = $this->resolveJwtUserOrFail($request);
+        $comment = $this->commentService->findOrFail($id);
+        $user = $this->panelUserService->resolveFromJwtRequest($request);
 
-        Gate::forUser($user)->authorize('delete', $comment);
+        GateFacade::forUser($user)->authorize('delete', $comment);
 
-        $this->comments->delete($comment);
+        $this->commentService->delete($comment);
 
         return response()->json(null, 204);
+    }
+
+    /**
+     * Listado de comentarios para un modelo comentable.
+     */
+    private function indexFor(Model $commentable): AnonymousResourceCollection
+    {
+        return CommentResource::collection(
+            $this->commentService->listForCommentable($commentable)
+        );
+    }
+
+    /**
+     * Crea un nuevo comentario para un modelo comentable.
+     */
+    private function storeFor(StoreCommentRequest $request, Model $commentable): JsonResponse
+    {
+        $user = $this->panelUserService->resolveFromJwtRequest($request);
+
+        $comment = $this->commentService->createForCommentable(
+            $commentable,
+            $user->id,
+            $request->validated('content')
+        );
+
+        return (new CommentResource($comment))
+            ->response()
+            ->setStatusCode(201);
     }
 }

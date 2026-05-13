@@ -21,7 +21,8 @@ class LogController extends Controller
     public function __construct(
         private LogServiceInterface $logService,
         private ArchivedLogServiceInterface $archivedLogService,
-    ) {}
+    ) {
+    }
 
     /**
      * Listado paginado y filtrado de logs activos.
@@ -31,7 +32,7 @@ class LogController extends Controller
         $perPage = (int) $request->integer('per_page', 25);
         $severity = $request->input('severity');
         if (is_string($severity)) {
-            $severity = array_filter(array_map('trim', explode(',', $severity)), fn (string $v): bool => $v !== '');
+            $severity = array_filter(array_map('trim', explode(',', $severity)), fn(string $v): bool => $v !== '');
         }
 
         $paginator = $this->logService->searchAndFilter(
@@ -80,9 +81,20 @@ class LogController extends Controller
         }
 
         try {
-            $user = $this->resolveJwtUserOrFail($request);
+            /** @var array<string, mixed>|null $jwtUser */
+            $jwtUser = $request->attributes->get('jwt_user');
+            $jwtSubject = is_array($jwtUser) ? ($jwtUser['id'] ?? null) : null;
 
-            $archivedLog = $this->archivedLogService->archiveFromLogId($id, $user->id);
+            if (!is_string($jwtSubject) || $jwtSubject === '') {
+                return response()->json([
+                    'error' => [
+                        'code' => 'actor_missing',
+                        'message' => __('logs.actor_missing'),
+                    ],
+                ], 403);
+            }
+
+            $archivedLog = $this->archivedLogService->archiveFromLogId($id, $jwtSubject);
 
             return response()->json([
                 'data' => ['archived_log_id' => $archivedLog->id],
@@ -128,10 +140,10 @@ class LogController extends Controller
             $payload = $this->logService->streamPayload(10);
 
             echo "event: logs\n";
-            echo 'data: '.json_encode(
+            echo 'data: ' . json_encode(
                 $payload,
                 JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-            )."\n\n";
+            ) . "\n\n";
 
             if (function_exists('ob_flush')) {
                 ob_flush();
