@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\LogWasArchived;
 use App\Models\ArchivedLog;
 use App\Repositories\Contracts\ArchivedLogRepositoryInterface;
 use App\Services\Contracts\ArchivedLogServiceInterface;
@@ -150,13 +151,7 @@ class ArchivedLogService implements ArchivedLogServiceInterface
     {
         try {
             $archivedLog = $this->archivedLogRepository->archiveFromLogId($logId, $archivedByUserId);
-            $this->auditPublisher->publish(
-                applicationSlug: $this->messagingAppSlug(),
-                entityType: 'archived_log',
-                entityId: (string) $archivedLog->id,
-                action: 'archive',
-                userId: $archivedByUserId,
-            );
+            LogWasArchived::dispatch($archivedLog, $archivedByUserId);
 
             return $archivedLog;
         } catch (Throwable $e) {
