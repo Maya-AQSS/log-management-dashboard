@@ -15,8 +15,8 @@ Sistema de gestión y visualización de logs del ecosistema Maya (CEEDCV).
 - Servicios: `backend`, `worker`, `frontend`
 
 ## Accesos locales (vía Traefik)
-- Frontend:  http://maya_logs.localhost
-- Backend:   http://maya_logs_api.localhost/api/v1
+- Frontend:  http://maya-logs.localhost
+- Backend:   http://maya-logs-api.localhost/api/v1
 - Keycloak:  http://keycloak.localhost
 - Traefik:   http://localhost:8888/dashboard/
 
