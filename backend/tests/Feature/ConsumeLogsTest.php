@@ -3,10 +3,12 @@
 namespace Tests\Feature;
 
 use App\Services\LogIngestionService;
+use App\Support\ResilientLogPublisher;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Maya\Messaging\Publishers\LogPublisher;
+use Mockery;
 use Tests\TestCase;
 
 class ConsumeLogsTest extends TestCase
@@ -16,8 +18,9 @@ class ConsumeLogsTest extends TestCase
     private function makeService(array $slugToId = []): LogIngestionService
     {
         // batchSize: 1 → every ingest() flushes immediately, keeping assertions simple.
-        $service = new LogIngestionService(batchSize: 1);
+        $service = $this->app->makeWith(LogIngestionService::class, ['batchSize' => 1]);
         $service->setApplicationMap($slugToId);
+
         return $service;
     }
 
@@ -39,12 +42,34 @@ class ConsumeLogsTest extends TestCase
 
     public function test_payload_with_unknown_app_is_dropped_and_logged(): void
     {
-        Log::shouldReceive('warning')
-            ->once()
-            ->withArgs(fn (string $msg, array $ctx = []) => isset($ctx['slug']) && $ctx['slug'] === 'ghost-app');
+        config(['logging.default' => 'null']);
+        $this->app->forgetInstance('log');
 
-        $this->makeService(['known' => 1])
-            ->ingest(['app' => 'ghost-app', 'severity' => 'low', 'message' => 'test']);
+        $logPublisher = Mockery::mock(LogPublisher::class);
+        $logPublisher->shouldReceive('publish')
+            ->once()
+            ->withArgs(function (...$args): bool {
+                // Llamada con named args puede omitir occurredAt → solo 7 argumentos posicionales.
+                if (count($args) < 7) {
+                    return false;
+                }
+                [$severity, $message, $errorCode, $file, $line, $metadata, $app] = $args;
+
+                return $severity === 'medium'
+                    && $errorCode === 'LAR-LOG-007'
+                    && is_string($message)
+                    && str_contains($message, 'descartar payload')
+                    && $file === null
+                    && $line === null
+                    && is_array($metadata)
+                    && ($metadata['slug'] ?? null) === 'ghost-app'
+                    && ($metadata['component'] ?? null) === 'log_ingestion'
+                    && is_string($app) && $app !== '';
+            });
+
+        $service = new LogIngestionService(new ResilientLogPublisher($logPublisher), 1);
+        $service->setApplicationMap(['known' => 1]);
+        $service->ingest(['app' => 'ghost-app', 'severity' => 'low', 'message' => 'test']);
 
         $this->assertDatabaseCount('logs', 0);
     }
@@ -53,17 +78,17 @@ class ConsumeLogsTest extends TestCase
     {
         $this->makeService(['my-app' => 7])
             ->ingest([
-                'app'      => 'my-app',
+                'app' => 'my-app',
                 'severity' => 'critical',
-                'message'  => 'Something broke',
+                'message' => 'Something broke',
             ]);
 
         $this->assertDatabaseHas('logs', [
             'application_id' => 7,
-            'severity'       => 'critical',
-            'message'        => 'Something broke',
-            'resolved'       => 0,
-            'error_code_id'  => null,
+            'severity' => 'critical',
+            'message' => 'Something broke',
+            'resolved' => 0,
+            'error_code_id' => null,
         ]);
     }
 
@@ -73,9 +98,9 @@ class ConsumeLogsTest extends TestCase
 
         $this->makeService(['my-app' => 1])
             ->ingest([
-                'app'         => 'my-app',
-                'severity'    => 'low',
-                'message'     => 'test',
+                'app' => 'my-app',
+                'severity' => 'low',
+                'message' => 'test',
                 'occurred_at' => $timestamp,
             ]);
 
@@ -89,20 +114,20 @@ class ConsumeLogsTest extends TestCase
     {
         $this->makeService(['my-app' => 3])
             ->ingest([
-                'app'        => 'my-app',
-                'severity'   => 'high',
-                'message'    => 'Error',
+                'app' => 'my-app',
+                'severity' => 'high',
+                'message' => 'Error',
                 'error_code' => 'EC001',
-                'file'       => 'src/Foo.php',
-                'line'       => 42,
+                'file' => 'src/Foo.php',
+                'line' => 42,
             ]);
 
         $this->assertDatabaseHas('error_codes', [
-            'code'           => 'EC001',
+            'code' => 'EC001',
             'application_id' => 3,
-            'name'           => 'EC001',
-            'file'           => 'src/Foo.php',
-            'line'           => 42,
+            'name' => 'EC001',
+            'file' => 'src/Foo.php',
+            'line' => 42,
         ]);
 
         $ecId = DB::table('error_codes')->value('id');
@@ -132,15 +157,38 @@ class ConsumeLogsTest extends TestCase
 
     public function test_malformed_timestamp_falls_back_to_now_without_crashing(): void
     {
-        Log::shouldReceive('warning')->once()->withArgs(fn (string $m, array $ctx = []) => isset($ctx['value']) && $ctx['value'] === 'not-a-date');
+        config(['logging.default' => 'null']);
+        $this->app->forgetInstance('log');
 
-        $this->makeService(['my-app' => 1])
-            ->ingest([
-                'app'         => 'my-app',
-                'severity'    => 'low',
-                'message'     => 'test',
-                'occurred_at' => 'not-a-date',
-            ]);
+        $logPublisher = Mockery::mock(LogPublisher::class);
+        $logPublisher->shouldReceive('publish')
+            ->once()
+            ->withArgs(function (...$args): bool {
+                if (count($args) < 7) {
+                    return false;
+                }
+                [$severity, $message, $errorCode, $file, $line, $metadata, $app] = $args;
+
+                return $severity === 'medium'
+                    && $errorCode === 'LAR-LOG-009'
+                    && is_string($message)
+                    && str_contains($message, 'occurred_at')
+                    && $file === null
+                    && $line === null
+                    && is_array($metadata)
+                    && ($metadata['value'] ?? null) === 'not-a-date'
+                    && ($metadata['component'] ?? null) === 'log_ingestion'
+                    && is_string($app) && $app !== '';
+            });
+
+        $service = new LogIngestionService(new ResilientLogPublisher($logPublisher), 1);
+        $service->setApplicationMap(['my-app' => 1]);
+        $service->ingest([
+            'app' => 'my-app',
+            'severity' => 'low',
+            'message' => 'test',
+            'occurred_at' => 'not-a-date',
+        ]);
 
         $this->assertDatabaseCount('logs', 1);
     }
@@ -149,9 +197,9 @@ class ConsumeLogsTest extends TestCase
     {
         $this->makeService(['my-app' => 1])
             ->ingest([
-                'app'      => 'my-app',
+                'app' => 'my-app',
                 'severity' => 'low',
-                'message'  => 'test',
+                'message' => 'test',
                 'metadata' => ['key' => 'value', 'num' => 42],
             ]);
 
@@ -210,7 +258,7 @@ class ConsumeLogsTest extends TestCase
 
     public function test_logs_are_buffered_until_batch_size_is_reached(): void
     {
-        $service = new LogIngestionService(batchSize: 3);
+        $service = $this->app->makeWith(LogIngestionService::class, ['batchSize' => 3]);
         $service->setApplicationMap(['my-app' => 1]);
         $payload = ['app' => 'my-app', 'severity' => 'low', 'message' => 'msg'];
 
@@ -224,7 +272,7 @@ class ConsumeLogsTest extends TestCase
 
     public function test_flush_drains_partial_buffer(): void
     {
-        $service = new LogIngestionService(batchSize: 10);
+        $service = $this->app->makeWith(LogIngestionService::class, ['batchSize' => 10]);
         $service->setApplicationMap(['my-app' => 1]);
 
         $service->ingest(['app' => 'my-app', 'severity' => 'low', 'message' => 'pending']);
@@ -237,6 +285,6 @@ class ConsumeLogsTest extends TestCase
     public function test_invalid_batch_size_throws(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        new LogIngestionService(batchSize: 0);
+        $this->app->makeWith(LogIngestionService::class, ['batchSize' => 0]);
     }
 }

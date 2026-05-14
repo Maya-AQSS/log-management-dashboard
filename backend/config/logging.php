@@ -1,5 +1,6 @@
 <?php
 
+use Maya\Messaging\Logging\RabbitMQLogChannel;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -15,6 +16,10 @@ return [
     | This option defines the default log channel that is utilized to write
     | messages to your logs. The value provided here should match one of
     | the channels present in the list of "channels" configured below.
+    |
+    | Trazabilidad en el propio maya-logs (tabla `logs` / panel): usa LOG_CHANNEL=stack
+    | y LOG_STACK con `rabbit` (véase .env.example). Warning+ y errores con `exception`
+    | en el contexto se publican a maya.logs; el worker `logs:consume` los persiste.
     |
     */
 
@@ -58,11 +63,16 @@ return [
             'ignore_exceptions' => false,
         ],
 
+        /*
+         * Reenvío a RabbitMQ (exchange maya.logs). Nivel mínimo: LOG_RABBIT_LEVEL.
+         * Complementa `daily`/`single` para que incidencias de esta app aparezcan
+         * en el listado de logs como cualquier otra app emisora (slug MAYA_MESSAGING_APP).
+         */
         'rabbit' => [
             'driver' => 'custom',
-            'via'    => \Maya\Messaging\Logging\RabbitMQLogChannel::class,
-            'level'  => env('LOG_RABBIT_LEVEL', 'warning'),
-            'name'   => 'maya-logs-rabbit',
+            'via' => RabbitMQLogChannel::class,
+            'level' => env('LOG_RABBIT_LEVEL', 'warning'),
+            'name' => 'maya-logs-rabbit',
         ],
 
         'single' => [

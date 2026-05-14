@@ -41,7 +41,7 @@ class ArchivedLogObserverTest extends TestCase
             ): bool {
                 return $entityType === 'archived_log'
                     && $entityId === '9'
-                    && $action === 'created'
+                    && $action === 'Archivar un log'
                     && $userId === 'actor-1'
                     && $blockId === null
                     && $previousValue === null
@@ -80,7 +80,7 @@ class ArchivedLogObserverTest extends TestCase
             ): bool {
                 return $entityType === 'archived_log'
                     && $entityId === '7'
-                    && $action === 'deleted'
+                    && $action === 'Eliminar un log archivado'
                     && $userId === 'del-user'
                     && $blockId === null
                     && is_array($previousValue)

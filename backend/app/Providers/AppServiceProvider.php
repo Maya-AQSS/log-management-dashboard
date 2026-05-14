@@ -19,14 +19,15 @@ use App\Services\ArchivedLogService;
 use App\Services\CommentContentSanitizer;
 use App\Services\CommentService;
 use App\Services\Contracts\ApplicationServiceInterface;
-use App\Services\Contracts\CommentContentSanitizerInterface;
 use App\Services\Contracts\ArchivedLogServiceInterface;
+use App\Services\Contracts\CommentContentSanitizerInterface;
 use App\Services\Contracts\CommentServiceInterface;
 use App\Services\Contracts\ErrorCodeServiceInterface;
 use App\Services\Contracts\LogServiceInterface;
 use App\Services\ErrorCodeService;
 use App\Services\LogService;
 use App\Services\PanelUserService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -59,6 +60,12 @@ class AppServiceProvider extends ServiceProvider
     {
         if ($this->app->environment(['production', 'staging'])) {
             URL::forceScheme('https');
+        }
+
+        if (! $this->app->runningUnitTests()) {
+            Log::shareContext([
+                'emitting_service' => 'maya_logs',
+            ]);
         }
     }
 }

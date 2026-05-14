@@ -60,4 +60,26 @@ class ResilientLogPublisherTest extends TestCase
             return $event->message === 'maya.logs.publish_failed_after_operation_failure';
         });
     }
+
+    #[Test]
+    public function publish_structured_registra_warning_si_log_publisher_falla(): void
+    {
+        Event::fake([MessageLogged::class]);
+
+        $logPublisher = $this->createMock(LogPublisher::class);
+        $logPublisher->expects($this->once())
+            ->method('publish')
+            ->willThrowException(new RuntimeException('broker down'));
+
+        $sut = new ResilientLogPublisher($logPublisher);
+        $sut->publishStructured('low', 'mensaje', 'LAR-LOG-099', ['k' => 1], 'maya_logs');
+
+        Event::assertDispatched(MessageLogged::class, function (MessageLogged $event): bool {
+            return $event->level === 'warning'
+                && $event->message === 'maya.logs.publish_failed_after_operation_failure'
+                && ($event->context['error_code'] ?? null) === 'LAR-LOG-099'
+                && ($event->context['original_message'] ?? null) === 'mensaje'
+                && ($event->context['publish_error'] ?? null) === 'broker down';
+        });
+    }
 }
