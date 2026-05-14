@@ -5,7 +5,8 @@ namespace Tests\Unit;
 use App\Models\Log;
 use App\Repositories\Contracts\LogRepositoryInterface;
 use App\Services\LogService;
-use PHPUnit\Framework\TestCase;
+use Maya\Messaging\Publishers\AuditPublisher;
+use Tests\TestCase;
 
 class LogServiceResolvedTest extends TestCase
 {
@@ -20,9 +21,36 @@ class LogServiceResolvedTest extends TestCase
             ->willReturn($log);
         $repository->expects($this->once())
             ->method('resolved')
-            ->with(42);
+            ->with(42)
+            ->willReturn(1);
 
-        $service = new LogService($repository);
-        $service->resolved(42);
+        $publisher = $this->createMock(AuditPublisher::class);
+        $publisher->expects($this->once())
+            ->method('publish');
+
+        $service = new LogService($repository, $publisher);
+        $service->resolved(42, 'sub-1');
+    }
+
+    public function test_resolved_no_audit_when_row_already_resolved(): void
+    {
+        $log = $this->createMock(Log::class);
+
+        $repository = $this->createMock(LogRepositoryInterface::class);
+        $repository->expects($this->once())
+            ->method('findOrFail')
+            ->with(7)
+            ->willReturn($log);
+        $repository->expects($this->once())
+            ->method('resolved')
+            ->with(7)
+            ->willReturn(0);
+
+        $publisher = $this->createMock(AuditPublisher::class);
+        $publisher->expects($this->never())
+            ->method('publish');
+
+        $service = new LogService($repository, $publisher);
+        $service->resolved(7, 'sub-2');
     }
 }

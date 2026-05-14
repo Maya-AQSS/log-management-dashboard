@@ -8,11 +8,16 @@ use App\Repositories\Contracts\LogRepositoryInterface;
 use App\Services\Contracts\LogServiceInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Maya\Messaging\Publishers\AuditPublisher;
 
 class LogService implements LogServiceInterface
 {
+    private const AUDIT_ENTITY_TYPE = 'log';
+
     public function __construct(
-        private LogRepositoryInterface $logRepository
+        private LogRepositoryInterface $logRepository,
+        private AuditPublisher $auditPublisher,
     ) {}
 
     /**
@@ -158,11 +163,40 @@ class LogService implements LogServiceInterface
     /**
      * Marca el log como resuelto.
      */
-    public function resolved(int $logId): void
+    public function resolved(int $logId, string $actorUserId): void
     {
         $this->logRepository->findOrFail($logId);
 
-        $this->logRepository->resolved($logId);
+        $affected = $this->logRepository->resolved($logId);
+        if ($affected < 1) {
+            return;
+        }
+
+        $this->afterCommit(function () use ($logId, $actorUserId): void {
+            $this->auditPublisher->publish(
+                applicationSlug: (string) config('messaging.app'),
+                entityType: self::AUDIT_ENTITY_TYPE,
+                entityId: (string) $logId,
+                action: 'Marcar un log como resuelto',
+                userId: $actorUserId,
+                previousValue: ['resolved' => false],
+                newValue: ['resolved' => true],
+            );
+        });
+    }
+
+    /**
+     * Sin transacción activa, publica de inmediato; dentro de `DB::transaction`, difiere al commit.
+     */
+    private function afterCommit(callable $callback): void
+    {
+        if (DB::transactionLevel() === 0) {
+            $callback();
+
+            return;
+        }
+
+        DB::afterCommit($callback);
     }
 
     /**

@@ -59,7 +59,9 @@ interface LogServiceInterface
     public function archivedLogIdFor(int $logId): ?int;
 
     /**
-     * Marca el log como resuelto.
+     * Marca el log como resuelto. Publica auditoría solo si hubo cambio en BD.
+     *
+     * @param  string  $actorUserId  Subject JWT (UUID) del usuario que resuelve.
      */
-    public function resolved(int $logId): void;
+    public function resolved(int $logId, string $actorUserId): void;
 }
