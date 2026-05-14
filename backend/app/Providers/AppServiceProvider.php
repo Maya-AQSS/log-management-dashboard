@@ -6,12 +6,14 @@ use App\Repositories\Contracts\ApplicationRepositoryInterface;
 use App\Repositories\Contracts\ArchivedLogRepositoryInterface;
 use App\Repositories\Contracts\CommentRepositoryInterface;
 use App\Repositories\Contracts\ErrorCodeRepositoryInterface;
+use App\Repositories\Contracts\LogIngestionRepositoryInterface;
 use App\Repositories\Contracts\LogRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Eloquent\ApplicationRepository;
 use App\Repositories\Eloquent\ArchivedLogRepository;
 use App\Repositories\Eloquent\CommentRepository;
 use App\Repositories\Eloquent\ErrorCodeRepository;
+use App\Repositories\Eloquent\LogIngestionRepository;
 use App\Repositories\Eloquent\LogRepository;
 use App\Repositories\Eloquent\UserRepository;
 use App\Services\ApplicationService;
@@ -39,6 +41,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ArchivedLogServiceInterface::class, ArchivedLogService::class);
 
         $this->app->singleton(LogRepositoryInterface::class, LogRepository::class);
+        $this->app->singleton(LogIngestionRepositoryInterface::class, LogIngestionRepository::class);
         $this->app->singleton(LogServiceInterface::class, LogService::class);
 
         $this->app->singleton(UserRepositoryInterface::class, UserRepository::class);

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Repositories\Contracts\LogIngestionRepositoryInterface;
 use App\Services\LogIngestionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -13,10 +14,13 @@ class ConsumeLogsTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function makeService(array $slugToId = []): LogIngestionService
+    private function makeService(array $slugToId = [], int $batchSize = 1): LogIngestionService
     {
         // batchSize: 1 → every ingest() flushes immediately, keeping assertions simple.
-        $service = new LogIngestionService(batchSize: 1);
+        $service = new LogIngestionService(
+            repository: app(LogIngestionRepositoryInterface::class),
+            batchSize: $batchSize,
+        );
         $service->setApplicationMap($slugToId);
         return $service;
     }
@@ -210,8 +214,7 @@ class ConsumeLogsTest extends TestCase
 
     public function test_logs_are_buffered_until_batch_size_is_reached(): void
     {
-        $service = new LogIngestionService(batchSize: 3);
-        $service->setApplicationMap(['my-app' => 1]);
+        $service = $this->makeService(['my-app' => 1], batchSize: 3);
         $payload = ['app' => 'my-app', 'severity' => 'low', 'message' => 'msg'];
 
         $service->ingest($payload);
@@ -224,8 +227,7 @@ class ConsumeLogsTest extends TestCase
 
     public function test_flush_drains_partial_buffer(): void
     {
-        $service = new LogIngestionService(batchSize: 10);
-        $service->setApplicationMap(['my-app' => 1]);
+        $service = $this->makeService(['my-app' => 1], batchSize: 10);
 
         $service->ingest(['app' => 'my-app', 'severity' => 'low', 'message' => 'pending']);
         $this->assertDatabaseCount('logs', 0); // Under threshold — not auto-flushed.
@@ -237,6 +239,9 @@ class ConsumeLogsTest extends TestCase
     public function test_invalid_batch_size_throws(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        new LogIngestionService(batchSize: 0);
+        new LogIngestionService(
+            repository: app(LogIngestionRepositoryInterface::class),
+            batchSize: 0,
+        );
     }
 }

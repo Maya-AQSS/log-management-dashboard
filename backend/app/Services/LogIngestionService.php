@@ -2,9 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Application;
+use App\Repositories\Contracts\LogIngestionRepositoryInterface;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class LogIngestionService
@@ -17,8 +16,10 @@ class LogIngestionService
     private const MAX_ERROR_CODE_CACHE = 10_000;
     private const DEFAULT_BATCH_SIZE = 100;
 
-    public function __construct(private readonly int $batchSize = self::DEFAULT_BATCH_SIZE)
-    {
+    public function __construct(
+        private readonly LogIngestionRepositoryInterface $repository,
+        private readonly int $batchSize = self::DEFAULT_BATCH_SIZE,
+    ) {
         if ($batchSize < 1) {
             throw new \InvalidArgumentException("batchSize must be >= 1, got {$batchSize}");
         }
@@ -26,9 +27,7 @@ class LogIngestionService
 
     public function loadApplicationMap(): void
     {
-        // Pre-loads application slug→id once per worker startup.
-        // Applications are a small, stable set; the map is refreshed on restart.
-        $this->setApplicationMap(Application::pluck('id', 'slug')->all());
+        $this->setApplicationMap($this->repository->applicationSlugToIdMap());
     }
 
     public function setApplicationMap(array $map): void
@@ -89,9 +88,7 @@ class LogIngestionService
         }
 
         try {
-            // Bypass the model's write-protection (saving => false) via query builder.
-            // The model remains read-only for HTTP consumers; only this worker writes via raw DB.
-            DB::table('logs')->insert($this->logBuffer);
+            $this->repository->insertLogs($this->logBuffer);
         } catch (\Throwable $e) {
             Log::error('ConsumeLogs: failed to flush log batch', [
                 'count' => count($this->logBuffer),
@@ -130,22 +127,9 @@ class LogIngestionService
             return $this->errorCodeIdCache[$cacheKey];
         }
 
-        // INSERT ON CONFLICT DO NOTHING — atomic under concurrent workers.
-        // 'name' defaults to the code string; users can set a readable name via HTTP API.
-        DB::table('error_codes')->insertOrIgnore([
-            'code'           => $code,
-            'application_id' => $applicationId,
-            'name'           => $code,
-            'file'           => $file,
-            'line'           => $line,
-            'created_at'     => now(),
-            'updated_at'     => now(),
-        ]);
+        $this->repository->insertErrorCodeIfMissing($code, $applicationId, $file, $line);
 
-        $id = DB::table('error_codes')
-            ->where('code', $code)
-            ->where('application_id', $applicationId)
-            ->value('id');
+        $id = $this->repository->findErrorCodeId($code, $applicationId);
 
         if ($id === null) {
             Log::error('ConsumeLogs: could not resolve id for error code', ['code' => $code, 'applicationId' => $applicationId]);

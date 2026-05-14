@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Repositories\Contracts\LogIngestionRepositoryInterface;
 use App\Services\LogIngestionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +19,10 @@ class LogIngestionServiceCacheTest extends TestCase
     public function test_error_code_cache_resets_and_continues_working_after_overflow(): void
     {
         // Subclass to lower MAX_ERROR_CODE_CACHE so the test doesn't need 10k inserts.
-        $service = new class (batchSize: 1) extends LogIngestionService {
+        $service = new class (
+            repository: app(LogIngestionRepositoryInterface::class),
+            batchSize: 1,
+        ) extends LogIngestionService {
             protected const MAX_ERROR_CODE_CACHE = 3;
         };
         $service->setApplicationMap(['app' => 1]);
