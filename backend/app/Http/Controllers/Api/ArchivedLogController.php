@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Concerns\ResolvesJwtUser;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\UpdateArchivedLogRequest;
 use App\Http\Resources\ArchivedLogResource;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use Illuminate\Http\JsonResponse;
@@ -51,18 +52,16 @@ class ArchivedLogController extends Controller
         ]);
     }
 
-    public function update(Request $request, int $id): JsonResponse
+    public function update(UpdateArchivedLogRequest $request, int $id): JsonResponse
     {
         $archivedLog = $this->archivedLogService->findModelOrFail($id);
 
         $this->authorize('update', $archivedLog);
 
-        $validated = $request->validate([
-            'description' => ['nullable', 'string', 'max:5000'],
-            'url_tutorial' => ['nullable', 'url', 'max:2048'],
-        ]);
-
-        $dto = $this->archivedLogService->updateArchivedFields($archivedLog, $validated);
+        $dto = $this->archivedLogService->updateArchivedFields(
+            $archivedLog,
+            $request->validated(),
+        );
 
         return response()->json([
             'data' => (new ArchivedLogResource($dto))->resolve($request),

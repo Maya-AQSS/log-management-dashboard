@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\Api\ApplicationController;
+use App\Http\Controllers\Api\ArchivedLogCommentController;
 use App\Http\Controllers\Api\ArchivedLogController;
 use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\ErrorCodeCommentController;
 use App\Http\Controllers\Api\ErrorCodeController;
 use App\Http\Controllers\Api\HealthCheckController;
 use App\Http\Controllers\Api\LogController;
@@ -51,8 +53,8 @@ Route::prefix('v1')->group(function () {
                 Route::delete('/archived-logs/{id}', [ArchivedLogController::class, 'destroy'])->whereNumber('id')->middleware('permission:logs.delete');
 
                 // Comments sobre ArchivedLogs
-                Route::get('/archived-logs/{id}/comments', [CommentController::class, 'indexForArchivedLog'])->whereNumber('id');
-                Route::post('/archived-logs/{id}/comments', [CommentController::class, 'storeForArchivedLog'])->whereNumber('id');
+                Route::get('/archived-logs/{id}/comments', [ArchivedLogCommentController::class, 'index'])->whereNumber('id');
+                Route::post('/archived-logs/{id}/comments', [ArchivedLogCommentController::class, 'store'])->whereNumber('id');
 
                 // Error codes
                 Route::get('/error-codes', [ErrorCodeController::class, 'index']);
@@ -62,8 +64,8 @@ Route::prefix('v1')->group(function () {
                 Route::delete('/error-codes/{id}', [ErrorCodeController::class, 'destroy'])->whereNumber('id')->middleware('permission:logs.delete');
 
                 // Comments sobre ErrorCodes
-                Route::get('/error-codes/{id}/comments', [CommentController::class, 'indexForErrorCode'])->whereNumber('id');
-                Route::post('/error-codes/{id}/comments', [CommentController::class, 'storeForErrorCode'])->whereNumber('id');
+                Route::get('/error-codes/{id}/comments', [ErrorCodeCommentController::class, 'index'])->whereNumber('id');
+                Route::post('/error-codes/{id}/comments', [ErrorCodeCommentController::class, 'store'])->whereNumber('id');
 
                 // Comments (shallow): update / delete por id
                 Route::match(['put', 'patch'], '/comments/{id}', [CommentController::class, 'update'])->whereNumber('id');
