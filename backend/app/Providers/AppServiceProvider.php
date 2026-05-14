@@ -16,8 +16,10 @@ use App\Repositories\Eloquent\LogRepository;
 use App\Repositories\Eloquent\UserRepository;
 use App\Services\ApplicationService;
 use App\Services\ArchivedLogService;
+use App\Services\CommentContentSanitizer;
 use App\Services\CommentService;
 use App\Services\Contracts\ApplicationServiceInterface;
+use App\Services\Contracts\CommentContentSanitizerInterface;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use App\Services\Contracts\CommentServiceInterface;
 use App\Services\Contracts\ErrorCodeServiceInterface;
@@ -50,9 +52,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ErrorCodeRepositoryInterface::class, ErrorCodeRepository::class);
         $this->app->singleton(ErrorCodeServiceInterface::class, ErrorCodeService::class);
 
-        $this->app->singleton(CommentRepositoryInterface::class, CommentRepository::class);
         $this->app->singleton(CommentContentSanitizerInterface::class, CommentContentSanitizer::class);
-        $this->app->singleton(CommentServiceInterface::class, CommentService::class);
     }
 
     public function boot(): void
