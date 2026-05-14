@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Services\LogIngestionService;
+use App\Support\ResilientLogPublisher;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -18,8 +19,15 @@ class LogIngestionServiceCacheTest extends TestCase
     public function test_error_code_cache_resets_and_continues_working_after_overflow(): void
     {
         // Subclass to lower MAX_ERROR_CODE_CACHE so the test doesn't need 10k inserts.
-        $service = new class (batchSize: 1) extends LogIngestionService {
+        $resilient = $this->app->make(ResilientLogPublisher::class);
+        $service = new class($resilient, 1) extends LogIngestionService
+        {
             protected const MAX_ERROR_CODE_CACHE = 3;
+
+            public function __construct(ResilientLogPublisher $resilientLogPublisher, int $batchSize = 1)
+            {
+                parent::__construct($resilientLogPublisher, $batchSize);
+            }
         };
         $service->setApplicationMap(['app' => 1]);
 

@@ -64,15 +64,7 @@ class CommentController extends Controller
     {
         $errorCode = $this->errorCodeService->findOrFail($errorCodeId);
 
-        $comment = $this->comments->storeForErrorCode(
-            $errorCodeId,
-            $author,
-            (string) $request->validated('content'),
-        );
-
-        return (new CommentResource($comment))
-            ->response()
-            ->setStatusCode(201);
+        return $this->storeFor($request, $errorCode);
     }
 
     /**

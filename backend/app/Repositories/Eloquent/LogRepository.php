@@ -243,13 +243,16 @@ class LogRepository implements LogRepositoryInterface
     }
 
     /**
-     * Marca el log como resuelto.
+     * Marca el log como resuelto solo si `resolved` es false (idempotente).
      *
-     * Se usa el query builder: el modelo {@see Log} cancela actualizaciones vía Eloquent en {@see Log::booted()}.
+     * Query builder: el modelo {@see Log} cancela actualizaciones vía Eloquent en {@see Log::booted()}.
      */
-    public function resolved(int $logId): void
+    public function resolved(int $logId): int
     {
-        DB::table('logs')->where('id', $logId)->update(['resolved' => true]);
+        return (int) DB::table('logs')
+            ->where('id', $logId)
+            ->where('resolved', false)
+            ->update(['resolved' => true]);
     }
 
     /**

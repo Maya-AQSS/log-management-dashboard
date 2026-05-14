@@ -343,4 +343,60 @@ return [
         'name' => 'External Rate Limit Hit (429)',
         'description' => 'El script está siendo bloqueado por un servicio externo (Moodle, pasarelas de firma) por exceso de peticiones concurrentes (HTTP 429).',
     ],
+    // Códigos de error para el archivado de logs
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-001',
+        'name' => 'Archived log fields update failed',
+        'description' => 'Fallo al persistir la actualización de campos editables (descripción, URL de tutorial, etc.) de un log archivado.',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-002',
+        'name' => 'Archived log delete failed',
+        'description' => 'Fallo al eliminar (soft delete) un log archivado.',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-003',
+        'name' => 'Active log archive failed',
+        'description' => 'Fallo al crear el registro de log archivado desde un log activo.',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-004',
+        'name' => 'Archived log not found',
+        'description' => 'No se encontró el log archivado solicitado por id.',
+    ],
+    // Telemetría del worker ConsumeLogs / LogIngestionService (publicación a maya.logs)
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-005',
+        'name' => 'Log ingestion: resolve error code failed',
+        'description' => 'Excepción al resolver el código de error (FK) para una fila de ingesta desde RabbitMQ.',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-006',
+        'name' => 'Log ingestion: batch flush failed',
+        'description' => 'Fallo al insertar el lote acumulado en la tabla logs (worker de consumo).',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-007',
+        'name' => 'Log ingestion: unknown application slug',
+        'description' => 'Payload descartado: el slug de aplicación no existe en el mapa cargado desde maya_auth.',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-008',
+        'name' => 'Log ingestion: error code id unresolved',
+        'description' => 'Tras insertOrIgnore no se obtuvo id para el par (code, application_id); la fila de log puede quedar sin FK de código.',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-009',
+        'name' => 'Log ingestion: invalid occurred_at',
+        'description' => 'Formato de occurred_at no parseable; se sustituye por la hora actual al persistir.',
+    ],
 ];
