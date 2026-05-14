@@ -105,9 +105,9 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
     /**
      * Soft delete. La autorización la define {@see \App\Policies\ArchivedLogPolicy}.
      */
-    public function delete(ArchivedLog $archivedLog): void
+    public function delete(ArchivedLog $archivedLog): bool
     {
-        $archivedLog->delete();
+        return (bool) $archivedLog->delete();
     }
 
     /**

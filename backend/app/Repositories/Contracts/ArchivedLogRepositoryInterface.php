@@ -30,8 +30,10 @@ interface ArchivedLogRepositoryInterface
 
     /**
      * Soft delete. No valida actor; debe haberse pasado {@see \App\Policies\ArchivedLogPolicy}.
+     *
+     * @return bool true si el modelo se eliminó (soft delete); false si Laravel no aplicó borrado
      */
-    public function delete(ArchivedLog $archivedLog): void;
+    public function delete(ArchivedLog $archivedLog): bool;
 
     /**
      * @param  string  $archivedByUserId  Subject JWT (UUID Keycloak) → `archived_logs.archived_by_id`.

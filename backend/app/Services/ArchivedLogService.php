@@ -83,6 +83,8 @@ class ArchivedLogService implements ArchivedLogServiceInterface
      * Actualiza los campos de un log archivado.
      *
      * El actor en auditoría es `archived_by_id` (subject JWT), coherente con {@see ArchivedLogPolicy}.
+     * Si los valores ya coinciden con lo enviado (no-op / doble envío), no se persiste ni se emite
+     * {@see ArchivedLogFieldsWereUpdated} (evita duplicar filas en maya.audit).
      */
     public function updateArchivedFields(ArchivedLog $archivedLog, array $fields): void
     {
@@ -91,6 +93,10 @@ class ArchivedLogService implements ArchivedLogServiceInterface
                 static fn($value) => is_string($value) ? (blank($value) ? null : trim($value)) : $value,
                 $fields
             );
+
+            if ($sanitized === [] || ! $this->archivedLogSanitizedDiffersFromModel($archivedLog, $sanitized)) {
+                return;
+            }
 
             $previousValue = [];
             foreach (array_keys($sanitized) as $key) {
@@ -119,6 +125,9 @@ class ArchivedLogService implements ArchivedLogServiceInterface
 
     /**
      * Elimina un log archivado.
+     *
+     * Solo se emite {@see ArchivedLogWasDeleted} si el soft delete se aplicó (evita duplicar audit
+     * si {@see ArchivedLogRepositoryInterface::delete} no modifica filas).
      */
     public function delete(ArchivedLog $archivedLog): void
     {
@@ -126,7 +135,9 @@ class ArchivedLogService implements ArchivedLogServiceInterface
             $archivedLogId = $archivedLog->id;
             $archivedByUserId = (string) $archivedLog->archived_by_id;
 
-            $this->archivedLogRepository->delete($archivedLog);
+            if (! $this->archivedLogRepository->delete($archivedLog)) {
+                return;
+            }
 
             ArchivedLogWasDeleted::dispatch($archivedLogId, $archivedByUserId);
         } catch (Throwable $e) {
@@ -142,13 +153,33 @@ class ArchivedLogService implements ArchivedLogServiceInterface
     }
 
     /**
+     * @param  array<string, mixed>  $sanitized
+     */
+    private function archivedLogSanitizedDiffersFromModel(ArchivedLog $archivedLog, array $sanitized): bool
+    {
+        foreach ($sanitized as $key => $value) {
+            if ($archivedLog->getAttribute($key) != $value) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Archiva un log por su id.
+     *
+     * Solo se emite {@see LogWasArchived} cuando el repositorio crea un registro nuevo.
+     * Si devuelve uno ya existente (huella duplicada o segunda petición concurrente), no se
+     * vuelve a publicar a maya.audit (evita filas duplicadas con el mismo `archived_log`).
      */
     public function archiveFromLogId(int $logId, string $archivedByUserId): ArchivedLog
     {
         try {
             $archivedLog = $this->archivedLogRepository->archiveFromLogId($logId, $archivedByUserId);
-            LogWasArchived::dispatch($archivedLog, $archivedByUserId);
+            if ($archivedLog->wasRecentlyCreated) {
+                LogWasArchived::dispatch($archivedLog, $archivedByUserId);
+            }
 
             return $archivedLog;
         } catch (Throwable $e) {
