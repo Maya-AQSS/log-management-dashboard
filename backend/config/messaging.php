@@ -11,6 +11,6 @@ return [
     | consumidores que enrutan por application_slug.
     |
     */
-    'app' => env('MAYA_MESSAGING_APP', 'maya-logs'),
+    'app' => env('MAYA_MESSAGING_APP', 'TraCEED'),
 
 ];
