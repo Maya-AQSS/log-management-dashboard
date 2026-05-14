@@ -58,10 +58,12 @@ class ArchivedLogController extends Controller
 
         $this->authorize('update', $archivedLog);
 
-        $dto = $this->archivedLogService->updateArchivedFields(
+        $this->archivedLogService->updateArchivedFields(
             $archivedLog,
             $request->validated(),
         );
+
+        $dto = $this->archivedLogService->findOrFail($id);
 
         return response()->json([
             'data' => (new ArchivedLogResource($dto))->resolve($request),

@@ -110,12 +110,6 @@ class ArchivedLogService implements ArchivedLogServiceInterface
                 $previousValue,
                 $sanitized,
             );
-
-            $archivedLog->refresh();
-            $archivedLog->loadMissing(['application', 'archivedBy', 'errorCode']);
-            $archivedLog->loadCount('comments');
-
-            return ArchivedLogDto::fromModel($archivedLog);
         } catch (Throwable $e) {
             $this->resilientLogPublisher->publishFromThrowable(
                 $e,
@@ -186,7 +180,7 @@ class ArchivedLogService implements ArchivedLogServiceInterface
                 LogWasArchived::dispatch($archivedLog, $archivedByUserId);
             }
 
-            return ArchivedLogDto::fromModel($archivedLog);
+            return $archivedLog;
         } catch (Throwable $e) {
             $this->resilientLogPublisher->publishFromThrowable(
                 $e,

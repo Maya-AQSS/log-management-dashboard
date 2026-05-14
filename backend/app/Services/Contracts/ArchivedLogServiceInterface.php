@@ -37,9 +37,9 @@ interface ArchivedLogServiceInterface
     /**
      * @param  array<string, mixed>  $fields
      */
-    public function updateArchivedFields(ArchivedLog $archivedLog, array $fields): ArchivedLogDto;
+    public function updateArchivedFields(ArchivedLog $archivedLog, array $fields): void;
 
     public function delete(ArchivedLog $archivedLog): void;
 
-    public function archiveFromLogId(int $logId, string $archivedByUserId): ArchivedLogDto;
+    public function archiveFromLogId(int $logId, string $archivedByUserId): ArchivedLog;
 }

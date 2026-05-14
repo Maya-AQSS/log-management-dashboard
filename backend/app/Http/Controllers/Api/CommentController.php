@@ -9,7 +9,6 @@ use App\Services\Contracts\CommentServiceInterface;
 use App\Services\PanelUserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate as GateFacade;
 
 class CommentController extends Controller
@@ -20,49 +19,9 @@ class CommentController extends Controller
     ) {
     }
 
-    public function indexForArchivedLog(int $id): AnonymousResourceCollection
+    public function update(UpdateCommentRequest $request, int $id): JsonResponse
     {
-        $archivedLog = $this->archivedLogService->findOrFail($id);
-
-        return $this->indexFor($archivedLog);
-    }
-
-    /**
-     * Listado de comentarios para un código de error.
-     */
-    public function indexForErrorCode(int $errorCodeId): AnonymousResourceCollection
-    {
-        $errorCode = $this->errorCodeService->findOrFail($errorCodeId);
-
-        return $this->indexFor($errorCode);
-    }
-
-    /**
-     * Crea un nuevo comentario para un log archivado.
-     */
-    public function storeForArchivedLog(StoreCommentRequest $request, int $archivedLogId): JsonResponse
-    {
-        $archivedLog = $this->archivedLogService->findOrFail($archivedLogId);
-
-        return $this->storeFor($request, $archivedLog);
-    }
-
-    /**
-     * Crea un nuevo comentario para un código de error.
-     */
-    public function storeForErrorCode(StoreCommentRequest $request, int $errorCodeId): JsonResponse
-    {
-        $errorCode = $this->errorCodeService->findOrFail($errorCodeId);
-
-        return $this->storeFor($request, $errorCode);
-    }
-
-    /**
-     * Actualiza un comentario.
-     */
-    public function update(UpdateCommentRequest $request, int $id): CommentResource
-    {
-        $comment = $this->commentService->findOrFail($id);
+        $comment = $this->commentService->findModelOrFail($id);
         $user = $this->panelUserService->resolveFromJwtRequest($request);
 
         GateFacade::forUser($user)->authorize('update', $comment);
