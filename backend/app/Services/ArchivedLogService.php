@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Dtos\ArchivedLogDto;
+use App\Dtos\Pagination\PaginatedDto;
 use App\Events\ArchivedLogFieldsWereUpdated;
 use App\Events\ArchivedLogWasDeleted;
 use App\Events\LogWasArchived;
@@ -9,7 +11,6 @@ use App\Models\ArchivedLog;
 use App\Repositories\Contracts\ArchivedLogRepositoryInterface;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use App\Support\ResilientLogPublisher;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Throwable;
 
 class ArchivedLogService implements ArchivedLogServiceInterface
@@ -25,19 +26,14 @@ class ArchivedLogService implements ArchivedLogServiceInterface
         return (string) config('messaging.app');
     }
 
-    /**
-     * Devuelve una página de logs archivados.
-     */
-    public function paginate(int $perPage = 15): LengthAwarePaginator
+    public function paginate(int $perPage = 15): PaginatedDto
     {
-        return $this->archivedLogRepository->paginate($perPage);
+        return PaginatedDto::fromPaginator(
+            $this->archivedLogRepository->paginate($perPage),
+            static fn (ArchivedLog $m) => ArchivedLogDto::fromModel($m),
+        );
     }
 
-    /**
-     * Busca y filtra logs archivados por diferentes criterios:
-     * - tipo de severidad de error
-     * - si tiene tutorial o no
-     */
     public function searchAndFilter(
         ?array $severities,
         ?int $applicationId,
@@ -46,24 +42,27 @@ class ArchivedLogService implements ArchivedLogServiceInterface
         ?string $sortBy,
         string $sortDir,
         int $perPage = 15
-    ): LengthAwarePaginator {
-        return $this->archivedLogRepository->searchAndFilter(
-            $severities,
-            $applicationId,
-            $dateFrom,
-            $dateTo,
-            $sortBy,
-            $sortDir,
-            $perPage
+    ): PaginatedDto {
+        return PaginatedDto::fromPaginator(
+            $this->archivedLogRepository->searchAndFilter(
+                $severities,
+                $applicationId,
+                $dateFrom,
+                $dateTo,
+                $sortBy,
+                $sortDir,
+                $perPage
+            ),
+            static fn (ArchivedLog $m) => ArchivedLogDto::fromModel($m),
         );
     }
 
-    /**
-     * Busca un log archivado por su id.
-     *
-     * Sin auditoría en cada GET (evita ruido); solo se publica a maya.logs si falla la carga.
-     */
-    public function findOrFail(int $id): ArchivedLog
+    public function findOrFail(int $id): ArchivedLogDto
+    {
+        return ArchivedLogDto::fromModel($this->findModelOrFail($id));
+    }
+
+    public function findModelOrFail(int $id): ArchivedLog
     {
         try {
             return $this->archivedLogRepository->findOrFail($id);
@@ -79,12 +78,7 @@ class ArchivedLogService implements ArchivedLogServiceInterface
         }
     }
 
-    /**
-     * Actualiza los campos de un log archivado.
-     *
-     * El actor en auditoría es `archived_by_id` (subject JWT), coherente con {@see ArchivedLogPolicy}.
-     */
-    public function updateArchivedFields(ArchivedLog $archivedLog, array $fields): void
+    public function updateArchivedFields(ArchivedLog $archivedLog, array $fields): ArchivedLogDto
     {
         try {
             $sanitized = array_map(
@@ -105,6 +99,12 @@ class ArchivedLogService implements ArchivedLogServiceInterface
                 $previousValue,
                 $sanitized,
             );
+
+            $archivedLog->refresh();
+            $archivedLog->loadMissing(['application', 'archivedBy', 'errorCode']);
+            $archivedLog->loadCount('comments');
+
+            return ArchivedLogDto::fromModel($archivedLog);
         } catch (Throwable $e) {
             $this->resilientLogPublisher->publishFromThrowable(
                 $e,
@@ -117,9 +117,6 @@ class ArchivedLogService implements ArchivedLogServiceInterface
         }
     }
 
-    /**
-     * Elimina un log archivado.
-     */
     public function delete(ArchivedLog $archivedLog): void
     {
         try {
@@ -141,16 +138,13 @@ class ArchivedLogService implements ArchivedLogServiceInterface
         }
     }
 
-    /**
-     * Archiva un log por su id.
-     */
-    public function archiveFromLogId(int $logId, string $archivedByUserId): ArchivedLog
+    public function archiveFromLogId(int $logId, string $archivedByUserId): ArchivedLogDto
     {
         try {
             $archivedLog = $this->archivedLogRepository->archiveFromLogId($logId, $archivedByUserId);
             LogWasArchived::dispatch($archivedLog, $archivedByUserId);
 
-            return $archivedLog;
+            return ArchivedLogDto::fromModel($archivedLog);
         } catch (Throwable $e) {
             $this->resilientLogPublisher->publishFromThrowable(
                 $e,

@@ -2,20 +2,19 @@
 
 namespace App\Services\Contracts;
 
+use App\Dtos\ArchivedLogDto;
+use App\Dtos\Pagination\PaginatedDto;
 use App\Models\ArchivedLog;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface ArchivedLogServiceInterface
 {
     /**
-     * Devuelve una página de logs archivados.
+     * @return PaginatedDto<ArchivedLogDto>
      */
-    public function paginate(int $perPage = 15): LengthAwarePaginator;
+    public function paginate(int $perPage = 15): PaginatedDto;
 
     /**
-     * Busca y filtra logs archivados por diferentes criterios:
-     * - tipo de severidad de error
-     * - si tiene tutorial o no
+     * @return PaginatedDto<ArchivedLogDto>
      */
     public function searchAndFilter(
         ?array $severities,
@@ -25,30 +24,22 @@ interface ArchivedLogServiceInterface
         ?string $sortBy,
         string $sortDir,
         int $perPage = 15
-    ): LengthAwarePaginator;
+    ): PaginatedDto;
+
+    public function findOrFail(int $id): ArchivedLogDto;
 
     /**
-     * Busca un log archivado por su id.
+     * Model lookup for the controller's policy gate (authorize uses the Eloquent
+     * instance). Kept separate from {@see self::findOrFail()} which returns a DTO.
      */
-    public function findOrFail(int $id): ArchivedLog;
+    public function findModelOrFail(int $id): ArchivedLog;
 
     /**
-     * Actualiza los campos editables del log archivado.
-     *
      * @param  array<string, mixed>  $fields
-     *
-     * La autorización (subject JWT === `archived_by_id`) la define {@see \App\Policies\ArchivedLogPolicy}.
      */
-    public function updateArchivedFields(ArchivedLog $archivedLog, array $fields): void;
+    public function updateArchivedFields(ArchivedLog $archivedLog, array $fields): ArchivedLogDto;
 
-    /**
-     * Soft delete. Quién puede invocarlo lo define {@see \App\Policies\ArchivedLogPolicy}.
-     */
     public function delete(ArchivedLog $archivedLog): void;
 
-    /**
-     * Archiva un log activo. `$archivedByUserId` es el subject del JWT (UUID Keycloak),
-     * que se persiste en `archived_logs.archived_by_id` (no exige fila en la vista FDW `users`).
-     */
-    public function archiveFromLogId(int $logId, string $archivedByUserId): ArchivedLog;
+    public function archiveFromLogId(int $logId, string $archivedByUserId): ArchivedLogDto;
 }

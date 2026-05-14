@@ -9,7 +9,6 @@ use App\Services\Contracts\ArchivedLogServiceInterface;
 use App\Services\Contracts\LogServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Throwable;
@@ -24,10 +23,7 @@ class LogController extends Controller
     ) {
     }
 
-    /**
-     * Listado paginado y filtrado de logs activos.
-     */
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): JsonResponse
     {
         $perPage = (int) $request->integer('per_page', 25);
         $severity = $request->input('severity');
@@ -35,7 +31,7 @@ class LogController extends Controller
             $severity = array_filter(array_map('trim', explode(',', $severity)), fn(string $v): bool => $v !== '');
         }
 
-        $paginator = $this->logService->searchAndFilter(
+        $page = $this->logService->searchAndFilter(
             search: $request->string('search')->toString() ?: null,
             severity: is_array($severity) && $severity !== [] ? array_values($severity) : null,
             applicationId: $request->filled('application_id') ? (int) $request->input('application_id') : null,
@@ -48,28 +44,24 @@ class LogController extends Controller
             perPage: $perPage > 0 ? $perPage : 25,
         );
 
-        return LogResource::collection($paginator);
+        return response()->json([
+            ...$page->jsonSerialize(),
+            'data' => LogResource::collection($page->items)->resolve($request),
+        ]);
     }
 
-    /**
-     * Detalle de un log. Incluye el id del ArchivedLog asociado (si existe).
-     */
     public function show(int $id): JsonResponse
     {
-        $log = $this->logService->findOrFail($id);
-        $log->loadMissing(['application', 'errorCode']);
+        $dto = $this->logService->findOrFail($id);
 
         return response()->json([
-            'data' => (new LogResource($log))->resolve(),
+            'data' => (new LogResource($dto))->resolve(),
             'meta' => [
                 'archived_log_id' => $this->logService->archivedLogIdFor($id),
             ],
         ]);
     }
 
-    /**
-     * Archiva un log (idempotente). Devuelve el ArchivedLog resultante.
-     */
     public function archive(Request $request, int $id): JsonResponse
     {
         $matchedId = $this->logService->archivedLogIdFor($id);
@@ -94,10 +86,10 @@ class LogController extends Controller
                 ], 403);
             }
 
-            $archivedLog = $this->archivedLogService->archiveFromLogId($id, $jwtSubject);
+            $archived = $this->archivedLogService->archiveFromLogId($id, $jwtSubject);
 
             return response()->json([
-                'data' => ['archived_log_id' => $archivedLog->id],
+                'data' => ['archived_log_id' => $archived->id],
                 'meta' => ['already_archived' => false],
             ], 201);
         } catch (AccessDeniedHttpException $e) {
@@ -119,9 +111,6 @@ class LogController extends Controller
         }
     }
 
-    /**
-     * Marca el log como resuelto.
-     */
     public function resolve(int $id): JsonResponse
     {
         $this->logService->resolved($id);
@@ -131,9 +120,6 @@ class LogController extends Controller
         ]);
     }
 
-    /**
-     * SSE: últimos logs para streaming en tiempo real.
-     */
     public function stream(): StreamedResponse
     {
         return response()->stream(function (): void {

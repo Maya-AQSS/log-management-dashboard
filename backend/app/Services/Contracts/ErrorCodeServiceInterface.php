@@ -2,24 +2,43 @@
 
 namespace App\Services\Contracts;
 
+use App\Dtos\ErrorCodeDto;
+use App\Dtos\Pagination\PaginatedDto;
 use App\Models\ErrorCode;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface ErrorCodeServiceInterface
 {
-    public function paginate(int $perPage = 15): LengthAwarePaginator;
+    /**
+     * @return PaginatedDto<ErrorCodeDto>
+     */
+    public function paginate(int $perPage = 15): PaginatedDto;
 
+    /**
+     * @return PaginatedDto<ErrorCodeDto>
+     */
     public function searchAndFilter(
         ?string $search,
         ?int $filterApp,
         int $perPage = 15
-    ): LengthAwarePaginator;
+    ): PaginatedDto;
 
-    public function findOrFail(int $id): ErrorCode;
+    public function findOrFail(int $id): ErrorCodeDto;
 
-    public function create(array $data): ErrorCode;
+    /**
+     * Model lookup for the controller's policy gate. See {@see self::findOrFail()}
+     * for the DTO read path.
+     */
+    public function findModelOrFail(int $id): ErrorCode;
 
-    public function update(ErrorCode $errorCode, array $data): ErrorCode;
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function create(array $data): ErrorCodeDto;
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function update(ErrorCode $errorCode, array $data): ErrorCodeDto;
 
     public function delete(ErrorCode $errorCode): void;
 }

@@ -27,67 +27,43 @@ class CommentController extends Controller
     ) {
     }
 
-    /**
-     * Listado de comentarios para un log archivado.
-     */
     public function indexForArchivedLog(int $archivedLogId): AnonymousResourceCollection
     {
-        $archivedLog = $this->archivedLogService->findOrFail($archivedLogId);
-
-        return $this->indexFor($archivedLog);
+        return $this->indexFor($this->archivedLogService->findModelOrFail($archivedLogId));
     }
 
-    /**
-     * Listado de comentarios para un código de error.
-     */
     public function indexForErrorCode(int $errorCodeId): AnonymousResourceCollection
     {
-        $errorCode = $this->errorCodeService->findOrFail($errorCodeId);
-
-        return $this->indexFor($errorCode);
+        return $this->indexFor($this->errorCodeService->findModelOrFail($errorCodeId));
     }
 
-    /**
-     * Crea un nuevo comentario para un log archivado.
-     */
     public function storeForArchivedLog(StoreCommentRequest $request, int $archivedLogId): JsonResponse
     {
-        $archivedLog = $this->archivedLogService->findOrFail($archivedLogId);
-
-        return $this->storeFor($request, $archivedLog);
+        return $this->storeFor($request, $this->archivedLogService->findModelOrFail($archivedLogId));
     }
 
-    /**
-     * Crea un nuevo comentario para un código de error.
-     */
     public function storeForErrorCode(StoreCommentRequest $request, int $errorCodeId): JsonResponse
     {
-        $errorCode = $this->errorCodeService->findOrFail($errorCodeId);
-
-        return $this->storeFor($request, $errorCode);
+        return $this->storeFor($request, $this->errorCodeService->findModelOrFail($errorCodeId));
     }
 
-    /**
-     * Actualiza un comentario.
-     */
-    public function update(UpdateCommentRequest $request, int $id): CommentResource
+    public function update(UpdateCommentRequest $request, int $id): JsonResponse
     {
-        $comment = $this->commentService->findOrFail($id);
+        $comment = $this->commentService->findModelOrFail($id);
         $user = $this->panelUserService->resolveFromJwtRequest($request);
 
         GateFacade::forUser($user)->authorize('update', $comment);
 
-        $comment = $this->commentService->updateContent($comment, $request->validated('content'));
+        $dto = $this->commentService->updateContent($comment, $request->validated('content'));
 
-        return new CommentResource($comment);
+        return response()->json([
+            'data' => (new CommentResource($dto))->resolve($request),
+        ]);
     }
 
-    /**
-     * Elimina un comentario.
-     */
     public function destroy(Request $request, int $id): JsonResponse
     {
-        $comment = $this->commentService->findOrFail($id);
+        $comment = $this->commentService->findModelOrFail($id);
         $user = $this->panelUserService->resolveFromJwtRequest($request);
 
         GateFacade::forUser($user)->authorize('delete', $comment);
@@ -97,31 +73,25 @@ class CommentController extends Controller
         return response()->json(null, 204);
     }
 
-    /**
-     * Listado de comentarios para un modelo comentable.
-     */
     private function indexFor(Model $commentable): AnonymousResourceCollection
     {
         return CommentResource::collection(
-            $this->commentService->listForCommentable($commentable)
+            $this->commentService->listForCommentable($commentable),
         );
     }
 
-    /**
-     * Crea un nuevo comentario para un modelo comentable.
-     */
     private function storeFor(StoreCommentRequest $request, Model $commentable): JsonResponse
     {
         $user = $this->panelUserService->resolveFromJwtRequest($request);
 
-        $comment = $this->commentService->createForCommentable(
+        $dto = $this->commentService->createForCommentable(
             $commentable,
             $user->id,
-            $request->validated('content')
+            $request->validated('content'),
         );
 
-        return (new CommentResource($comment))
-            ->response()
-            ->setStatusCode(201);
+        return response()->json([
+            'data' => (new CommentResource($dto))->resolve($request),
+        ], 201);
     }
 }

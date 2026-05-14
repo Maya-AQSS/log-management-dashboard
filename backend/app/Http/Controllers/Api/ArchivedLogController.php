@@ -8,7 +8,6 @@ use App\Http\Resources\ArchivedLogResource;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ArchivedLogController extends Controller
 {
@@ -19,10 +18,7 @@ class ArchivedLogController extends Controller
     ) {
     }
 
-    /**
-     * Listado paginado y filtrado de logs archivados.
-     */
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): JsonResponse
     {
         $perPage = (int) $request->integer('per_page', 15);
         $severity = $request->input('severity');
@@ -30,7 +26,7 @@ class ArchivedLogController extends Controller
             $severity = array_filter(array_map('trim', explode(',', $severity)), fn(string $v): bool => $v !== '');
         }
 
-        $paginator = $this->archivedLogService->searchAndFilter(
+        $page = $this->archivedLogService->searchAndFilter(
             severities: is_array($severity) && $severity !== [] ? array_values($severity) : null,
             applicationId: $request->filled('application_id') ? (int) $request->input('application_id') : null,
             dateFrom: $request->string('date_from')->toString() ?: null,
@@ -40,27 +36,24 @@ class ArchivedLogController extends Controller
             perPage: $perPage > 0 ? $perPage : 15,
         );
 
-        return ArchivedLogResource::collection($paginator);
+        return response()->json([
+            ...$page->jsonSerialize(),
+            'data' => ArchivedLogResource::collection($page->items)->resolve($request),
+        ]);
     }
 
-    /**
-     * Detalle de un log archivado con relaciones estándar.
-     */
-    public function show(int $id): ArchivedLogResource
+    public function show(int $id): JsonResponse
     {
-        $archivedLog = $this->archivedLogService->findOrFail($id);
-        $archivedLog->loadMissing(['application', 'archivedBy', 'errorCode']);
-        $archivedLog->loadCount('comments');
+        $dto = $this->archivedLogService->findOrFail($id);
 
-        return new ArchivedLogResource($archivedLog);
+        return response()->json([
+            'data' => (new ArchivedLogResource($dto))->resolve(),
+        ]);
     }
 
-    /**
-     * Actualiza los campos editables del log archivado.
-     */
-    public function update(Request $request, int $id): ArchivedLogResource
+    public function update(Request $request, int $id): JsonResponse
     {
-        $archivedLog = $this->archivedLogService->findOrFail($id);
+        $archivedLog = $this->archivedLogService->findModelOrFail($id);
 
         $this->authorize('update', $archivedLog);
 
@@ -69,21 +62,16 @@ class ArchivedLogController extends Controller
             'url_tutorial' => ['nullable', 'url', 'max:2048'],
         ]);
 
-        $this->archivedLogService->updateArchivedFields($archivedLog, $validated);
+        $dto = $this->archivedLogService->updateArchivedFields($archivedLog, $validated);
 
-        $archivedLog->refresh();
-        $archivedLog->loadMissing(['application', 'archivedBy', 'errorCode']);
-        $archivedLog->loadCount('comments');
-
-        return new ArchivedLogResource($archivedLog);
+        return response()->json([
+            'data' => (new ArchivedLogResource($dto))->resolve($request),
+        ]);
     }
 
-    /**
-     * Elimina (soft delete) un log archivado.
-     */
     public function destroy(int $id): JsonResponse
     {
-        $archivedLog = $this->archivedLogService->findOrFail($id);
+        $archivedLog = $this->archivedLogService->findModelOrFail($id);
 
         $this->authorize('delete', $archivedLog);
 

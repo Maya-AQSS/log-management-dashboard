@@ -2,22 +2,28 @@
 
 namespace App\Services\Contracts;
 
+use App\Dtos\CommentDto;
 use App\Models\Comment;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 interface CommentServiceInterface
 {
-    public function findOrFail(int $id): Comment;
+    public function findOrFail(int $id): CommentDto;
 
     /**
-     * @return Collection<int, Comment>
+     * Model lookup needed by the controller's policy gate. See {@see self::findOrFail()}
+     * for the DTO read path.
      */
-    public function listForCommentable(Model $commentable): Collection;
+    public function findModelOrFail(int $id): Comment;
 
-    public function createForCommentable(Model $commentable, string $userId, string $rawContent): Comment;
+    /**
+     * @return list<CommentDto>
+     */
+    public function listForCommentable(Model $commentable): array;
 
-    public function updateContent(Comment $comment, string $rawContent): Comment;
+    public function createForCommentable(Model $commentable, string $userId, string $rawContent): CommentDto;
+
+    public function updateContent(Comment $comment, string $rawContent): CommentDto;
 
     public function delete(Comment $comment): void;
 }

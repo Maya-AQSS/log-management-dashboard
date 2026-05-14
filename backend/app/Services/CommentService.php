@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
+use App\Dtos\CommentDto;
 use App\Models\Comment;
 use App\Repositories\Contracts\CommentRepositoryInterface;
 use App\Services\Contracts\CommentServiceInterface;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 use Mews\Purifier\Facades\Purifier;
@@ -21,40 +21,44 @@ final class CommentService implements CommentServiceInterface
     ) {
     }
 
-    /**
-     * Busca un comentario por su id.
-     */
-    public function findOrFail(int $id): Comment
+    public function findOrFail(int $id): CommentDto
+    {
+        return CommentDto::fromModel($this->findModelOrFail($id));
+    }
+
+    public function findModelOrFail(int $id): Comment
     {
         return $this->commentRepository->findOrFail($id);
     }
 
-    /**
-     * Lista los comentarios para un modelo comentable.
-     */
-    public function listForCommentable(Model $commentable): Collection
+    public function listForCommentable(Model $commentable): array
     {
-        return $this->commentRepository->listForCommentable($commentable);
+        $comments = $this->commentRepository->listForCommentable($commentable);
+
+        return $comments
+            ->map(static fn (Comment $c): CommentDto => CommentDto::fromModel($c))
+            ->values()
+            ->all();
     }
 
-    /**
-     * Crea un comentario para un modelo comentable.
-     */
-    public function createForCommentable(Model $commentable, string $userId, string $rawContent): Comment
+    public function createForCommentable(Model $commentable, string $userId, string $rawContent): CommentDto
     {
         $sanitized = $this->sanitizeAndValidateContent($rawContent);
 
-        return $this->commentRepository->createForCommentable($commentable, $userId, $sanitized);
+        $comment = $this->commentRepository->createForCommentable($commentable, $userId, $sanitized);
+        $comment->loadMissing('user');
+
+        return CommentDto::fromModel($comment);
     }
 
-    /**
-     * Actualiza el contenido de un comentario.
-     */
-    public function updateContent(Comment $comment, string $rawContent): Comment
+    public function updateContent(Comment $comment, string $rawContent): CommentDto
     {
         $sanitized = $this->sanitizeAndValidateContent($rawContent);
 
-        return $this->commentRepository->updateContent($comment, $sanitized);
+        $updated = $this->commentRepository->updateContent($comment, $sanitized);
+        $updated->loadMissing('user');
+
+        return CommentDto::fromModel($updated);
     }
 
     /**
