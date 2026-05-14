@@ -111,7 +111,7 @@ final class ArchivedLogObserver
         $userId = (string) ($archivedLog->archived_by_id ?? 'system');
 
         $this->publisher->publish(
-            applicationSlug: (string) config('messaging.app'),
+            applicationSlug: "maya-logs",
             entityType: self::ENTITY_TYPE,
             entityId: (string) $archivedLog->getKey(),
             action: $action,

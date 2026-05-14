@@ -3,11 +3,13 @@
 namespace Database\Seeders;
 
 use App\Models\ErrorCode;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class ErrorCodeSeeder extends Seeder
 {
+    use WithoutModelEvents;
     /**
      * Run the database seeds.
      *
