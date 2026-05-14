@@ -1,34 +1,32 @@
 import { useTranslation } from 'react-i18next';
+import { useFormContext } from 'react-hook-form';
 import { FieldLabel, Select, TextArea, TextInput } from '@maya/shared-ui-react';
 import type { ApplicationRef } from '../../types/logs';
+import type { ErrorCodeFormInput } from '../../schemas/errorCode';
 
-export type ErrorCodeFormState = {
-  application_id: number | null;
-  code: string;
-  name: string;
-  file: string;
-  line: string;
-  description: string;
-};
-
-type ErrorCodeFormProps = {
-  value: ErrorCodeFormState;
+interface ErrorCodeFormProps {
   applications: ApplicationRef[];
   disabled?: boolean;
   codeReadOnly?: boolean;
   applicationReadOnly?: boolean;
-  onChange: (patch: Partial<ErrorCodeFormState>) => void;
-};
+}
 
+/**
+ * Presentational form for error code create/edit. Consumes the surrounding
+ * `<FormProvider>` for state + validation (see `errorCodeFormSchema`).
+ */
 export function ErrorCodeForm({
-  value,
   applications,
   disabled = false,
   codeReadOnly = false,
   applicationReadOnly = false,
-  onChange,
 }: ErrorCodeFormProps) {
   const { t } = useTranslation('errorCodes');
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext<ErrorCodeFormInput>();
+
   const applicationLocked = applicationReadOnly || disabled;
 
   return (
@@ -40,11 +38,11 @@ export function ErrorCodeForm({
         <TextInput
           id="error-code-name"
           fieldSize="comfortable"
-          value={value.name}
-          onChange={(e) => onChange({ name: e.target.value })}
           disabled={disabled}
-          required
+          error={!!errors.name}
+          {...register('name')}
         />
+        {errors.name && <p className="mt-1 text-xs text-danger">{errors.name.message}</p>}
       </div>
 
       <div>
@@ -54,13 +52,13 @@ export function ErrorCodeForm({
         <TextInput
           id="error-code-code"
           fieldSize="comfortable"
-          value={value.code}
-          onChange={(e) => onChange({ code: e.target.value })}
           disabled={disabled}
           readOnly={codeReadOnly}
-          required
           className="font-mono"
+          error={!!errors.code}
+          {...register('code')}
         />
+        {errors.code && <p className="mt-1 text-xs text-danger">{errors.code.message}</p>}
       </div>
 
       <div>
@@ -70,13 +68,9 @@ export function ErrorCodeForm({
         <Select
           id="error-code-application"
           fieldSize="comfortable"
-          value={value.application_id ?? ''}
-          onChange={(e) => {
-            const v = e.target.value;
-            onChange({ application_id: v === '' ? null : Number(v) });
-          }}
           disabled={applicationLocked}
-          required
+          error={!!errors.application_id}
+          {...register('application_id')}
         >
           <option value="">{t('form.applicationPlaceholder')}</option>
           {applications.map((app) => (
@@ -85,6 +79,9 @@ export function ErrorCodeForm({
             </option>
           ))}
         </Select>
+        {errors.application_id && (
+          <p className="mt-1 text-xs text-danger">{errors.application_id.message}</p>
+        )}
       </div>
 
       <div>
@@ -92,11 +89,12 @@ export function ErrorCodeForm({
         <TextInput
           id="error-code-file"
           fieldSize="comfortable"
-          value={value.file}
-          onChange={(e) => onChange({ file: e.target.value })}
           disabled={disabled}
           className="font-mono"
+          error={!!errors.file}
+          {...register('file')}
         />
+        {errors.file && <p className="mt-1 text-xs text-danger">{errors.file.message}</p>}
       </div>
 
       <div>
@@ -106,10 +104,11 @@ export function ErrorCodeForm({
           type="number"
           fieldSize="comfortable"
           min={1}
-          value={value.line}
-          onChange={(e) => onChange({ line: e.target.value })}
           disabled={disabled}
+          error={!!errors.line}
+          {...register('line')}
         />
+        {errors.line && <p className="mt-1 text-xs text-danger">{errors.line.message}</p>}
       </div>
 
       <div className="md:col-span-2">
@@ -117,11 +116,13 @@ export function ErrorCodeForm({
         <TextArea
           id="error-code-description"
           fieldSize="comfortable"
-          value={value.description}
-          onChange={(e) => onChange({ description: e.target.value })}
-          disabled={disabled}
           rows={4}
+          disabled={disabled}
+          {...register('description')}
         />
+        {errors.description && (
+          <p className="mt-1 text-xs text-danger">{errors.description.message}</p>
+        )}
       </div>
     </div>
   );

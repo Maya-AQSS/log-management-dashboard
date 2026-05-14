@@ -1,24 +1,22 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, Button, PageTitle } from '@maya/shared-ui-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { fetchApplications } from '../api/applications';
 import { createErrorCode, type ErrorCodePayload } from '../api/errorCodes';
-import { ErrorCodeForm, type ErrorCodeFormState } from '../components/error-codes';
+import { ErrorCodeForm } from '../components/error-codes';
 import type { ApplicationRef } from '../types/logs';
+import {
+  errorCodeFormSchema,
+  emptyErrorCodeForm,
+  type ErrorCodeFormInput,
+} from '../schemas/errorCode';
 
-const EMPTY_FORM: ErrorCodeFormState = {
-  application_id: null,
-  code: '',
-  name: '',
-  file: '',
-  line: '',
-  description: '',
-};
-
-function toPayload(form: ErrorCodeFormState): ErrorCodePayload {
+function toPayload(form: ErrorCodeFormInput): ErrorCodePayload {
   const parsedLine = form.line.trim() === '' ? null : Number(form.line);
   return {
-    application_id: form.application_id as number,
+    application_id: Number(form.application_id),
     code: form.code,
     name: form.name,
     file: form.file.trim() === '' ? null : form.file,
@@ -30,9 +28,13 @@ function toPayload(form: ErrorCodeFormState): ErrorCodePayload {
 export function ErrorCodeCreatePage() {
   const navigate = useNavigate();
   const [applications, setApplications] = useState<ApplicationRef[]>([]);
-  const [form, setForm] = useState<ErrorCodeFormState>(EMPTY_FORM);
-  const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  const methods = useForm<ErrorCodeFormInput>({
+    defaultValues: emptyErrorCodeForm,
+    mode: 'onChange',
+    resolver: zodResolver(errorCodeFormSchema),
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -48,61 +50,51 @@ export function ErrorCodeCreatePage() {
     };
   }, []);
 
-  const onChangeForm = useCallback((patch: Partial<ErrorCodeFormState>) => {
-    setForm((f) => ({ ...f, ...patch }));
-  }, []);
-
-  const onSave = useCallback(async () => {
-    if (form.application_id == null) {
-      setSaveError('Selecciona una aplicación.');
-      return;
-    }
-    if (form.code.trim() === '' || form.name.trim() === '') {
-      setSaveError('El código y el nombre son obligatorios.');
-      return;
-    }
-    setSaving(true);
+  const onSubmit = methods.handleSubmit(async (values) => {
     setSaveError(null);
     try {
-      const created = await createErrorCode(toPayload(form));
+      const created = await createErrorCode(toPayload(values));
       navigate(`/error-codes/${created.id}`);
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : String(e));
-      setSaving(false);
     }
-  }, [form, navigate]);
+  });
+
+  const saving = methods.formState.isSubmitting;
 
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
-      <PageTitle
-        title="Nuevo código de error"
-        onBack={() => navigate(-1)}
-        backLabel="Volver"
-      />
+      <PageTitle title="Nuevo código de error" onBack={() => navigate(-1)} backLabel="Volver" />
 
       <div className="mt-4 rounded-lg border border-ui-border bg-ui-card p-4 dark:border-ui-dark-border dark:bg-ui-dark-card">
-        <ErrorCodeForm
-          value={form}
-          applications={applications}
-          disabled={saving}
-          onChange={onChangeForm}
-        />
-
-        {saveError && (
-          <Alert tone="danger" className="mt-4">{saveError}</Alert>
-        )}
-
-        <div className="mt-4 flex justify-end gap-2">
-          <Link
-            to="/error-codes"
-            className="inline-flex items-center bg-transparent text-text-secondary dark:text-text-dark-secondary border border-ui-border dark:border-ui-dark-border hover:text-text-primary dark:hover:text-text-dark-primary hover:border-text-secondary dark:hover:border-text-dark-secondary px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer"
+        <FormProvider {...methods}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              void onSubmit();
+            }}
           >
-            Cancelar
-          </Link>
-          <Button variant="primary" size="sm" onClick={onSave} disabled={saving} loading={saving}>
-            {saving ? '…' : 'Crear'}
-          </Button>
-        </div>
+            <ErrorCodeForm applications={applications} disabled={saving} />
+
+            {saveError && (
+              <Alert tone="danger" className="mt-4">
+                {saveError}
+              </Alert>
+            )}
+
+            <div className="mt-4 flex justify-end gap-2">
+              <Link
+                to="/error-codes"
+                className="inline-flex items-center bg-transparent text-text-secondary dark:text-text-dark-secondary border border-ui-border dark:border-ui-dark-border hover:text-text-primary dark:hover:text-text-dark-primary hover:border-text-secondary dark:hover:border-text-dark-secondary px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer"
+              >
+                Cancelar
+              </Link>
+              <Button type="submit" variant="primary" size="sm" disabled={saving} loading={saving}>
+                {saving ? '…' : 'Crear'}
+              </Button>
+            </div>
+          </form>
+        </FormProvider>
       </div>
     </div>
   );

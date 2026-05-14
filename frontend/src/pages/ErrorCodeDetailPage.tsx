@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Button, PageTitle } from '@maya/shared-ui-react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Alert, Button, ConfirmDialog, PageTitle } from '@maya/shared-ui-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchApplications } from '../api/applications';
 import {
@@ -9,9 +11,13 @@ import {
   type ErrorCodePayload,
 } from '../api/errorCodes';
 import { CommentThread } from '../components/comments';
-import { ErrorCodeForm, type ErrorCodeFormState } from '../components/error-codes';
-import { ConfirmDialog } from '@maya/shared-ui-react';
+import { ErrorCodeForm } from '../components/error-codes';
 import type { ApplicationRef, ErrorCode } from '../types/logs';
+import {
+  errorCodeFormSchema,
+  emptyErrorCodeForm,
+  type ErrorCodeFormInput,
+} from '../schemas/errorCode';
 
 type State =
   | { status: 'loading'; data: ErrorCode | null }
@@ -19,9 +25,9 @@ type State =
   | { status: 'error'; error: string; data: ErrorCode | null }
   | { status: 'not-found' };
 
-function toFormState(ec: ErrorCode): ErrorCodeFormState {
+function toFormInput(ec: ErrorCode): ErrorCodeFormInput {
   return {
-    application_id: ec.application?.id ?? null,
+    application_id: ec.application?.id != null ? String(ec.application.id) : '',
     code: ec.code,
     name: ec.name,
     file: ec.file ?? '',
@@ -30,10 +36,10 @@ function toFormState(ec: ErrorCode): ErrorCodeFormState {
   };
 }
 
-function toPayload(form: ErrorCodeFormState): Partial<ErrorCodePayload> {
+function toPayload(form: ErrorCodeFormInput): Partial<ErrorCodePayload> {
   const parsedLine = form.line.trim() === '' ? null : Number(form.line);
   return {
-    application_id: form.application_id ?? undefined,
+    application_id: form.application_id ? Number(form.application_id) : undefined,
     code: form.code,
     name: form.name,
     file: form.file.trim() === '' ? null : form.file,
@@ -52,19 +58,16 @@ export function ErrorCodeDetailPage() {
   const [applications, setApplications] = useState<ApplicationRef[]>([]);
   const [state, setState] = useState<State>({ status: 'loading', data: null });
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState<ErrorCodeFormState>({
-    application_id: null,
-    code: '',
-    name: '',
-    file: '',
-    line: '',
-    description: '',
-  });
-  const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const methods = useForm<ErrorCodeFormInput>({
+    defaultValues: emptyErrorCodeForm,
+    mode: 'onChange',
+    resolver: zodResolver(errorCodeFormSchema),
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -92,7 +95,9 @@ export function ErrorCodeDetailPage() {
     }));
     fetchErrorCode(errorCodeId)
       .then((data) => {
-        if (!cancelled) setState({ status: 'ready', data });
+        if (cancelled) return;
+        setState({ status: 'ready', data });
+        methods.reset(toFormInput(data));
       })
       .catch((e) => {
         if (cancelled) return;
@@ -110,7 +115,7 @@ export function ErrorCodeDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [errorCodeId, validId]);
+  }, [errorCodeId, validId, methods]);
 
   useEffect(() => load(), [load]);
 
@@ -118,42 +123,29 @@ export function ErrorCodeDetailPage() {
 
   const onStartEdit = useCallback(() => {
     if (!ec) return;
-    setForm(toFormState(ec));
+    methods.reset(toFormInput(ec));
     setSaveError(null);
     setEditing(true);
-  }, [ec]);
+  }, [ec, methods]);
 
   const onCancelEdit = useCallback(() => {
+    if (ec) methods.reset(toFormInput(ec));
     setEditing(false);
     setSaveError(null);
-  }, []);
+  }, [ec, methods]);
 
-  const onChangeForm = useCallback((patch: Partial<ErrorCodeFormState>) => {
-    setForm((f) => ({ ...f, ...patch }));
-  }, []);
-
-  const onSave = useCallback(async () => {
+  const onSubmit = methods.handleSubmit(async (values) => {
     if (!validId) return;
-    if (form.application_id == null) {
-      setSaveError('Selecciona una aplicación.');
-      return;
-    }
-    if (form.code.trim() === '' || form.name.trim() === '') {
-      setSaveError('El código y el nombre son obligatorios.');
-      return;
-    }
-    setSaving(true);
     setSaveError(null);
     try {
-      const updated = await updateErrorCode(errorCodeId, toPayload(form));
+      const updated = await updateErrorCode(errorCodeId, toPayload(values));
       setState({ status: 'ready', data: updated });
+      methods.reset(toFormInput(updated));
       setEditing(false);
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setSaving(false);
     }
-  }, [errorCodeId, validId, form]);
+  });
 
   const onDelete = useCallback(async () => {
     if (!validId) return;
@@ -180,6 +172,8 @@ export function ErrorCodeDetailPage() {
     );
   }
 
+  const saving = methods.formState.isSubmitting;
+
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
       <PageTitle
@@ -201,11 +195,14 @@ export function ErrorCodeDetailPage() {
       />
 
       {deleteError && (
-        <Alert tone="danger" className="mt-4">{deleteError}</Alert>
+        <Alert tone="danger" className="mt-4">
+          {deleteError}
+        </Alert>
       )}
 
       {state.status === 'error' && (
-        <Alert tone="danger" className="mt-4">No se pudo cargar el código de error: {state.error}
+        <Alert tone="danger" className="mt-4">
+          No se pudo cargar el código de error: {state.error}
         </Alert>
       )}
 
@@ -218,29 +215,50 @@ export function ErrorCodeDetailPage() {
       {ec && (
         <div className="mt-4 space-y-4">
           <div className="rounded-lg border border-ui-border bg-ui-card p-4 dark:border-ui-dark-border dark:bg-ui-dark-card">
-            <ErrorCodeForm
-              value={editing ? form : toFormState(ec)}
-              applications={applications}
-              disabled={!editing || saving}
-              codeReadOnly
-              applicationReadOnly
-              onChange={onChangeForm}
-            />
+            <FormProvider {...methods}>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void onSubmit();
+                }}
+              >
+                <ErrorCodeForm
+                  applications={applications}
+                  disabled={!editing || saving}
+                  codeReadOnly
+                  applicationReadOnly
+                />
 
-            {editing && saveError && (
-              <Alert tone="danger" className="mt-4">{saveError}</Alert>
-            )}
+                {editing && saveError && (
+                  <Alert tone="danger" className="mt-4">
+                    {saveError}
+                  </Alert>
+                )}
 
-            {editing && (
-              <div className="mt-4 flex justify-end gap-2">
-                <Button variant="secondary" size="sm" onClick={onCancelEdit} disabled={saving}>
-                  Cancelar
-                </Button>
-                <Button variant="primary" size="sm" onClick={onSave} disabled={saving} loading={saving}>
-                  {saving ? '…' : 'Guardar'}
-                </Button>
-              </div>
-            )}
+                {editing && (
+                  <div className="mt-4 flex justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={onCancelEdit}
+                      disabled={saving}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      size="sm"
+                      disabled={saving}
+                      loading={saving}
+                    >
+                      {saving ? '…' : 'Guardar'}
+                    </Button>
+                  </div>
+                )}
+              </form>
+            </FormProvider>
           </div>
 
           <div className="rounded-lg border border-ui-border bg-ui-card p-4 dark:border-ui-dark-border dark:bg-ui-dark-card">
