@@ -23,10 +23,10 @@ import {
 } from '../api/archivedLogs';
 import type { ArchivedLogsFiltersState } from '../components/archived-logs';
 import { SeverityBadge, severityLabel } from '../components/severity';
-import type { PaginatedResponse, SortDir } from '../types/api';
+import type { PaginatedResponse, SortDir } from '@maya/shared-auth-react';
 import type { ApplicationRef, ArchivedLog } from '../types/logs';
 import { LOG_SEVERITY_KEYS } from '../types/logs';
-import { formatDateTime } from '../utils/date';
+import { formatDateTime } from '@maya/shared-ui-react';
 
 export type ArchivedLogsSortKey =
   | 'application'

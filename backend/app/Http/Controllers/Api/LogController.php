@@ -145,10 +145,10 @@ class LogController extends Controller
                 JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
             ) . "\n\n";
 
-            if (function_exists('ob_flush')) {
-                ob_flush();
+            if (function_exists('ob_flush') && ob_get_level() > 0) {
+                @ob_flush();
             }
-            flush();
+            @flush();
         }, 200, [
             'Cache-Control' => 'no-cache',
             'Content-Type' => 'text/event-stream',

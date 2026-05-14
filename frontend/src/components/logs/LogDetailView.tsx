@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { Log } from '../../types/logs';
-import { formatDateTime } from '../../utils/date';
+import { formatDateTime } from '@maya/shared-ui-react';
 import { SeverityBadge } from '../severity';
 
 type LogDetailViewProps = {

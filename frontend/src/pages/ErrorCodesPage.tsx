@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { fetchApplications } from '../api/applications';
 import { fetchErrorCodes, type ErrorCodesFilters as ApiErrorCodesFilters } from '../api/errorCodes';
 import type { ErrorCodesFiltersState } from '../components/error-codes';
-import type { PaginatedResponse } from '../types/api';
+import type { PaginatedResponse } from '@maya/shared-auth-react';
 import type { ApplicationRef, ErrorCode } from '../types/logs';
 
 type ListState =

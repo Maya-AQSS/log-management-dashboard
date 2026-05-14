@@ -21,10 +21,10 @@ import { fetchLogs, type LogsFilters as ApiLogsFilters, type LogsSortBy } from '
 import type { LogsFiltersState } from '../components/logs';
 import { SeverityBadge, severityLabel } from '../components/severity';
 import { useLogStream } from '../hooks';
-import type { PaginatedResponse, SortDir } from '../types/api';
+import type { PaginatedResponse, SortDir } from '@maya/shared-auth-react';
 import type { ApplicationRef, Log } from '../types/logs';
 import { LOG_SEVERITY_KEYS } from '../types/logs';
-import { formatDateTime } from '../utils/date';
+import { formatDateTime } from '@maya/shared-ui-react';
 
 export type LogsSortKey = 'application' | 'severity' | 'created_at';
 
