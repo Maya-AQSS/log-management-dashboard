@@ -343,6 +343,7 @@ return [
         'name' => 'External Rate Limit Hit (429)',
         'description' => 'El script está siendo bloqueado por un servicio externo (Moodle, pasarelas de firma) por exceso de peticiones concurrentes (HTTP 429).',
     ],
+    // Códigos de error para el archivado de logs
     [
         'application_id' => 4,
         'code' => 'LAR-LOG-001',

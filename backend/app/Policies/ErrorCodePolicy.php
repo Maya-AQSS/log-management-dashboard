@@ -6,56 +6,74 @@ use App\Models\ErrorCode;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Http\Request;
+use Maya\Profile\Services\Contracts\UserProfileServiceInterface;
 
 /**
- * Alta / edición / baja de códigos de error: requiere permiso concedido en maya_authorization
- * y reflejado en el claim JWT `permissions` (véase {@see \Maya\Auth\Middleware\JwtMiddleware}).
+ * Alta / edición / baja de códigos de error: permisos desde el mismo flujo
+ * que {@code GET /me} — {@see UserProfileServiceInterface::getProfile()}
+ * (resolver FDW + {@code extra.permissions}), no desde claims arbitrarios del JWT.
  *
- * Código de permiso: {@see self::MANAGE_PERMISSION_CODE} (crear, actualizar y eliminar).
+ * Coherente con middleware en rutas API: mutación {@see self::MUTATE_PERMISSION_CODE},
+ * baja {@see self::DELETE_PERMISSION_CODE}.
  */
 class ErrorCodePolicy
 {
-    /** Permiso único de gestión de códigos de error en la app maya_logs. */
-    public const MANAGE_PERMISSION_CODE = 'maya_logs.error_codes.manage';
+    /** POST y PUT/PATCH de error codes (ruta PUT usa middleware con este slug). */
+    public const MUTATE_PERMISSION_CODE = 'logs.update';
+
+    /** DELETE de error codes. */
+    public const DELETE_PERMISSION_CODE = 'logs.delete';
 
     public function __construct(
         private readonly Request $request,
+        private readonly UserProfileServiceInterface $profileService,
     ) {}
 
     public function create(?User $user): Response
     {
-        return $this->managePermissionResponse();
+        return $this->responseForSlug(self::MUTATE_PERMISSION_CODE);
     }
 
     public function update(?User $user, ErrorCode $errorCode): Response
     {
-        return $this->managePermissionResponse();
+        return $this->responseForSlug(self::MUTATE_PERMISSION_CODE);
     }
 
     public function delete(?User $user, ErrorCode $errorCode): Response
     {
-        return $this->managePermissionResponse();
+        return $this->responseForSlug(self::DELETE_PERMISSION_CODE);
     }
 
-    private function managePermissionResponse(): Response
+    private function responseForSlug(string $permissionSlug): Response
     {
-        if ($this->jwtHasPermission(self::MANAGE_PERMISSION_CODE)) {
+        [$userId, $jwtProfile] = $this->jwtContext();
+        if ($userId === '') {
+            return Response::deny(__('api.error_codes.forbidden'), 'error_codes_permission_denied')->withStatus(403);
+        }
+
+        $profile = $this->profileService->getProfile($userId, $jwtProfile);
+        $permissions = $profile->extra['permissions'] ?? null;
+        if (! is_array($permissions)) {
+            return Response::deny(__('api.error_codes.forbidden'), 'error_codes_permission_denied')->withStatus(403);
+        }
+
+        if (in_array($permissionSlug, $permissions, true)) {
             return Response::allow();
         }
 
         return Response::deny(__('api.error_codes.forbidden'), 'error_codes_permission_denied')->withStatus(403);
     }
 
-    private function jwtHasPermission(string $code): bool
+    /**
+     * Mismo criterio que {@see \Maya\Profile\Controllers\MeController::jwtContext()}.
+     *
+     * @return array{0: string, 1: array<string, mixed>}
+     */
+    private function jwtContext(): array
     {
-        /** @var array<string, mixed>|null $jwtUser */
-        $jwtUser = $this->request->attributes->get('jwt_user');
-        $permissions = is_array($jwtUser) ? ($jwtUser['permissions'] ?? []) : [];
+        $jwtProfile = (array) $this->request->attributes->get('jwt_user', []);
+        $userId = (string) ($jwtProfile['id'] ?? '');
 
-        if (! is_array($permissions)) {
-            return false;
-        }
-
-        return in_array($code, $permissions, true);
+        return [$userId, $jwtProfile];
     }
 }
