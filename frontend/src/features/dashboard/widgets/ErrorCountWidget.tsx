@@ -1,45 +1,46 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { createDataHook } from '@maya/shared-auth-react/src/data';
 import { fetchLogs } from '../../../api/logs';
 import { useLogStream } from '../../../hooks';
 
-/**
- * StatCard widget — count of CRITICAL+HIGH (treated as "errors") logs in the
- * last 24h. The backend exposes filtering by severity and date_from/date_to,
- * so we ask the API for a single-page count and read pagination.meta.total.
- */
-function ErrorCountWidget() {
-  const { t } = useTranslation('dashboard');
-  const [count, setCount] = useState<number | null>(null);
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+interface ErrorCountArgs {
+  since: string;
+  streamMark: number;
+}
 
-  const { payload: streamPayload } = useLogStream({ intervalMs: 5000 });
-
-  useEffect(() => {
-    let cancelled = false;
-    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    fetchLogs({
+const useErrorCount = createDataHook<ErrorCountArgs, number>({
+  // streamMark is part of the key so the query re-runs on each SSE tick.
+  queryKey: ({ since, streamMark }) => ['logs', 'error-count', { since, streamMark }],
+  fetcher: async ({ since }) => {
+    const res = await fetchLogs({
       severity: ['critical', 'high'],
       archived: 'without',
       date_from: since,
       per_page: 1,
-    })
-      .then((res) => {
-        if (!cancelled) {
-          setCount(res.meta?.total ?? res.data?.length ?? 0);
-          setStatus('ready');
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setStatus('error');
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [streamPayload]);
+    });
+    return res.meta?.total ?? res.data?.length ?? 0;
+  },
+  defaultOptions: { staleTime: 5_000 },
+});
 
-  if (status === 'loading') {
+/**
+ * StatCard widget — count of CRITICAL+HIGH (treated as "errors") logs in the
+ * last 24h. Re-fetched whenever a new SSE log payload arrives.
+ */
+function ErrorCountWidget() {
+  const { t } = useTranslation('dashboard');
+  const { payload: streamPayload } = useLogStream({ intervalMs: 5000 });
+
+  // Stable per-tick: a marker derived from the latest SSE item so the query
+  // refetches when a new log arrives. Hashing the top item id is enough.
+  const streamMark =
+    streamPayload && streamPayload.length > 0 ? Number(streamPayload[0]?.id ?? 0) : 0;
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+  const { data, isLoading, error } = useErrorCount({ since, streamMark });
+
+  if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="h-12 w-24 bg-ui-border-l dark:bg-ui-dark-border rounded-lg animate-pulse" />
@@ -47,7 +48,7 @@ function ErrorCountWidget() {
     );
   }
 
-  if (status === 'error') {
+  if (error) {
     return (
       <p className="text-sm text-danger-dark dark:text-danger text-center py-4">
         {t('error')}
@@ -65,7 +66,7 @@ function ErrorCountWidget() {
         <span
           className="text-5xl sm:text-6xl font-extrabold leading-none bg-clip-text text-transparent bg-gradient-to-br from-danger to-warning-dark"
         >
-          {count ?? 0}
+          {data ?? 0}
         </span>
         <span className="mt-2 text-xs uppercase tracking-wide font-medium text-text-secondary dark:text-text-dark-secondary">
           {t('widgets.errorCount.label')}
