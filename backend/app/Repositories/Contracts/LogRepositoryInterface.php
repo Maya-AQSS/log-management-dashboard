@@ -58,7 +58,9 @@ interface LogRepositoryInterface
     public function archivedLogIdFor(int $logId): ?int;
 
     /**
-     * Marca el log como resuelto (resolved = true).
+     * Marca el log como resuelto (resolved = true) solo si aún no lo estaba.
+     *
+     * @return int Filas afectadas (0 si ya estaba resuelto).
      */
-    public function resolved(int $logId): void;
+    public function resolved(int $logId): int;
 }
