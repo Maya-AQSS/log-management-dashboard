@@ -12,18 +12,18 @@ class ErrorCodeObserver
 
     public function created(ErrorCode $errorCode): void
     {
-        DB::afterCommit(fn () => $this->publish('created', $errorCode, null, $errorCode->getAttributes()));
+        DB::afterCommit(fn () => $this->publish('Creado un Error code', $errorCode, null, $errorCode->getAttributes()));
     }
 
     public function updated(ErrorCode $errorCode): void
     {
         $previous= array_intersect_key($errorCode->getOriginal(), $errorCode->getChanges());
-        DB::afterCommit(fn() => $this->publish('updated', $errorCode, $previous, $errorCode->getChanges()));
+        DB::afterCommit(fn() => $this->publish('Actualizado un Error code', $errorCode, $previous, $errorCode->getChanges()));
     }
 
     public function deleted(ErrorCode $errorCode): void
     {
-        DB::afterCommit(fn() => $this->publish('deleted', $errorCode, $errorCode->getAttributes(), null));
+        DB::afterCommit(fn() => $this->publish('Eliminado un Error code', $errorCode, $errorCode->getAttributes(), null));
     }
 
 
@@ -31,7 +31,7 @@ class ErrorCodeObserver
     {
         $this->publisher->publish(
             applicationSlug: 'maya-logs',
-            entityType: 'error_code',
+            entityType: self::ENTITY_TYPE,
             entityId:  (string) $errorCode->getKey(),
             action: $action,
             userId: (string) (auth()->id() ?? 'system'),
