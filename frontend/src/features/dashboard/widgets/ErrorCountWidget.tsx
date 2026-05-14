@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { createDataHook } from '@maya/shared-auth-react/src/data';
+import { createDataHook } from '@maya/shared-auth-react';
 import { fetchLogs } from '../../../api/logs';
 import { useLogStream } from '../../../hooks';
 
