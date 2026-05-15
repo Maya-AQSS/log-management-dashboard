@@ -7,17 +7,17 @@ cd "$SCRIPT_DIR"
 
 SERVICE_LABEL="maya-logs"
 BACKEND_CONTAINER="maya_log_mgmt"
-FRONTEND_URL="https://desarrollo-ceedcv-logs.192.168.2.1.nip.io"
-BACKEND_API_URL="https://desarrollo-ceedcv-logs-api.192.168.2.1.nip.io/api/v1"
+FRONTEND_URL="https://${HOST_PREFIX:-}logs.${DOMAIN_SUFFIX:-localhost}"
+BACKEND_API_URL="https://${HOST_PREFIX:-}logs-api.${DOMAIN_SUFFIX:-localhost}/api/v1"
 DEFAULT_BACKEND_PORT="8002"
 DEFAULT_FRONTEND_PORT="5176"
 
 setup_frontend_env() {
-    upsert_env_var frontend/.env VITE_API_URL            "${VITE_API_URL:-https://desarrollo-ceedcv-logs-api.192.168.2.1.nip.io/api/v1}"
-    upsert_env_var frontend/.env VITE_KEYCLOAK_URL       "${VITE_KEYCLOAK_URL:-https://keycloak.192.168.2.1.nip.io}"
-    upsert_env_var frontend/.env VITE_KEYCLOAK_REALM     "${VITE_KEYCLOAK_REALM:-maya}"
+    upsert_env_var frontend/.env VITE_API_URL            "${VITE_API_URL:-https://${HOST_PREFIX:-}logs-api.${DOMAIN_SUFFIX:-localhost}/api/v1}"
+    upsert_env_var frontend/.env VITE_KEYCLOAK_URL       "${VITE_KEYCLOAK_URL:-https://keycloak.${DOMAIN_SUFFIX:-localhost}}"
+    upsert_env_var frontend/.env VITE_KEYCLOAK_REALM     "${VITE_KEYCLOAK_REALM:-${MAYA_SLOT:-maya}}"
     upsert_env_var frontend/.env VITE_KEYCLOAK_CLIENT_ID "${VITE_KEYCLOAK_CLIENT_ID:-maya-logs}"
-    upsert_env_var frontend/.env VITE_DASHBOARD_API_URL  "${VITE_DASHBOARD_API_URL:-https://desarrollo-ceedcv-dashboard-api.192.168.2.1.nip.io}"
+    upsert_env_var frontend/.env VITE_DASHBOARD_API_URL  "${VITE_DASHBOARD_API_URL:-https://${HOST_PREFIX:-}dashboard-api.${DOMAIN_SUFFIX:-localhost}}"
 }
 
 # shellcheck source=../maya_infra/scripts/up-common.sh
