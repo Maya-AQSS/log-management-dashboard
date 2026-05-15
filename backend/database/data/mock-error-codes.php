@@ -449,4 +449,11 @@ return [
         'name' => 'Comment delete failed',
         'description' => 'Fallo al eliminar un comentario.',
     ],
+    // Telemetría del panel: logs (LogService)
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-018',
+        'name' => 'Active log mark resolved failed',
+        'description' => 'Fallo al marcar un log activo como resuelto (log inexistente o error de persistencia).',
+    ],
 ];
