@@ -3,18 +3,19 @@
 namespace App\Http\Resources;
 
 use App\Dtos\CommentDto;
-use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Gate;
 
+/**
+ * @property CommentDto $resource
+ */
 class CommentResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $dto = $this->resource instanceof CommentDto
-            ? $this->resource
-            : CommentDto::fromModel($this->resource);
+        /** @var CommentDto $dto */
+        $dto = $this->resource;
 
         $authUser = $request->user();
         $canEdit = $authUser !== null && Gate::forUser($authUser)->check('update', $dto->source);

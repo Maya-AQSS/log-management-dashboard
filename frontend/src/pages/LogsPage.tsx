@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Alert,
@@ -16,12 +16,12 @@ import {
 } from '@maya/shared-ui-react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
-import { fetchApplications } from '../api/applications';
+import { fetchApplications, type ApplicationScope } from '../api/applications';
 import { fetchLogs, type LogsFilters as ApiLogsFilters, type LogsSortBy } from '../api/logs';
 import type { LogsFiltersState } from '../components/logs';
 import { SeverityBadge, severityLabel } from '../components/severity';
 import { useLogStream } from '../hooks';
-import type { PaginatedResponse, SortDir } from '@maya/shared-auth-react';
+import { createDataHook, type PaginatedResponse, type SortDir } from '@maya/shared-auth-react';
 import type { ApplicationRef, Log } from '../types/logs';
 import { LOG_SEVERITY_KEYS } from '../types/logs';
 import { formatDateTime } from '@maya/shared-ui-react';
@@ -31,10 +31,21 @@ export type LogsSortKey = 'application' | 'severity' | 'created_at';
 const VALID_SORT_COLUMNS: readonly LogsSortKey[] = ['application', 'severity', 'created_at'];
 const VALID_SORT_DIRS: readonly SortDir[] = ['asc', 'desc'];
 
-type ListState =
-  | { status: 'loading'; data: PaginatedResponse<Log> | null }
-  | { status: 'ready'; data: PaginatedResponse<Log> }
-  | { status: 'error'; error: string; data: PaginatedResponse<Log> | null };
+const useApplicationsQuery = createDataHook<ApplicationScope, ApplicationRef[]>({
+  queryKey: (scope) => ['applications', scope],
+  fetcher: (scope) => fetchApplications(scope),
+  defaultOptions: { staleTime: 60_000 },
+});
+
+const useLogsListQuery = createDataHook<ApiLogsFilters, PaginatedResponse<Log>>({
+  queryKey: (filters) => ['logs', filters],
+  fetcher: (filters) => fetchLogs(filters),
+  defaultOptions: {
+    // Tabla paginada — mantenemos el resultado previo mientras se carga la siguiente página.
+    placeholderData: (prev) => prev,
+    staleTime: 0,
+  },
+});
 
 function truncate(text: string | null | undefined, max = 120): string {
   if (!text) return '-';
@@ -149,9 +160,6 @@ export function LogsPage() {
   const { t: tCommon } = useTranslation('common');
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [applications, setApplications] = useState<ApplicationRef[]>([]);
-  const [state, setState] = useState<ListState>({ status: 'loading', data: null });
-  const [refreshNonce, setRefreshNonce] = useState(0);
   const { hiddenIds, toggleHidden, pageSize, setPageSize } = useTablePreferences({
     storageKey: 'maya:logs:logs-table',
   });
@@ -162,41 +170,14 @@ export function LogsPage() {
     [searchParams],
   );
 
-  useEffect(() => {
-    let cancelled = false;
-    fetchApplications('with_logs')
-      .then((apps) => {
-        if (!cancelled) setApplications(apps);
-      })
-      .catch(() => {
-        /* sin bloqueador: dejamos dropdown vacío */
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  // Dropdown de aplicaciones. Fallo silencioso (dropdown vacío).
+  const applicationsQuery = useApplicationsQuery('with_logs');
+  const applications = applicationsQuery.data ?? [];
 
-  useEffect(() => {
-    let cancelled = false;
-    setState((prev) => ({ status: 'loading', data: prev.data }));
-    fetchLogs(toApiFilters(filters, sortBy, sortDir, page, pageSize))
-      .then((data) => {
-        if (!cancelled) setState({ status: 'ready', data });
-      })
-      .catch((e) => {
-        if (!cancelled) {
-          setState((prev) => ({
-            status: 'error',
-            error: e instanceof Error ? e.message : String(e),
-            data: prev.data,
-          }));
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [filters, sortBy, sortDir, page, pageSize, refreshNonce]);
+  // Listado paginado de logs.
+  const logsQuery = useLogsListQuery(toApiFilters(filters, sortBy, sortDir, page, pageSize));
 
+  // Refresh por log stream: cuando llega un id nuevo, invalidamos la query.
   const { payload: streamPayload } = useLogStream({ intervalMs: 5000 });
 
   useEffect(() => {
@@ -208,9 +189,9 @@ export function LogsPage() {
     }
     if (maxId > lastStreamIdRef.current) {
       lastStreamIdRef.current = maxId;
-      setRefreshNonce((n) => n + 1);
+      void logsQuery.refetch();
     }
-  }, [streamPayload]);
+  }, [streamPayload, logsQuery]);
 
   const updateFilters = useCallback(
     (patch: Partial<LogsFiltersState>) => {
@@ -304,13 +285,16 @@ export function LogsPage() {
     [t],
   );
 
-  const pagination = state.data;
+  const pagination = logsQuery.data;
   const logs = pagination?.data ?? [];
   const meta = pagination?.meta;
   const startIndex = meta && meta.from != null ? meta.from : 0;
   const endIndex = meta && meta.to != null ? meta.to : 0;
   const total = meta?.total ?? 0;
   const activeCount = countActiveFilters(filters);
+  const errorMessage = logsQuery.error
+    ? (logsQuery.error instanceof Error ? logsQuery.error.message : String(logsQuery.error))
+    : null;
 
   const filtersPanel = (
     <>
@@ -387,8 +371,8 @@ export function LogsPage() {
     <div className="px-4 py-6 sm:px-6 lg:px-8">
       <PageTitle title={t('title')} />
 
-      {state.status === 'error' && (
-        <Alert tone="danger" className="mt-4">{t('loadError', { message: state.error })}
+      {logsQuery.isError && errorMessage && (
+        <Alert tone="danger" className="mt-4">{t('loadError', { message: errorMessage })}
         </Alert>
       )}
 
@@ -398,7 +382,7 @@ export function LogsPage() {
           columns={columns}
           rows={logs}
           rowKey={(l) => l.id}
-          loading={state.status === 'loading'}
+          loading={logsQuery.isLoading || logsQuery.isFetching}
           hiddenColumnIds={hiddenIds}
           onToggleHiddenColumn={toggleHidden}
           filtersStorageKey="maya:logs:logs-table"

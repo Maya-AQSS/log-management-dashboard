@@ -6,16 +6,15 @@ use App\Dtos\ApplicationRefDto;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @property ApplicationRefDto $resource
+ */
 class ApplicationRefResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $dto = $this->resource instanceof ApplicationRefDto
-            ? $this->resource
-            : new ApplicationRefDto(
-                id: (int) $this->resource->id,
-                name: (string) $this->resource->name,
-            );
+        /** @var ApplicationRefDto $dto */
+        $dto = $this->resource;
 
         return [
             'id' => $dto->id,

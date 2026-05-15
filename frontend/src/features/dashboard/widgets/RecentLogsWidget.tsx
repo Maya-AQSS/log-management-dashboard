@@ -1,12 +1,28 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
+import { createDataHook, type PaginatedResponse } from '@maya/shared-auth-react';
 import { fetchLogs } from '../../../api/logs';
 import { SeverityBadge } from '../../../components/severity';
 import type { Log } from '../../../types/logs';
 import { useLogStream } from '../../../hooks';
 
 const PAGE_SIZE = 5;
+
+const RECENT_LOGS_KEY = ['recent-logs', PAGE_SIZE] as const;
+
+const useRecentLogsQuery = createDataHook<void, PaginatedResponse<Log>>({
+  queryKey: () => RECENT_LOGS_KEY,
+  fetcher: () =>
+    fetchLogs({
+      per_page: PAGE_SIZE,
+      archived: 'without',
+      sort_by: 'created_at',
+      sort_dir: 'desc',
+    }),
+  defaultOptions: { staleTime: 0 },
+});
 
 function formatRelative(iso: string | null, locale: string): string {
   if (!iso) return '—';
@@ -21,34 +37,21 @@ function formatRelative(iso: string | null, locale: string): string {
   return rtf.format(Math.round(diffSec / 86_400), 'day');
 }
 
-/** Compact list with the latest 5 logs, auto-refreshed via the SSE stream tick. */
 function RecentLogsWidget() {
   const { t, i18n } = useTranslation('dashboard');
-  const [logs, setLogs] = useState<Log[]>([]);
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const queryClient = useQueryClient();
 
-  // Reuse the same stream tick logic as LogsPage to refresh on new entries.
   const { payload: streamPayload } = useLogStream({ intervalMs: 5000 });
+  const recentQuery = useRecentLogsQuery();
 
   useEffect(() => {
-    let cancelled = false;
-    fetchLogs({ per_page: PAGE_SIZE, archived: 'without', sort_by: 'created_at', sort_dir: 'desc' })
-      .then((res) => {
-        if (!cancelled) {
-          setLogs(res.data ?? []);
-          setStatus('ready');
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setStatus('error');
-      });
-    return () => {
-      cancelled = true;
-    };
-    // streamPayload trigger refetch when new items arrive
-  }, [streamPayload]);
+    if (streamPayload == null) return;
+    void queryClient.invalidateQueries({ queryKey: RECENT_LOGS_KEY });
+  }, [streamPayload, queryClient]);
 
-  if (status === 'loading') {
+  const logs = recentQuery.data?.data ?? [];
+
+  if (recentQuery.isLoading && logs.length === 0) {
     return (
       <div className="flex flex-col gap-2 p-1">
         {[1, 2, 3].map((n) => (
@@ -61,7 +64,7 @@ function RecentLogsWidget() {
     );
   }
 
-  if (status === 'error') {
+  if (recentQuery.isError) {
     return (
       <p className="text-sm text-danger-dark dark:text-danger text-center py-4">
         {t('error')}

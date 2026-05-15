@@ -6,13 +6,15 @@ use App\Dtos\LogDto;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @property LogDto $resource
+ */
 class LogResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $dto = $this->resource instanceof LogDto
-            ? $this->resource
-            : LogDto::fromModel($this->resource);
+        /** @var LogDto $dto */
+        $dto = $this->resource;
 
         $payload = [
             'id' => $dto->id,

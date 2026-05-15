@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
   Alert,
   DataTable,
@@ -12,16 +12,26 @@ import {
 } from '@maya/shared-ui-react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { fetchApplications } from '../api/applications';
+import { fetchApplications, type ApplicationScope } from '../api/applications';
 import { fetchErrorCodes, type ErrorCodesFilters as ApiErrorCodesFilters } from '../api/errorCodes';
 import type { ErrorCodesFiltersState } from '../components/error-codes';
-import type { PaginatedResponse } from '@maya/shared-auth-react';
+import { createDataHook, type PaginatedResponse } from '@maya/shared-auth-react';
 import type { ApplicationRef, ErrorCode } from '../types/logs';
 
-type ListState =
-  | { status: 'loading'; data: PaginatedResponse<ErrorCode> | null }
-  | { status: 'ready'; data: PaginatedResponse<ErrorCode> }
-  | { status: 'error'; error: string; data: PaginatedResponse<ErrorCode> | null };
+const useApplicationsQuery = createDataHook<ApplicationScope, ApplicationRef[]>({
+  queryKey: (scope) => ['applications', scope],
+  fetcher: (scope) => fetchApplications(scope),
+  defaultOptions: { staleTime: 60_000 },
+});
+
+const useErrorCodesListQuery = createDataHook<ApiErrorCodesFilters, PaginatedResponse<ErrorCode>>({
+  queryKey: (filters) => ['error-codes', filters],
+  fetcher: (filters) => fetchErrorCodes(filters),
+  defaultOptions: {
+    placeholderData: (prev) => prev,
+    staleTime: 0,
+  },
+});
 
 function parseFiltersFromUrl(params: URLSearchParams): {
   filters: ErrorCodesFiltersState;
@@ -73,48 +83,16 @@ export function ErrorCodesPage() {
   const { t: tCommon } = useTranslation('common');
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [applications, setApplications] = useState<ApplicationRef[]>([]);
-  const [state, setState] = useState<ListState>({ status: 'loading', data: null });
   const { hiddenIds, toggleHidden, pageSize, setPageSize } = useTablePreferences({
     storageKey: 'maya:logs:error-codes-table',
   });
 
   const { filters, page } = useMemo(() => parseFiltersFromUrl(searchParams), [searchParams]);
 
-  useEffect(() => {
-    let cancelled = false;
-    fetchApplications('all')
-      .then((apps) => {
-        if (!cancelled) setApplications(apps);
-      })
-      .catch(() => {
-        /* dropdown vacío si falla */
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const applicationsQuery = useApplicationsQuery('all');
+  const applications = applicationsQuery.data ?? [];
 
-  useEffect(() => {
-    let cancelled = false;
-    setState((prev) => ({ status: 'loading', data: prev.data }));
-    fetchErrorCodes(toApiFilters(filters, page, pageSize))
-      .then((data) => {
-        if (!cancelled) setState({ status: 'ready', data });
-      })
-      .catch((e) => {
-        if (!cancelled) {
-          setState((prev) => ({
-            status: 'error',
-            error: e instanceof Error ? e.message : String(e),
-            data: prev.data,
-          }));
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [filters, page, pageSize]);
+  const errorCodesQuery = useErrorCodesListQuery(toApiFilters(filters, page, pageSize));
 
   const updateFilters = useCallback(
     (patch: Partial<ErrorCodesFiltersState>) => {
@@ -172,13 +150,16 @@ export function ErrorCodesPage() {
     [t],
   );
 
-  const pagination = state.data;
+  const pagination = errorCodesQuery.data;
   const errorCodes = pagination?.data ?? [];
   const meta = pagination?.meta;
   const startIndex = meta && meta.from != null ? meta.from : 0;
   const endIndex = meta && meta.to != null ? meta.to : 0;
   const total = meta?.total ?? 0;
   const activeCount = countActiveFilters(filters);
+  const errorMessage = errorCodesQuery.error
+    ? (errorCodesQuery.error instanceof Error ? errorCodesQuery.error.message : String(errorCodesQuery.error))
+    : null;
 
   const filtersPanel = (
     <>
@@ -225,12 +206,12 @@ export function ErrorCodesPage() {
         }
       />
 
-      {state.status === 'error' && (
-        <Alert tone="danger" className="mt-4">No se pudieron cargar los códigos de error: {state.error}
+      {errorCodesQuery.isError && errorMessage && (
+        <Alert tone="danger" className="mt-4">No se pudieron cargar los códigos de error: {errorMessage}
         </Alert>
       )}
 
-      {state.status === 'loading' && !pagination && (
+      {errorCodesQuery.isLoading && !pagination && (
         <div className="mt-4 rounded-lg border border-ui-border bg-ui-card p-6 text-center text-sm text-text-muted dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-muted">
           Cargando…
         </div>
@@ -244,7 +225,7 @@ export function ErrorCodesPage() {
               columns={columns}
               rows={errorCodes}
               rowKey={(ec) => ec.id}
-              loading={state.status === 'loading'}
+              loading={errorCodesQuery.isLoading || errorCodesQuery.isFetching}
               hiddenColumnIds={hiddenIds}
               onToggleHiddenColumn={toggleHidden}
               filtersStorageKey="maya:logs:error-codes-table"

@@ -3,17 +3,18 @@
 namespace App\Http\Resources;
 
 use App\Dtos\ArchivedLogDto;
-use App\Models\ArchivedLog;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @property ArchivedLogDto $resource
+ */
 class ArchivedLogResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $dto = $this->resource instanceof ArchivedLogDto
-            ? $this->resource
-            : ArchivedLogDto::fromModel($this->resource);
+        /** @var ArchivedLogDto $dto */
+        $dto = $this->resource;
 
         $payload = [
             'id' => $dto->id,

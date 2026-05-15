@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   Alert,
   Button,
@@ -18,12 +18,26 @@ import {
 import { ArchivedLogDetailView } from '../components/archived-logs';
 import { CommentThread } from '../components/comments';
 import type { ArchivedLog } from '../types/logs';
+import { createDataHook, createMutationHook } from '@maya/shared-auth-react';
 
-type State =
-  | { status: 'loading'; data: ArchivedLog | null }
-  | { status: 'ready'; data: ArchivedLog }
-  | { status: 'error'; error: string; data: ArchivedLog | null }
-  | { status: 'not-found' };
+const useArchivedLogDetailQuery = createDataHook<number, ArchivedLog>({
+  queryKey: (id) => ['archived-log', id],
+  fetcher: (id) => fetchArchivedLog(id),
+  defaultOptions: { staleTime: 0 },
+});
+
+type UpdateVars = { id: number; description: string | null; url_tutorial: string | null };
+
+const useUpdateArchivedLog = createMutationHook<UpdateVars, ArchivedLog>({
+  mutationFn: ({ id, description, url_tutorial }) =>
+    updateArchivedLog(id, { description, url_tutorial }),
+  invalidates: ({ id }) => [['archived-log', id], ['archived-logs']],
+});
+
+const useDeleteArchivedLog = createMutationHook<number, void>({
+  mutationFn: (id) => deleteArchivedLog(id),
+  invalidates: () => [['archived-logs']],
+});
 
 type EditForm = {
   description: string;
@@ -45,50 +59,29 @@ export function ArchivedLogDetailPage() {
   const logId = id ? Number(id) : NaN;
   const validId = Number.isFinite(logId) && logId > 0;
 
-  const [state, setState] = useState<State>({ status: 'loading', data: null });
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<EditForm>({ description: '', url_tutorial: '' });
-  const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const load = useCallback(() => {
-    if (!validId) {
-      setState({ status: 'not-found' });
-      return () => {};
-    }
-    let cancelled = false;
-    setState((prev) => ({
-      status: 'loading',
-      data: prev.status === 'ready' || prev.status === 'error' ? prev.data : null,
-    }));
-    fetchArchivedLog(logId)
-      .then((data) => {
-        if (!cancelled) setState({ status: 'ready', data });
-      })
-      .catch((e) => {
-        if (cancelled) return;
-        const message = e instanceof Error ? e.message : String(e);
-        if (/404/.test(message)) {
-          setState({ status: 'not-found' });
-        } else {
-          setState((prev) => ({
-            status: 'error',
-            error: message,
-            data: prev.status === 'ready' || prev.status === 'error' ? prev.data : null,
-          }));
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [logId, validId]);
+  const logQuery = useArchivedLogDetailQuery(logId, { enabled: validId });
+  const updateMutation = useUpdateArchivedLog();
+  const deleteMutation = useDeleteArchivedLog();
 
-  useEffect(() => load(), [load]);
+  const saving = updateMutation.isPending;
+  const deleting = deleteMutation.isPending;
 
-  const log = state.status === 'ready' || state.status === 'error' ? state.data : null;
+  const errorMessage = logQuery.error
+    ? logQuery.error instanceof Error
+      ? logQuery.error.message
+      : String(logQuery.error)
+    : null;
+
+  const notFound = !validId || (logQuery.isError && errorMessage != null && /404/.test(errorMessage));
+  const otherError = logQuery.isError && errorMessage != null && !/404/.test(errorMessage);
+
+  const log = logQuery.data ?? null;
 
   const onStartEdit = useCallback(() => {
     if (!log) return;
@@ -102,39 +95,35 @@ export function ArchivedLogDetailPage() {
     setSaveError(null);
   }, []);
 
-  const onSave = useCallback(async () => {
+  const onSave = useCallback(() => {
     if (!validId) return;
-    setSaving(true);
     setSaveError(null);
-    try {
-      const updated = await updateArchivedLog(logId, {
+    updateMutation.mutate(
+      {
+        id: logId,
         description: form.description.trim() === '' ? null : form.description,
         url_tutorial: form.url_tutorial.trim() === '' ? null : form.url_tutorial,
-      });
-      setState({ status: 'ready', data: updated });
-      setEditing(false);
-    } catch (e) {
-      setSaveError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setSaving(false);
-    }
-  }, [logId, validId, form]);
+      },
+      {
+        onSuccess: () => setEditing(false),
+        onError: (e) => setSaveError(e instanceof Error ? e.message : String(e)),
+      },
+    );
+  }, [logId, validId, form, updateMutation]);
 
-  const onDelete = useCallback(async () => {
+  const onDelete = useCallback(() => {
     if (!validId) return;
-    setDeleting(true);
     setDeleteError(null);
-    try {
-      await deleteArchivedLog(logId);
-      navigate('/archived-logs');
-    } catch (e) {
-      setDeleteError(e instanceof Error ? e.message : String(e));
-      setDeleting(false);
-      setConfirmDelete(false);
-    }
-  }, [logId, validId, navigate]);
+    deleteMutation.mutate(logId, {
+      onSuccess: () => navigate('/archived-logs'),
+      onError: (e) => {
+        setDeleteError(e instanceof Error ? e.message : String(e));
+        setConfirmDelete(false);
+      },
+    });
+  }, [logId, validId, navigate, deleteMutation]);
 
-  if (state.status === 'not-found') {
+  if (notFound) {
     return (
       <div className="px-4 py-6 sm:px-6 lg:px-8">
         <PageTitle title={t('detail.title')} onBack={() => navigate(-1)} backLabel={t('detail.back')} />
@@ -169,12 +158,12 @@ export function ArchivedLogDetailPage() {
         <Alert tone="danger" className="mt-4">{deleteError}</Alert>
       )}
 
-      {state.status === 'error' && (
-        <Alert tone="danger" className="mt-4">{t('detail.loadError', { message: state.error })}
+      {otherError && errorMessage && (
+        <Alert tone="danger" className="mt-4">{t('detail.loadError', { message: errorMessage })}
         </Alert>
       )}
 
-      {state.status === 'loading' && !log && (
+      {logQuery.isLoading && !log && (
         <div className="mt-4 rounded-lg border border-ui-border bg-ui-card p-6 text-center text-sm text-text-muted dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-muted">
           {t('detail.loading')}
         </div>

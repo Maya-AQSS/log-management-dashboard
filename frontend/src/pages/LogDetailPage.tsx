@@ -1,15 +1,25 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Alert, Button, ConfirmDialog, PageTitle } from '@maya/shared-ui-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { archiveLog, fetchLog, resolveLog, type LogDetailResponse } from '../api/logs';
 import { LogDetailView } from '../components/logs';
+import { createDataHook, createMutationHook } from '@maya/shared-auth-react';
 
-type State =
-  | { status: 'loading'; data: LogDetailResponse | null }
-  | { status: 'ready'; data: LogDetailResponse }
-  | { status: 'error'; error: string; data: LogDetailResponse | null }
-  | { status: 'not-found' };
+const useLogDetailQuery = createDataHook<number, LogDetailResponse>({
+  queryKey: (id) => ['log', id],
+  fetcher: (id) => fetchLog(id),
+  defaultOptions: { staleTime: 0 },
+});
+
+const useArchiveLog = createMutationHook<number, Awaited<ReturnType<typeof archiveLog>>>({
+  mutationFn: (id) => archiveLog(id),
+});
+
+const useResolveLog = createMutationHook<number, Awaited<ReturnType<typeof resolveLog>>>({
+  mutationFn: (id) => resolveLog(id),
+  invalidates: (id) => [['log', id]],
+});
 
 type Dialog = 'none' | 'archive' | 'resolve';
 
@@ -21,74 +31,51 @@ export function LogDetailPage() {
   const logId = id ? Number(id) : NaN;
   const validId = Number.isFinite(logId) && logId > 0;
 
-  const [state, setState] = useState<State>({ status: 'loading', data: null });
   const [dialog, setDialog] = useState<Dialog>('none');
-  const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const load = useCallback(() => {
-    if (!validId) {
-      setState({ status: 'not-found' });
-      return () => {};
-    }
-    let cancelled = false;
-    setState((prev) => ({
-      status: 'loading',
-      data: prev.status === 'ready' || prev.status === 'error' ? prev.data : null,
-    }));
-    fetchLog(logId)
-      .then((data) => {
-        if (!cancelled) setState({ status: 'ready', data });
-      })
-      .catch((e) => {
-        if (cancelled) return;
-        const message = e instanceof Error ? e.message : String(e);
-        if (/404/.test(message)) {
-          setState({ status: 'not-found' });
-        } else {
-          setState((prev) => ({
-            status: 'error',
-            error: message,
-            data: prev.status === 'ready' || prev.status === 'error' ? prev.data : null,
-          }));
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [logId, validId]);
+  const logQuery = useLogDetailQuery(logId, { enabled: validId });
+  const archiveMutation = useArchiveLog();
+  const resolveMutation = useResolveLog();
 
-  useEffect(() => load(), [load]);
+  const busy = archiveMutation.isPending || resolveMutation.isPending;
 
-  const onArchive = useCallback(async () => {
-    setBusy(true);
+  const errorMessage = logQuery.error
+    ? logQuery.error instanceof Error
+      ? logQuery.error.message
+      : String(logQuery.error)
+    : null;
+
+  const notFound = !validId || (logQuery.isError && errorMessage != null && /404/.test(errorMessage));
+  const otherError = logQuery.isError && errorMessage != null && !/404/.test(errorMessage);
+
+  const onArchive = useCallback(() => {
     setActionError(null);
-    try {
-      const res = await archiveLog(logId);
-      navigate(`/archived-logs/${res.data.archived_log_id}`);
-    } catch (e) {
-      setActionError(e instanceof Error ? e.message : String(e));
-      setBusy(false);
-      setDialog('none');
-    }
-  }, [logId, navigate]);
+    archiveMutation.mutate(logId, {
+      onSuccess: (res) => {
+        navigate(`/archived-logs/${res.data.archived_log_id}`);
+      },
+      onError: (e) => {
+        setActionError(e instanceof Error ? e.message : String(e));
+        setDialog('none');
+      },
+    });
+  }, [logId, navigate, archiveMutation]);
 
-  const onResolve = useCallback(async () => {
-    setBusy(true);
+  const onResolve = useCallback(() => {
     setActionError(null);
-    try {
-      await resolveLog(logId);
-      setDialog('none');
-      setBusy(false);
-      load();
-    } catch (e) {
-      setActionError(e instanceof Error ? e.message : String(e));
-      setBusy(false);
-      setDialog('none');
-    }
-  }, [logId, load]);
+    resolveMutation.mutate(logId, {
+      onSuccess: () => {
+        setDialog('none');
+      },
+      onError: (e) => {
+        setActionError(e instanceof Error ? e.message : String(e));
+        setDialog('none');
+      },
+    });
+  }, [logId, resolveMutation]);
 
-  if (state.status === 'not-found') {
+  if (notFound) {
     return (
       <div className="px-4 py-6 sm:px-6 lg:px-8">
         <PageTitle title={t('detail.title')} onBack={() => navigate(-1)} backLabel={t('detail.back')} />
@@ -99,11 +86,8 @@ export function LogDetailPage() {
     );
   }
 
-  const log = state.status === 'ready' || state.status === 'error' ? state.data?.data : null;
-  const archivedLogId =
-    state.status === 'ready' || state.status === 'error'
-      ? (state.data?.meta.archived_log_id ?? null)
-      : null;
+  const log = logQuery.data?.data ?? null;
+  const archivedLogId = logQuery.data?.meta.archived_log_id ?? null;
 
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
@@ -131,12 +115,12 @@ export function LogDetailPage() {
         <Alert tone="danger" className="mt-4">{actionError}</Alert>
       )}
 
-      {state.status === 'error' && (
-        <Alert tone="danger" className="mt-4">{t('detail.loadError', { message: state.error })}
+      {otherError && errorMessage && (
+        <Alert tone="danger" className="mt-4">{t('detail.loadError', { message: errorMessage })}
         </Alert>
       )}
 
-      {state.status === 'loading' && !log && (
+      {logQuery.isLoading && !log && (
         <div className="mt-4 rounded-lg border border-ui-border bg-ui-card p-6 text-center text-sm text-text-muted dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-muted">
           {t('detail.loading')}
         </div>

@@ -1,17 +1,29 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, Button, PageTitle } from '@maya/shared-ui-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { fetchApplications } from '../api/applications';
+import { fetchApplications, type ApplicationScope } from '../api/applications';
 import { createErrorCode, type ErrorCodePayload } from '../api/errorCodes';
 import { ErrorCodeForm } from '../components/error-codes';
-import type { ApplicationRef } from '../types/logs';
+import type { ApplicationRef, ErrorCode } from '../types/logs';
 import {
   errorCodeFormSchema,
   emptyErrorCodeForm,
   type ErrorCodeFormInput,
 } from '../schemas/errorCode';
+import { createDataHook, createMutationHook } from '@maya/shared-auth-react';
+
+const useApplicationsQuery = createDataHook<ApplicationScope, ApplicationRef[]>({
+  queryKey: (scope) => ['applications', scope],
+  fetcher: (scope) => fetchApplications(scope),
+  defaultOptions: { staleTime: 60_000 },
+});
+
+const useCreateErrorCode = createMutationHook<ErrorCodePayload, ErrorCode>({
+  mutationFn: (payload) => createErrorCode(payload),
+  invalidates: () => [['error-codes']],
+});
 
 function toPayload(form: ErrorCodeFormInput): ErrorCodePayload {
   const parsedLine = form.line.trim() === '' ? null : Number(form.line);
@@ -27,7 +39,6 @@ function toPayload(form: ErrorCodeFormInput): ErrorCodePayload {
 
 export function ErrorCodeCreatePage() {
   const navigate = useNavigate();
-  const [applications, setApplications] = useState<ApplicationRef[]>([]);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const methods = useForm<ErrorCodeFormInput>({
@@ -36,31 +47,19 @@ export function ErrorCodeCreatePage() {
     resolver: zodResolver(errorCodeFormSchema),
   });
 
-  useEffect(() => {
-    let cancelled = false;
-    fetchApplications('all')
-      .then((apps) => {
-        if (!cancelled) setApplications(apps);
-      })
-      .catch(() => {
-        /* ignorar, select mostrará vacío */
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const applicationsQuery = useApplicationsQuery('all');
+  const applications = applicationsQuery.data ?? [];
+  const createMutation = useCreateErrorCode();
 
-  const onSubmit = methods.handleSubmit(async (values) => {
+  const onSubmit = methods.handleSubmit((values) => {
     setSaveError(null);
-    try {
-      const created = await createErrorCode(toPayload(values));
-      navigate(`/error-codes/${created.id}`);
-    } catch (e) {
-      setSaveError(e instanceof Error ? e.message : String(e));
-    }
+    createMutation.mutate(toPayload(values), {
+      onSuccess: (created) => navigate(`/error-codes/${created.id}`),
+      onError: (e) => setSaveError(e instanceof Error ? e.message : String(e)),
+    });
   });
 
-  const saving = methods.formState.isSubmitting;
+  const saving = createMutation.isPending || methods.formState.isSubmitting;
 
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">

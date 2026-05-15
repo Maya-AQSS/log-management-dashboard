@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Concerns\ResolvesJwtUser;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\ListLogsRequest;
 use App\Http\Resources\LogResource;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use App\Services\Contracts\LogServiceInterface;
@@ -23,7 +24,7 @@ class LogController extends Controller
     ) {
     }
 
-    public function index(Request $request): JsonResponse
+    public function index(ListLogsRequest $request): JsonResponse
     {
         $perPage = (int) $request->integer('per_page', 25);
         $severity = $request->input('severity');

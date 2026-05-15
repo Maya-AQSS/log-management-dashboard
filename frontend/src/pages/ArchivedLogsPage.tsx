@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Alert,
@@ -15,7 +15,7 @@ import {
 } from '@maya/shared-ui-react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
-import { fetchApplications } from '../api/applications';
+import { fetchApplications, type ApplicationScope } from '../api/applications';
 import {
   fetchArchivedLogs,
   type ArchivedLogsFilters as ApiArchivedLogsFilters,
@@ -23,10 +23,25 @@ import {
 } from '../api/archivedLogs';
 import type { ArchivedLogsFiltersState } from '../components/archived-logs';
 import { SeverityBadge, severityLabel } from '../components/severity';
-import type { PaginatedResponse, SortDir } from '@maya/shared-auth-react';
+import { createDataHook, type PaginatedResponse, type SortDir } from '@maya/shared-auth-react';
 import type { ApplicationRef, ArchivedLog } from '../types/logs';
 import { LOG_SEVERITY_KEYS } from '../types/logs';
 import { formatDateTime } from '@maya/shared-ui-react';
+
+const useApplicationsQuery = createDataHook<ApplicationScope, ApplicationRef[]>({
+  queryKey: (scope) => ['applications', scope],
+  fetcher: (scope) => fetchApplications(scope),
+  defaultOptions: { staleTime: 60_000 },
+});
+
+const useArchivedLogsListQuery = createDataHook<ApiArchivedLogsFilters, PaginatedResponse<ArchivedLog>>({
+  queryKey: (filters) => ['archived-logs', filters],
+  fetcher: (filters) => fetchArchivedLogs(filters),
+  defaultOptions: {
+    placeholderData: (prev) => prev,
+    staleTime: 0,
+  },
+});
 
 export type ArchivedLogsSortKey =
   | 'application'
@@ -41,11 +56,6 @@ const VALID_SORT_COLUMNS: readonly ArchivedLogsSortKey[] = [
   'original_created_at',
 ];
 const VALID_SORT_DIRS: readonly SortDir[] = ['asc', 'desc'];
-
-type ListState =
-  | { status: 'loading'; data: PaginatedResponse<ArchivedLog> | null }
-  | { status: 'ready'; data: PaginatedResponse<ArchivedLog> }
-  | { status: 'error'; error: string; data: PaginatedResponse<ArchivedLog> | null };
 
 function truncate(text: string | null | undefined, max = 120): string {
   if (!text) return '-';
@@ -147,8 +157,6 @@ export function ArchivedLogsPage() {
   const { t: tCommon } = useTranslation('common');
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [applications, setApplications] = useState<ApplicationRef[]>([]);
-  const [state, setState] = useState<ListState>({ status: 'loading', data: null });
   const { hiddenIds, toggleHidden, pageSize, setPageSize } = useTablePreferences({
     storageKey: 'maya:logs:archived-logs-table',
   });
@@ -158,40 +166,12 @@ export function ArchivedLogsPage() {
     [searchParams],
   );
 
-  useEffect(() => {
-    let cancelled = false;
-    fetchApplications('with_archived_logs')
-      .then((apps) => {
-        if (!cancelled) setApplications(apps);
-      })
-      .catch(() => {
-        /* sin bloqueador: dejamos dropdown vacío */
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const applicationsQuery = useApplicationsQuery('with_archived_logs');
+  const applications = applicationsQuery.data ?? [];
 
-  useEffect(() => {
-    let cancelled = false;
-    setState((prev) => ({ status: 'loading', data: prev.data }));
-    fetchArchivedLogs(toApiFilters(filters, sortBy, sortDir, page, pageSize))
-      .then((data) => {
-        if (!cancelled) setState({ status: 'ready', data });
-      })
-      .catch((e) => {
-        if (!cancelled) {
-          setState((prev) => ({
-            status: 'error',
-            error: e instanceof Error ? e.message : String(e),
-            data: prev.data,
-          }));
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [filters, sortBy, sortDir, page, pageSize]);
+  const archivedLogsQuery = useArchivedLogsListQuery(
+    toApiFilters(filters, sortBy, sortDir, page, pageSize),
+  );
 
   const updateFilters = useCallback(
     (patch: Partial<ArchivedLogsFiltersState>) => {
@@ -263,13 +243,18 @@ export function ArchivedLogsPage() {
     [t],
   );
 
-  const pagination = state.data;
+  const pagination = archivedLogsQuery.data;
   const logs = pagination?.data ?? [];
   const meta = pagination?.meta;
   const startIndex = meta && meta.from != null ? meta.from : 0;
   const endIndex = meta && meta.to != null ? meta.to : 0;
   const total = meta?.total ?? 0;
   const activeCount = countActiveFilters(filters);
+  const errorMessage = archivedLogsQuery.error
+    ? archivedLogsQuery.error instanceof Error
+      ? archivedLogsQuery.error.message
+      : String(archivedLogsQuery.error)
+    : null;
 
   const filtersPanel = (
     <>
@@ -324,12 +309,12 @@ export function ArchivedLogsPage() {
     <div className="px-4 py-6 sm:px-6 lg:px-8">
       <PageTitle title={t('title')} />
 
-      {state.status === 'error' && (
-        <Alert tone="danger" className="mt-4">{t('listLoadError', { message: state.error })}
+      {archivedLogsQuery.isError && errorMessage && (
+        <Alert tone="danger" className="mt-4">{t('listLoadError', { message: errorMessage })}
         </Alert>
       )}
 
-      {state.status === 'loading' && !pagination && (
+      {archivedLogsQuery.isLoading && !pagination && (
         <div className="mt-4 rounded-lg border border-ui-border bg-ui-card p-6 text-center text-sm text-text-muted dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-muted">
           {t('detail.loading')}
         </div>
@@ -343,7 +328,7 @@ export function ArchivedLogsPage() {
               columns={columns}
               rows={logs}
               rowKey={(l) => l.id}
-              loading={state.status === 'loading'}
+              loading={archivedLogsQuery.isLoading || archivedLogsQuery.isFetching}
               hiddenColumnIds={hiddenIds}
               onToggleHiddenColumn={toggleHidden}
               filtersStorageKey="maya:logs:archived-logs-table"

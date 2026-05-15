@@ -3,17 +3,18 @@
 namespace App\Http\Resources;
 
 use App\Dtos\ErrorCodeDto;
-use App\Models\ErrorCode;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @property ErrorCodeDto $resource
+ */
 class ErrorCodeResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $dto = $this->resource instanceof ErrorCodeDto
-            ? $this->resource
-            : ErrorCodeDto::fromModel($this->resource);
+        /** @var ErrorCodeDto $dto */
+        $dto = $this->resource;
 
         $payload = [
             'id' => $dto->id,

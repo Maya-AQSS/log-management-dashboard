@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Concerns\ResolvesJwtUser;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\ListArchivedLogsRequest;
 use App\Http\Requests\Api\UpdateArchivedLogRequest;
 use App\Http\Resources\ArchivedLogResource;
 use App\Services\Contracts\ArchivedLogServiceInterface;
@@ -19,7 +20,7 @@ class ArchivedLogController extends Controller
     ) {
     }
 
-    public function index(Request $request): JsonResponse
+    public function index(ListArchivedLogsRequest $request): JsonResponse
     {
         $perPage = (int) $request->integer('per_page', 15);
         $severity = $request->input('severity');

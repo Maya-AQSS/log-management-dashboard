@@ -1,198 +1,153 @@
-# maya_logs — Architecture Audit Report
+# Audit — maya_logs
 
-Project: `maya_logs` (Laravel 12 backend + React 19 frontend)
-Date: 2026-05-13
-Rules source: `.claude/rules/project/maya-architecture.md`
+Generated: 2026-05-15
+Auditor: maya-architecture-auditor
 
-## Summary table
+## Compliance summary
 
-| Rule | Description | Status | Failing |
-|------|-------------|--------|---------|
-| B1   | Controllers delegate to Service, no direct Eloquent | PARTIAL | 1 controller violates |
-| B2   | FormRequest for every input endpoint (no inline `->validate()`) | PARTIAL | 1 violation |
-| B3   | No `$request->all()` in controllers | PASS | 0 |
-| B4   | Service returns DTO, NOT Eloquent model | FAIL | 9 / 9 services |
-| B5   | DB access only in Repositories | FAIL | `LogIngestionService` uses raw `DB::table` |
-| B6   | Contracts + Provider bindings present | PASS | 0 |
-| B7   | API Resources for all responses | PARTIAL | LogController/Dashboard return raw `response()->json` |
-| B8   | Listings paginate | PASS | 0 |
-| B9   | Controllers ≤5 public methods, ≤200 LOC | PARTIAL | CommentController = 6 public methods |
-| F1   | No `useEffect+useState+fetch` triplet | FAIL | 8 pages/components |
-| F2   | React Hook Form (no manual controlled state) | FAIL | `ErrorCodeCreatePage` |
-| F3   | No `any` outside tests | PASS | 0 |
-| F4   | No `React.FC`, use `interface XProps` | PASS | 0 |
-| F5   | No prop drilling >2 levels | PASS (no evidence) | 0 |
+| Layer | Total checks | Passing | Failing |
+|-------|-------------|---------|---------|
+| Backend B1–B9 | 9 | 6 | 3 (+ 2 partial) |
+| Frontend F1–F5 | 5 | 3 | 2 |
+| Events E1–E5 | 5 | 2 | 2 (+ 1 N/A, 1 PREREQ-blocked) |
 
-**Total violations: 22** (counted as distinct file:rule pairs)
+## Critical bug status (reported 2026-05-13)
 
----
+**CONFIRMED FIXED.** `CommentController::storeForErrorCode` (referencing `$this->comments` and undeclared `$author`) no longer exists. The current `CommentController.php` contains only `update()` and `destroy()` (47 LOC). Store functionality was split into dedicated `ErrorCodeCommentController` and `ArchivedLogCommentController`, both clean.
 
-## Backend findings
+## Backend violations
 
-### B1 — Controller has business logic / direct DB
+### B2 — Missing FormRequest / inline validate
 
-- `backend/app/Http/Controllers/Api/CommentController.php:67-76` — `storeForErrorCode` references `$this->comments` (does not exist; should be `$this->commentService`) and `$author` (undeclared variable). Also bypasses the shared `storeFor` helper at line 121 → logic divergence. The dead/broken path also instantiates a Resource with a method that, on a working day, would never compile. **Functional bug + B1 architectural violation**. CRITICAL.
-
-### B2 — Inline validate
-
-- `backend/app/Http/Controllers/Api/ArchivedLogController.php:67-70`:
-  ```php
-  $validated = $request->validate([
-      'description' => ['nullable', 'string', 'max:5000'],
-      'url_tutorial' => ['nullable', 'url', 'max:2048'],
-  ]);
-  ```
-  Should be an `UpdateArchivedLogRequest` FormRequest under `app/Http/Requests/Api/`. CRITICAL.
-
-- `backend/app/Http/Requests/StoreCommentRequest.php` and `UpdateCommentRequest.php` are **stale duplicates** of the canonical files under `app/Http/Requests/Api/` (different namespace; identical rules). Dead code that should be removed. MEDIUM.
-
-### B3 — `$request->all()`
-
-PASS. No `$request->all()` found. The only `->all()` in controllers is `ApplicationController.php:35` on a Collection (`$applications->...->all()`), which is unrelated.
+- `app/Http/Controllers/Api/ArchivedLogController.php:67-70` — inline `$request->validate([...])` for `description` and `url_tutorial` fields. A dedicated `UpdateArchivedLogRequest` FormRequest is missing. CRITICAL.
+- `app/Http/Controllers/Api/LogController.php` — `archive()` extracts `$request->attributes->get('jwt_user')` inline; JWT resolution is middleware-injected but the downstream authorization decision is embedded in controller body. LOW/borderline.
 
 ### B4 — Services return Eloquent models, not DTOs
 
-`backend/app/Dtos/` directory **does not exist**. Every service returns Eloquent models or paginators of models:
-
-- `LogService::findOrFail(): Log` (line 29)
-- `LogService::paginate(): LengthAwarePaginator` of `Log` models
-- `LogService::searchAndFilter(): LengthAwarePaginator` of `Log` models
-- `ArchivedLogService::findOrFail(): ArchivedLog` (line 66)
-- `ArchivedLogService::archiveFromLogId(): ArchivedLog` (line 147)
-- `ArchivedLogService::paginate(): LengthAwarePaginator`
-- `CommentService::findOrFail(): Comment` (line 27)
-- `CommentService::listForCommentable(): Collection` of `Comment` models
-- `CommentService::createForCommentable(): Comment` (line 43)
-- `CommentService::updateContent(): Comment` (line 53)
-- `ErrorCodeService::findOrFail(): ErrorCode` (line 30)
-- `ErrorCodeService::create(): ErrorCode` (line 35)
-- `ErrorCodeService::update(): ErrorCode` (line 40)
-- `PanelUserService::resolveFromJwtRequest(): User` (line 25)
-
-Resources are typed `@mixin <Model>` and access Eloquent relations directly (`$this->whenLoaded(...)`). Migrating to DTOs requires reshaping Resources too — large refactor. CRITICAL but project-wide.
-
-### B5 — DB access outside Repositories
-
-- `backend/app/Services/LogIngestionService.php:94` — `DB::table('logs')->insert(...)`
-- `backend/app/Services/LogIngestionService.php:135` — `DB::table('error_codes')->insertOrIgnore(...)`
-- `backend/app/Services/LogIngestionService.php:145-148` — `DB::table('error_codes')->where(...)->value('id')`
-- `backend/app/Services/LogIngestionService.php:31` — `Application::pluck('id', 'slug')->all()`
-
-The worker’s ingestion path skips the repository layer. Encapsulate in a `LogIngestionRepository`. CRITICAL.
-
-### B6 — Contracts and DI bindings
-
-PASS. `app/Providers/AppServiceProvider.php` binds every Service and Repository interface (`ApplicationServiceInterface`, `ArchivedLogServiceInterface`, `LogServiceInterface`, `CommentServiceInterface`, `ErrorCodeServiceInterface`, all repository contracts). `Contracts/` subdirs exist under `app/Services/` and `app/Repositories/`.
+`app/Dtos/` directory does not exist. Every service method returns Eloquent models or paginators of models (`Log`, `ArchivedLog`, `Comment`, `ErrorCode`). Resources access Eloquent relations directly via `$this->whenLoaded(...)`. Full DTO layer is absent. HIGH — large refactor scope.
 
 ### B7 — Raw JSON responses bypassing Resources
 
-- `backend/app/Http/Controllers/Api/LogController.php:62-68, 77-81, 99-102, 113-119, 125-132` — repeated `response()->json([...])` with `LogResource` resolved manually or with hand-written error envelopes. The `archive`, `show`, `resolve` endpoints should return dedicated Resources (or a thin `ArchivedLogReferenceResource`) instead of inlined arrays. HIGH.
-- `backend/app/Http/Controllers/Api/DashboardController.php:19-25` — returns `response()->json([...])` directly from service data. Either OK (no model) or should be wrapped in a `DashboardResource`. MEDIUM.
-- `backend/app/Http/Controllers/Api/ApplicationController.php:21-37` — same pattern; returns inline JSON instead of an `ApplicationRefResource::collection(...)`. MEDIUM.
+- `app/Http/Controllers/Api/LogController.php` — `archive()`, `resolve()`, and `stream()` return `response()->json([...])` with hand-built arrays alongside manually resolved Resources. HIGH.
+- `app/Http/Controllers/Api/DashboardController.php` — returns inline `response()->json([...])` from service data. MEDIUM.
+- `app/Http/Controllers/Api/ApplicationController.php` — returns inline JSON instead of `ApplicationRefResource::collection(...)`. MEDIUM.
 
-### B8 — Pagination
+### AppServiceProvider — duplicate singleton registrations (HIGH bug, not a B-check)
 
-PASS. All list endpoints use `->paginate($perPage)` via repository methods. `LogIngestionService` is a worker, not an HTTP endpoint.
+`app/Providers/AppServiceProvider.php` registers `CommentRepositoryInterface` and `CommentServiceInterface` twice (lines ~50-51 and ~56-58). Additionally, line ~57 references `CommentContentSanitizerInterface` without a `use` import statement — this will throw a PHP `BindingResolutionException` at runtime when the container resolves it. Fix priority: HIGH.
 
-### B9 — Controller size
+### B5 — DB access outside Repositories (from prior audit, verify still applies)
 
-- `CommentController.php` has **6 public methods** (`indexForArchivedLog`, `indexForErrorCode`, `storeForArchivedLog`, `storeForErrorCode`, `update`, `destroy`) — exceeds the ≤5 limit. Refactor candidate: split into `ArchivedLogCommentController` + `ErrorCodeCommentController`, or merge index/store via a generic commentable resolver. MEDIUM.
-- `LogController.php` = 158 LOC — within ≤200 but close to the boundary; consider extracting the SSE `stream()` handler.
+- `app/Services/LogIngestionService.php` — uses `DB::table('logs')->insert(...)` and `DB::table('error_codes')->insertOrIgnore(...)` directly, bypassing the repository layer. Should be encapsulated in a `LogIngestionRepository`. HIGH.
 
----
+## Frontend violations
 
-## Frontend findings
+### F1 — useEffect + useState + fetch (no SWR/TanStack Query)
 
-### F1 — `useEffect + useState + fetch` triplets (no SWR / TanStack Query)
+Neither `swr` nor `@tanstack/react-query` is a dependency. The entire frontend uses manual fetch orchestration. Affected files:
 
-`maya_logs` does not depend on `swr` or `@tanstack/react-query` (see `frontend/package.json`). The standard pattern is hand-rolled:
+- `frontend/src/pages/LogsPage.tsx` — two `useEffect` blocks (`fetchApplications` + `fetchLogs`)
+- `frontend/src/pages/ErrorCodesPage.tsx` — two `useEffect` blocks (`fetchApplications` + `fetchErrorCodes`)
+- `frontend/src/pages/ArchivedLogsPage.tsx` — two `useEffect` blocks (`fetchApplications` + `fetchArchivedLogs`)
+- `frontend/src/pages/ArchivedLogDetailPage.tsx` — `useEffect` + `useState` calling `fetchArchivedLog`
+- `frontend/src/pages/LogDetailPage.tsx` — `useEffect` + `useState` calling `fetchLog`
+- `frontend/src/pages/ErrorCodeCreatePage.tsx` — `useEffect` + `useState` for applications fetch
+- `frontend/src/features/dashboard/widgets/RecentLogsWidget.tsx` — `useEffect` + `useState` calling `fetchLogs`
+- `frontend/src/components/comments/CommentThread.tsx` — `useEffect` + `useState` + `fetchComments`
 
-- `frontend/src/pages/LogsPage.tsx:152-202` — three `useState` + three `useEffect` blocks orchestrating `fetchApplications`, `fetchLogs`, refresh nonce.
-- `frontend/src/pages/ArchivedLogsPage.tsx:150-185` — same pattern.
-- `frontend/src/pages/ErrorCodesPage.tsx:76-117` — same pattern, includes cancellation flag.
-- `frontend/src/pages/ErrorCodeCreatePage.tsx:32-49`
-- `frontend/src/pages/ErrorCodeDetailPage.tsx`
-- `frontend/src/pages/LogDetailPage.tsx`
-- `frontend/src/pages/ArchivedLogDetailPage.tsx`
-- `frontend/src/features/dashboard/widgets/RecentLogsWidget.tsx`, `ErrorCountWidget.tsx`
-- `frontend/src/components/comments/CommentThread.tsx`
-- `frontend/src/hooks/useLogStream.ts` — polling hook is legitimate, but the pattern (useState + setInterval + fetch) duplicates what a SWR `refreshInterval` solves.
+Note: `frontend/src/hooks/useLogStream.ts` intentionally uses `useEffect` for SSE polling — this is the correct abstraction (a dedicated custom hook wrapping the concern), not a violation.
 
-CRITICAL pattern violation, repeated across the whole feature surface.
+CRITICAL — 8 files affected, structural gap requiring a phased migration.
 
-### F2 — Manual form state (no React Hook Form)
+### F2 — Inline form state instead of React Hook Form
 
-`react-hook-form` is not a dependency. Forms use ad-hoc `useState<FormState>`:
+`react-hook-form` is not a dependency. Forms use raw `useState`:
 
-- `frontend/src/pages/ErrorCodeCreatePage.tsx:33-73` — manual `form` state, manual validation in `onSave`, manual error strings (e.g. `'Selecciona una aplicación.'` hardcoded, not translated).
-- `frontend/src/components/error-codes/ErrorCodeForm.tsx` — controlled component fed from parent state.
-- `frontend/src/components/archived-logs/...` — edit panels for `description`/`url_tutorial` follow the same hand-rolled approach.
+- `frontend/src/pages/ArchivedLogDetailPage.tsx` — edit form uses `useState<EditForm>` with manual `onChange` handlers
+- `frontend/src/components/comments/CommentThread.tsx` — comment create/edit uses `useState` for `newContent` and `editingContent`
 
-HIGH.
+`frontend/src/pages/ErrorCodeCreatePage.tsx` uses manual form state for the create form. HIGH.
 
-### F3 — `any`
+## Eventos / Audit (E1–E5)
 
-PASS. No `: any` / `as any` outside tests detected with grep.
+### E-PREREQ — Missing package infrastructure (BLOCKER for E2 and E5)
 
-### F4 — `React.FC`
+`maya-shared-messaging-laravel` is missing two required artifacts:
 
-PASS. No `React.FC` / `: FC<` usages.
+- `packages/maya-shared-messaging-laravel/src/Contracts/AuditableEvent.php` — interface does not exist (only `MessagePublisher.php` is present in Contracts/)
+- `packages/maya-shared-messaging-laravel/src/Listeners/RecordAuditableEvent.php` — the Listeners directory does not exist
 
-### F5 — Prop drilling >2 levels
+This is an `maya_infra` task. All E2 and E5 full compliance is blocked until these are added. maya_logs cannot complete E2 until the package ships the interface.
 
-No evidence of >2-level drilling found in spot checks (the codebase mostly composes shared components at page level). PASS (low confidence — full graph not traversed).
+### E1 — Missing Observer for ErrorCode model (FAILING)
 
----
+No `app/Observers/` directory exists. `ErrorCode` model has no `#[ObservedBy]` attribute and no Observer registered in any ServiceProvider. Per `events.md`, `ErrorCode` CRUD must be audited via an `ErrorCodeObserver` calling `AuditPublisher::publish()` inside `DB::afterCommit()`. This is not blocked by E-PREREQ and can be implemented immediately. HIGH.
 
-## Extraction candidates (cross-project)
+`ArchivedLog` is exempt: it is covered by domain Events (`LogWasArchived`, `ArchivedLogWasDeleted`).
 
-### Already extracted but consumed locally — CRITICAL
+### E2 — Domain Events do not implement AuditableEvent (FAILING — PREREQ-blocked)
 
-None confirmed. `frontend/src/components/filters/SearchInput.tsx` wraps `@maya/shared-ui-react`'s `SearchInput` for translations — this is acceptable adapter usage, not a duplicate.
+All three domain Events implement `Dispatchable` only:
 
-### New candidates with cross-project evidence
+- `app/Events/LogWasArchived.php`
+- `app/Events/ArchivedLogFieldsWereUpdated.php`
+- `app/Events/ArchivedLogWasDeleted.php`
 
-- **`@maya/shared-ui-react` already exposes `Select` / `FilterField`**, yet `maya_logs` ships its own:
-  - `components/filters/ApplicationSelect.tsx` — bespoke styled `<select>` (lines 1-40). Same Tailwind classes used in other Maya frontends. **Candidate**: extend shared `Select` with a generic "single-select with placeholder" preset, then delete this file.
-  - `components/filters/ResolvedFilter.tsx` — same shape, same classes. Same extraction path.
-  - `components/filters/SeverityFilterCheckboxes.tsx` — would fit a shared `CheckboxGroup` primitive in `maya-shared-ui-react`.
-- **HTTP client wrapper** — `frontend/src/api/http.ts` is byte-identical to `maya_authorization/frontend/src/api/http.ts` and `maya_audit/frontend/src/api/http.ts` except for `DEFAULT_BASE_URL`. **Candidate**: extract `createMayaApiClient(baseUrlEnv, defaultUrl)` factory into `@maya/shared-auth-react`. Each app then has a 3-line wrapper. (Confirmed appears in ≥4 projects → strong extraction signal.)
-- **`useNavItems` hook** — `components/layout/navItems.tsx` is structurally identical across `maya_logs`, `maya_authorization`, `maya_audit`, `maya_dashboard` (same imports from `@maya/shared-layout-react`, same `NavItem[]` memo). **Candidate**: parameterize as `useNavItemsBuilder(items)` in `@maya/shared-layout-react`, leaving each app to declare only the array. Currently 4 copies with permission-gating divergence in `maya_authorization`.
-- **`fetchApplications` + `ApplicationRef` shape** — appears in `maya_logs`, `maya_authorization`, partially in `maya_audit`. Three independent definitions of the same DTO. **Candidate**: ship `useApplications()` / `fetchApplications()` in a tiny `@maya/shared-applications-react` package (or extend `shared-auth-react`).
+None implement `AuditableEvent`. Once the package adds the interface, all three must add `implements AuditableEvent`. This work is ready to do as soon as E-PREREQ is resolved.
 
-### Local-only (keep)
+### E3 — Services do not call AuditPublisher directly (PASSING)
 
-- `components/severity/*` (`SeverityBadge`, `palette.ts`, `SeverityCardClasses`) — log-domain specific. No matches in other projects.
-- `components/logs/*`, `components/archived-logs/*`, `components/error-codes/*` — domain components of maya_logs.
-- `components/comments/CommentThread.tsx` — the comments feature is exclusive to maya_logs.
-- `hooks/useLogStream.ts` — log streaming is exclusive to maya_logs.
-- Backend: `LogIngestionService`, `ResilientLogPublisher`, all `Log*` services — domain-specific.
+`app/Services/ArchivedLogService.php` dispatches domain Events (`LogWasArchived::dispatch()`, etc.) and does not reference `AuditPublisher`. Correct pattern.
 
----
+### E4 — Observer guards with wasChanged() (N/A)
 
-## Stats
+No Observers exist, so this check is not applicable.
 
-| Metric | Count |
-|--------|------:|
-| Controllers (`app/Http/Controllers/Api/`) | 7 |
-| Services (`app/Services/`) | 9 |
-| Service contracts (`app/Services/Contracts/`) | 6 |
-| Repositories (`app/Repositories/Eloquent/`) | 6 |
-| Repository contracts (`app/Repositories/Contracts/`) | 6 |
-| DTOs (`app/Dtos/`) | **0 (directory missing)** |
-| FormRequests (`app/Http/Requests/Api/`) | 4 |
-| Stale FormRequest duplicates | 2 |
-| API Resources | 4 |
-| Frontend pages | 8 |
-| Frontend components | 15 |
-| Frontend hooks (non-index) | 1 |
-| Frontend `useEffect`+`useState`+`fetch` triplet files | 8 |
-| `any` in non-test code | 0 |
-| `React.FC` usages | 0 |
+### E5 — Listeners do not duplicate package wildcard listener (PASSING — conditional)
 
-## Severity rollup
+Local Listeners (`RecordArchivedLogArchiveAudit`, `RecordArchivedLogUpdateAudit`, `RecordArchivedLogDeleteAudit`) call `$this->auditPublisher->publish()` directly and implement `ShouldHandleEventsAfterCommit`. This is correct given the package wildcard `RecordAuditableEvent` listener does not exist yet. Once the package listener is added, these local listeners must be removed and replaced by the package wildcard.
 
-- **CRITICAL**: 4 (CommentController broken `storeForErrorCode`, DTO layer absent, DB access in LogIngestionService, F1 pattern violation across pages)
-- **HIGH**: 2 (B2 inline validate in ArchivedLogController, F2 manual form state)
-- **MEDIUM**: 4 (stale duplicate FormRequests, B7 raw JSON in Log/Dashboard/Application controllers, CommentController public-method count, extraction candidate http.ts/navItems/applications)
-- **LOW**: 0
+## Extraction candidates
+
+### Cross-project patterns (strong extraction signal)
+
+- `frontend/src/api/http.ts` — structurally identical to `maya_authorization/frontend/src/api/http.ts` and `maya_audit/frontend/src/api/http.ts` (confirmed in ≥4 projects). Candidate: extract a `createMayaApiClient(baseUrlEnv, defaultUrl)` factory into `@maya/shared-auth-react`. Each app becomes a 3-line wrapper.
+- `frontend/src/components/layout/navItems.tsx` — structurally identical across `maya_logs`, `maya_authorization`, `maya_audit`, `maya_dashboard` (same imports from `@maya/shared-layout-react`, same `NavItem[]` memo). Candidate: parameterize as `useNavItemsBuilder(items)` in `@maya/shared-layout-react`.
+- `fetchApplications` + `ApplicationRef` DTO — independently defined in `maya_logs`, `maya_authorization`, `maya_audit`. Candidate: ship `useApplications()` in `@maya/shared-auth-react` or a dedicated package.
+- `frontend/src/components/filters/ApplicationSelect.tsx` and `ResolvedFilter.tsx` — bespoke styled selects matching the pattern of `@maya/shared-ui-react`'s `FilterField`. Candidate: extend shared component, remove local copies.
+
+### Already extracted — consuming local copy (verify)
+
+None confirmed; `SearchInput` wrapper is an acceptable adapter for i18n translation keys, not a true local duplicate.
+
+### Local-only patterns (no extraction needed)
+
+- `app/Services/LogIngestionService.php`, `ResilientLogPublisher.php` — log ingestion pipeline, specific to maya_logs
+- `app/Http/Controllers/Api/LogController.php::stream()` — SSE streaming endpoint, maya_logs-specific
+- `frontend/src/hooks/useLogStream.ts` — SSE polling hook, specific to this service
+- `frontend/src/components/severity/*` (`SeverityBadge`, `palette.ts`) — log-domain specific
+- `frontend/src/components/comments/CommentThread.tsx` — comments feature is exclusive to maya_logs
+- All `Log*`, `ArchivedLog*`, `ErrorCode*` domain components — stay local
+
+## Statistics
+
+- Controllers audited: 9 (`LogController`, `ErrorCodeController`, `ApplicationController`, `CommentController`, `ErrorCodeCommentController`, `ArchivedLogCommentController`, `ArchivedLogController`, `HealthController`, `DashboardController`)
+- Services audited: 6+ (`LogService`, `ErrorCodeService`, `ArchivedLogService`, `CommentService`, `LogIngestionService`, `ApplicationService`, `PanelUserService`)
+- Repositories audited: 6
+- DTOs found: 0 (directory absent)
+- FormRequests found: ~10 (4 canonical in `app/Http/Requests/Api/`, plus duplicates under `app/Http/Requests/`)
+- Frontend pages: 8
+- Frontend components: ~15
+- Frontend hooks: 2 (`useLogStream`, plus inline)
+- F1 violation files: 8
+- `any` in non-test code: 0
+- `React.FC` usages: 0
+
+## Notes
+
+- **Laravel 12**: This project runs Laravel 12; the other Maya services are on Laravel 13. Not a violation but relevant for cross-project parity planning.
+- **AppServiceProvider duplicates**: Almost certainly a merge artifact from the Comment feature addition. The PHP container silently overwrites, so `CommentRepository`/`CommentService` resolve correctly — but the missing `use` import for `CommentContentSanitizerInterface` is a latent runtime error. Fix immediately.
+- **Stale FormRequests**: Two duplicate FormRequest files under `app/Http/Requests/` (non-canonical namespace) should be removed to avoid confusion.
+- **F1 migration path**: Given 8 affected files, recommend a phased SWR migration: (1) install `swr`, (2) migrate page-level data fetches (`LogsPage`, `ErrorCodesPage`, `ArchivedLogsPage`), (3) detail pages, (4) widgets and CommentThread.
+- **E1 is actionable now**: Creating `app/Observers/ErrorCodeObserver.php` with `AuditPublisher` calls inside `DB::afterCommit()` and registering it with `#[ObservedBy(ErrorCodeObserver::class)]` on the `ErrorCode` model is fully unblocked and should be done independently of E-PREREQ.
+- **E5 future work**: Once `maya-shared-messaging-laravel` ships `RecordAuditableEvent`, maya_logs must (1) remove its three local Listeners, (2) remove their `EventServiceProvider` mappings, and (3) implement `AuditableEvent` on the three Events.
