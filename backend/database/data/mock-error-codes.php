@@ -424,4 +424,29 @@ return [
         'name' => 'Error code delete failed',
         'description' => 'Fallo al eliminar un código de error (y comentarios en cascada) desde el panel.',
     ],
+    // Telemetría del panel: comentarios (CommentService)
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-014',
+        'name' => 'Comment not found',
+        'description' => 'No se encontró el comentario solicitado por id.',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-015',
+        'name' => 'Comment create failed',
+        'description' => 'Fallo al persistir un comentario sobre un modelo comentable.',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-016',
+        'name' => 'Comment update failed',
+        'description' => 'Fallo al actualizar el contenido de un comentario.',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-017',
+        'name' => 'Comment delete failed',
+        'description' => 'Fallo al eliminar un comentario.',
+    ],
 ];
