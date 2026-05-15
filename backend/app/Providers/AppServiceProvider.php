@@ -64,7 +64,7 @@ class AppServiceProvider extends ServiceProvider
 
         if (! $this->app->runningUnitTests()) {
             Log::shareContext([
-                'emitting_service' => 'maya_logs',
+                'emitting_service' => (string) config('messaging.app'),
             ]);
         }
     }

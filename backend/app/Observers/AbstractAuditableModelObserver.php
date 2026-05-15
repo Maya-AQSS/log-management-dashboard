@@ -87,6 +87,26 @@ abstract class AbstractAuditableModelObserver
         DB::afterCommit($callback);
     }
 
+    protected function messagingAppSlug(): string
+    {
+        return (string) config('messaging.app');
+    }
+
+    /**
+     * Subject JWT del request actual (panel API). Null fuera de HTTP o sin `jwt_user`.
+     */
+    protected function jwtSubjectFromRequest(): ?string
+    {
+        $jwtUser = request()->attributes->get('jwt_user');
+        if (! is_array($jwtUser)) {
+            return null;
+        }
+
+        $id = $jwtUser['id'] ?? null;
+
+        return is_string($id) && $id !== '' ? $id : null;
+    }
+
     /**
      * @param  array<string, mixed>|null  $previousValue
      * @param  array<string, mixed>|null  $newValue
@@ -98,7 +118,7 @@ abstract class AbstractAuditableModelObserver
         ?array $newValue,
     ): void {
         $this->publisher->publish(
-            applicationSlug: 'maya-logs', //(string) config('messaging.app'),
+            applicationSlug: $this->messagingAppSlug(),
             entityType: $this->auditEntityType(),
             entityId: (string) $model->getKey(),
             action: $action,

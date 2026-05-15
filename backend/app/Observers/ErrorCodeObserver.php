@@ -19,7 +19,7 @@ final class ErrorCodeObserver extends AbstractAuditableModelObserver
 
     protected function resolveAuditUserId(Model $model): string
     {
-        return (string) (auth()->id() ?? 'system');
+        return $this->jwtSubjectFromRequest() ?? 'system';
     }
 
     public function created(ErrorCode $errorCode): void
