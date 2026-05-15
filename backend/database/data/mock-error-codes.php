@@ -456,4 +456,10 @@ return [
         'name' => 'Active log mark resolved failed',
         'description' => 'Fallo al marcar un log activo como resuelto (log inexistente o error de persistencia).',
     ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-019',
+        'name' => 'Active log not found',
+        'description' => 'No se encontró el log activo solicitado por id.',
+    ],
 ];

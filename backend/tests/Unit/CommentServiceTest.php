@@ -7,6 +7,7 @@ namespace Tests\Unit;
 use App\Models\Comment;
 use App\Models\ErrorCode;
 use App\Repositories\Contracts\CommentRepositoryInterface;
+use App\Services\CommentContentSanitizer;
 use App\Services\CommentService;
 use App\Support\ResilientLogPublisher;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -18,6 +19,13 @@ use Tests\TestCase;
 
 class CommentServiceTest extends TestCase
 {
+    private function makeSut(
+        CommentRepositoryInterface $repo,
+        ResilientLogPublisher $publisher,
+    ): CommentService {
+        return new CommentService($repo, $publisher, new CommentContentSanitizer);
+    }
+
     protected function tearDown(): void
     {
         Mockery::close();
@@ -45,7 +53,7 @@ class CommentServiceTest extends TestCase
             ->with(7)
             ->andThrow(new ModelNotFoundException);
 
-        $sut = new CommentService($repo, new ResilientLogPublisher($logPublisher));
+        $sut = $this->makeSut($repo, new ResilientLogPublisher($logPublisher));
 
         $this->expectException(ModelNotFoundException::class);
         $sut->findOrFail(7);
@@ -62,7 +70,7 @@ class CommentServiceTest extends TestCase
         $repo->shouldReceive('delete')->once()->with($comment);
 
         $publisher = new ResilientLogPublisher($this->createMock(LogPublisher::class));
-        $sut = new CommentService($repo, $publisher);
+        $sut = $this->makeSut($repo, $publisher);
 
         $sut->delete($comment);
     }
@@ -79,7 +87,7 @@ class CommentServiceTest extends TestCase
         $logPublisher = $this->createMock(LogPublisher::class);
         $logPublisher->expects($this->never())->method('publish');
 
-        $sut = new CommentService($repo, new ResilientLogPublisher($logPublisher));
+        $sut = $this->makeSut($repo, new ResilientLogPublisher($logPublisher));
 
         $this->expectException(ValidationException::class);
         $sut->createForCommentable($commentable, 'user-1', '   ');

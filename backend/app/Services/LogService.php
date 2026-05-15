@@ -17,6 +17,8 @@ class LogService implements LogServiceInterface
 {
     private const AUDIT_ENTITY_TYPE = 'log';
 
+    private const CODE_NOT_FOUND = 'LAR-LOG-019';
+
     private const CODE_MARK_RESOLVED_FAILED = 'LAR-LOG-018';
 
     public function __construct(
@@ -40,10 +42,23 @@ class LogService implements LogServiceInterface
 
     /**
      * Encuentra un log por su id.
+     *
+     * Sin telemetría en listados; solo se publica a maya.logs si falla la carga por id.
      */
     public function findOrFail(int $id): Log
     {
-        return $this->logRepository->findOrFail($id);
+        try {
+            return $this->logRepository->findOrFail($id);
+        } catch (Throwable $e) {
+            $this->resilientLogPublisher->publishFromThrowable(
+                $e,
+                'medium',
+                self::CODE_NOT_FOUND,
+                ['log_id' => $id],
+                $this->messagingAppSlug(),
+            );
+            throw $e;
+        }
     }
 
     /**
