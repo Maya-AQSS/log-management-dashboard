@@ -462,4 +462,10 @@ return [
         'name' => 'Active log not found',
         'description' => 'No se encontró el log activo solicitado por id.',
     ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-020',
+        'name' => 'Audit event publish failed',
+        'description' => 'AuditPublisher no pudo enviar a maya.audit (p. ej. tras marcar resuelto u otro CRUD); RetryAmqpPublishJob puede recuperarlo.',
+    ],
 ];
