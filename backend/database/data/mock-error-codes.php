@@ -399,4 +399,29 @@ return [
         'name' => 'Log ingestion: invalid occurred_at',
         'description' => 'Formato de occurred_at no parseable; se sustituye por la hora actual al persistir.',
     ],
+    // Telemetría del panel: CRUD de códigos de error (ErrorCodeService)
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-010',
+        'name' => 'Error code not found',
+        'description' => 'No se encontró el código de error solicitado por id.',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-011',
+        'name' => 'Error code create failed',
+        'description' => 'Fallo al crear un código de error desde el panel.',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-012',
+        'name' => 'Error code update failed',
+        'description' => 'Fallo al actualizar un código de error desde el panel.',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-013',
+        'name' => 'Error code delete failed',
+        'description' => 'Fallo al eliminar un código de error (y comentarios en cascada) desde el panel.',
+    ],
 ];
