@@ -1,42 +1,39 @@
 <?php
+
 namespace App\Observers;
 
 use App\Models\ErrorCode;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Support\Facades\DB;
-use Maya\Messaging\Publishers\AuditPublisher;
+use Illuminate\Database\Eloquent\Model;
 
-class ErrorCodeObserver
+final class ErrorCodeObserver extends AbstractAuditableModelObserver
 {
-    public function __construct(private readonly AuditPublisher $publisher) {}
+    protected function auditEntityType(): string
+    {
+        return 'error_code';
+    }
+
+    protected function auditTemporalKeys(): array
+    {
+        return self::AUDIT_ELOQUENT_TEMPORAL_KEYS;
+    }
+
+    protected function resolveAuditUserId(Model $model): string
+    {
+        return $this->jwtSubjectFromRequest() ?? 'system';
+    }
 
     public function created(ErrorCode $errorCode): void
     {
-        DB::afterCommit(fn () => $this->publish('Creado un Error code', $errorCode, null, $errorCode->getAttributes()));
+        $this->auditAfterCreate('Creado un código de error', $errorCode);
     }
 
     public function updated(ErrorCode $errorCode): void
     {
-        $previous= array_intersect_key($errorCode->getOriginal(), $errorCode->getChanges());
-        DB::afterCommit(fn() => $this->publish('Actualizado un Error code', $errorCode, $previous, $errorCode->getChanges()));
+        $this->auditAfterUpdate('Actualizado un código de error', $errorCode);
     }
 
     public function deleted(ErrorCode $errorCode): void
     {
-        DB::afterCommit(fn() => $this->publish('Eliminado un Error code', $errorCode, $errorCode->getAttributes(), null));
-    }
-
-
-    private function publish(string $action, ErrorCode $errorCode, ?array $previous, ?array $new): void
-    {
-        $this->publisher->publish(
-            applicationSlug: 'maya-logs',
-            entityType: self::ENTITY_TYPE,
-            entityId:  (string) $errorCode->getKey(),
-            action: $action,
-            userId: (string) (auth()->id() ?? 'system'),
-            previousValue:  $previous,
-            newValue:  $new,
-        );
+        $this->auditAfterDelete('Eliminado un código de error', $errorCode);
     }
 }

@@ -6,19 +6,31 @@ use App\Enums\Severity;
 use App\Models\Log;
 use App\Repositories\Contracts\LogRepositoryInterface;
 use App\Services\Contracts\LogServiceInterface;
+use App\Support\ResilientLogPublisher;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Maya\Messaging\Publishers\AuditPublisher;
+use Throwable;
 
 class LogService implements LogServiceInterface
 {
     private const AUDIT_ENTITY_TYPE = 'log';
 
+    private const CODE_NOT_FOUND = 'LAR-LOG-019';
+
+    private const CODE_MARK_RESOLVED_FAILED = 'LAR-LOG-018';
+
     public function __construct(
         private LogRepositoryInterface $logRepository,
         private AuditPublisher $auditPublisher,
+        private ResilientLogPublisher $resilientLogPublisher,
     ) {}
+
+    private function messagingAppSlug(): string
+    {
+        return (string) config('messaging.app');
+    }
 
     /**
      * Devuelve una página de logs.
@@ -30,10 +42,23 @@ class LogService implements LogServiceInterface
 
     /**
      * Encuentra un log por su id.
+     *
+     * Sin telemetría en listados; solo se publica a maya.logs si falla la carga por id.
      */
     public function findOrFail(int $id): Log
     {
-        return $this->logRepository->findOrFail($id);
+        try {
+            return $this->logRepository->findOrFail($id);
+        } catch (Throwable $e) {
+            $this->resilientLogPublisher->publishFromThrowable(
+                $e,
+                'medium',
+                self::CODE_NOT_FOUND,
+                ['log_id' => $id],
+                $this->messagingAppSlug(),
+            );
+            throw $e;
+        }
     }
 
     /**
@@ -162,27 +187,41 @@ class LogService implements LogServiceInterface
 
     /**
      * Marca el log como resuelto.
+     *
+     * Si el log no existe o falla la persistencia, se publica incidencia a maya.logs antes de relanzar.
+     * Si ya estaba resuelto ({@see LogRepositoryInterface::resolved} devuelve 0), no hay auditoría ni telemetría.
      */
     public function resolved(int $logId, string $actorUserId): void
     {
-        $this->logRepository->findOrFail($logId);
+        try {
+            $this->logRepository->findOrFail($logId);
 
-        $affected = $this->logRepository->resolved($logId);
-        if ($affected < 1) {
-            return;
-        }
+            $affected = $this->logRepository->resolved($logId);
+            if ($affected < 1) {
+                return;
+            }
 
-        $this->afterCommit(function () use ($logId, $actorUserId): void {
-            $this->auditPublisher->publish(
-                applicationSlug: (string) config('messaging.app'),
-                entityType: self::AUDIT_ENTITY_TYPE,
-                entityId: (string) $logId,
-                action: 'Marcar un log como resuelto',
-                userId: $actorUserId,
-                previousValue: ['resolved' => false],
-                newValue: ['resolved' => true],
+            $this->afterCommit(function () use ($logId, $actorUserId): void {
+                $this->auditPublisher->publish(
+                    applicationSlug: $this->messagingAppSlug(),
+                    entityType: self::AUDIT_ENTITY_TYPE,
+                    entityId: (string) $logId,
+                    action: 'Marcar un log como resuelto',
+                    userId: $actorUserId,
+                    previousValue: ['resolved' => false],
+                    newValue: ['resolved' => true],
+                );
+            });
+        } catch (Throwable $e) {
+            $this->resilientLogPublisher->publishFromThrowable(
+                $e,
+                'medium',
+                self::CODE_MARK_RESOLVED_FAILED,
+                ['log_id' => $logId, 'actor_user_id' => $actorUserId],
+                $this->messagingAppSlug(),
             );
-        });
+            throw $e;
+        }
     }
 
     /**

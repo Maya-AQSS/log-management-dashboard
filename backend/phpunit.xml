@@ -28,7 +28,7 @@
         <env name="DB_CONNECTION" value="sqlite"/>
         <env name="DB_DATABASE" value=":memory:"/>
         <env name="LOG_CHANNEL" value="null"/>
-        <env name="MAYA_MESSAGING_APP" value="maya_logs"/>
+        <env name="MAYA_MESSAGING_APP" value="maya-logs"/>
         <env name="AUTH_EXTERNAL_URL" value="http://auth.example.com"/>
         <env name="AUTH_EXTERNAL_PUBLIC_URL" value="http://auth.example.com/login"/>
         <env name="MAIL_MAILER" value="array"/>

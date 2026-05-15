@@ -399,4 +399,73 @@ return [
         'name' => 'Log ingestion: invalid occurred_at',
         'description' => 'Formato de occurred_at no parseable; se sustituye por la hora actual al persistir.',
     ],
+    // Telemetría del panel: CRUD de códigos de error (ErrorCodeService)
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-010',
+        'name' => 'Error code not found',
+        'description' => 'No se encontró el código de error solicitado por id.',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-011',
+        'name' => 'Error code create failed',
+        'description' => 'Fallo al crear un código de error desde el panel.',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-012',
+        'name' => 'Error code update failed',
+        'description' => 'Fallo al actualizar un código de error desde el panel.',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-013',
+        'name' => 'Error code delete failed',
+        'description' => 'Fallo al eliminar un código de error (y comentarios en cascada) desde el panel.',
+    ],
+    // Telemetría del panel: comentarios (CommentService)
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-014',
+        'name' => 'Comment not found',
+        'description' => 'No se encontró el comentario solicitado por id.',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-015',
+        'name' => 'Comment create failed',
+        'description' => 'Fallo al persistir un comentario sobre un modelo comentable.',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-016',
+        'name' => 'Comment update failed',
+        'description' => 'Fallo al actualizar el contenido de un comentario.',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-017',
+        'name' => 'Comment delete failed',
+        'description' => 'Fallo al eliminar un comentario.',
+    ],
+    // Telemetría del panel: logs (LogService)
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-018',
+        'name' => 'Active log mark resolved failed',
+        'description' => 'Fallo al marcar un log activo como resuelto (log inexistente o error de persistencia).',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-019',
+        'name' => 'Active log not found',
+        'description' => 'No se encontró el log activo solicitado por id.',
+    ],
+    [
+        'application_id' => 4,
+        'code' => 'LAR-LOG-020',
+        'name' => 'Audit event publish failed',
+        'description' => 'AuditPublisher no pudo enviar a maya.audit (p. ej. tras marcar resuelto u otro CRUD); RetryAmqpPublishJob puede recuperarlo.',
+    ],
 ];

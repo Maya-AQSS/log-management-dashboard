@@ -32,12 +32,12 @@ class ResilientLogPublisherTest extends TestCase
         $original = new RuntimeException('error de negocio');
 
         $sut = new ResilientLogPublisher($logPublisher);
-        $sut->publishFromThrowable($original, 'medium', 'test_error_code', ['k' => 1], 'maya_logs');
+        $sut->publishFromThrowable($original, 'medium', 'test_error_code', ['k' => 1], 'maya-logs');
 
         Event::assertDispatched(MessageLogged::class, function (MessageLogged $event): bool {
             return $event->level === 'warning'
                 && $event->message === 'maya.logs.publish_failed_after_operation_failure'
-                && ($event->context['app'] ?? null) === 'maya_logs'
+                && ($event->context['app'] ?? null) === 'maya-logs'
                 && ($event->context['error_code'] ?? null) === 'test_error_code'
                 && ($event->context['original_message'] ?? null) === 'error de negocio'
                 && ($event->context['publish_error'] ?? null) === 'broker caído';
@@ -72,7 +72,7 @@ class ResilientLogPublisherTest extends TestCase
             ->willThrowException(new RuntimeException('broker down'));
 
         $sut = new ResilientLogPublisher($logPublisher);
-        $sut->publishStructured('low', 'mensaje', 'LAR-LOG-099', ['k' => 1], 'maya_logs');
+        $sut->publishStructured('low', 'mensaje', 'LAR-LOG-099', ['k' => 1], 'maya-logs');
 
         Event::assertDispatched(MessageLogged::class, function (MessageLogged $event): bool {
             return $event->level === 'warning'
