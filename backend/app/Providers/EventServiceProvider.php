@@ -11,16 +11,6 @@ use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvi
  */
 class EventServiceProvider extends ServiceProvider
 {
-    /**
-     * @var array<class-string, array<int, class-string>>
-     */
-    protected $listen = [];
-
-    public function boot(): void
-    {
-        parent::boot();
-    }
-
     public function shouldDiscoverEvents(): bool
     {
         return false;
