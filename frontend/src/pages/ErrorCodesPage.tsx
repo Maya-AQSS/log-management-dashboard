@@ -195,25 +195,25 @@ export function ErrorCodesPage() {
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
       <PageTitle
-        title="Códigos de error"
+        title={t('title')}
         actions={
           <Link
             to="/error-codes/create"
             className="inline-flex items-center bg-odoo-purple dark:bg-odoo-dark-purple text-text-inverse border-odoo-purple dark:border-odoo-dark-purple hover:bg-odoo-purple-d dark:hover:bg-odoo-dark-purple-d hover:border-odoo-purple-d dark:hover:border-odoo-dark-purple-d px-4 py-1.5 rounded-md text-sm font-semibold transition-colors cursor-pointer border shadow-sm"
           >
-            Nuevo código
+            {t('actions.new')}
           </Link>
         }
       />
 
       {errorCodesQuery.isError && errorMessage && (
-        <Alert tone="danger" className="mt-4">No se pudieron cargar los códigos de error: {errorMessage}
+        <Alert tone="danger" className="mt-4">{t('loadError')}: {errorMessage}
         </Alert>
       )}
 
       {errorCodesQuery.isLoading && !pagination && (
         <div className="mt-4 rounded-lg border border-ui-border bg-ui-card p-6 text-center text-sm text-text-muted dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-muted">
-          Cargando…
+          {t('loading')}
         </div>
       )}
 
@@ -221,7 +221,7 @@ export function ErrorCodesPage() {
         <>
           <div className="mt-3">
             <DataTable
-              title="Códigos de error"
+              title={t('title')}
               columns={columns}
               rows={errorCodes}
               rowKey={(ec) => ec.id}
