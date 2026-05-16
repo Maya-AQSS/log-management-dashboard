@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Observers;
@@ -60,12 +61,12 @@ final class ErrorCodeObserver
     {
         $this->publisher->publish(
             applicationSlug: (string) config('messaging.app'),
-            entityType:      'error_code',
-            entityId:        (string) $errorCode->getKey(),
-            action:          $action,
-            userId:          (string) (Auth::id() ?? 'system'),
-            previousValue:   $previous,
-            newValue:        $new,
+            entityType: 'error_code',
+            entityId: (string) $errorCode->getKey(),
+            action: $action,
+            userId: (string) (Auth::id() ?? 'system'),
+            previousValue: $previous,
+            newValue: $new,
         );
     }
 }

@@ -1,13 +1,15 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Events;
 
+use App\Models\ArchivedLog;
 use Illuminate\Foundation\Events\Dispatchable;
 use Maya\Messaging\Contracts\AuditableEvent;
 
 /**
- * Un {@see \App\Models\ArchivedLog} acaba de eliminarse (soft delete) en base de datos.
+ * Un {@see ArchivedLog} acaba de eliminarse (soft delete) en base de datos.
  */
 final class ArchivedLogWasDeleted implements AuditableEvent
 {
@@ -22,10 +24,10 @@ final class ArchivedLogWasDeleted implements AuditableEvent
     {
         return [
             'applicationSlug' => (string) config('messaging.app'),
-            'entityType'      => 'archived_log',
-            'entityId'        => (string) $this->archivedLogId,
-            'action'          => 'delete',
-            'userId'          => $this->archivedByUserId,
+            'entityType' => 'archived_log',
+            'entityId' => (string) $this->archivedLogId,
+            'action' => 'delete',
+            'userId' => $this->archivedByUserId,
         ];
     }
 }

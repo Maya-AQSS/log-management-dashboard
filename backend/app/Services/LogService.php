@@ -1,15 +1,16 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
 
 use App\Dtos\LogDto;
-use Maya\Http\Pagination\PaginatedDto;
 use App\Enums\Severity;
 use App\Models\Log;
 use App\Repositories\Contracts\LogRepositoryInterface;
 use App\Services\Contracts\LogServiceInterface;
 use Illuminate\Support\Facades\Cache;
+use Maya\Http\Pagination\PaginatedDto;
 
 class LogService implements LogServiceInterface
 {

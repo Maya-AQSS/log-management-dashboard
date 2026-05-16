@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Events;
@@ -23,10 +24,10 @@ final class LogWasArchived implements AuditableEvent
     {
         return [
             'applicationSlug' => (string) config('messaging.app'),
-            'entityType'      => 'archived_log',
-            'entityId'        => (string) $this->archivedLog->id,
-            'action'          => 'archive',
-            'userId'          => $this->archivedByUserId,
+            'entityType' => 'archived_log',
+            'entityId' => (string) $this->archivedLog->id,
+            'action' => 'archive',
+            'userId' => $this->archivedByUserId,
         ];
     }
 }

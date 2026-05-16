@@ -1,16 +1,17 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
 
 use App\Dtos\ArchivedLogDto;
-use Maya\Http\Pagination\PaginatedDto;
 use App\Events\ArchivedLogFieldsWereUpdated;
 use App\Events\ArchivedLogWasDeleted;
 use App\Events\LogWasArchived;
 use App\Models\ArchivedLog;
 use App\Repositories\Contracts\ArchivedLogRepositoryInterface;
 use App\Services\Contracts\ArchivedLogServiceInterface;
+use Maya\Http\Pagination\PaginatedDto;
 use Maya\Messaging\Publishers\ResilientLogPublisher;
 use Throwable;
 
@@ -19,8 +20,7 @@ class ArchivedLogService implements ArchivedLogServiceInterface
     public function __construct(
         private ArchivedLogRepositoryInterface $archivedLogRepository,
         private ResilientLogPublisher $resilientLogPublisher,
-    ) {
-    }
+    ) {}
 
     private function messagingAppSlug(): string
     {
@@ -31,7 +31,7 @@ class ArchivedLogService implements ArchivedLogServiceInterface
     {
         return PaginatedDto::fromPaginator(
             $this->archivedLogRepository->paginate($perPage),
-            static fn(ArchivedLog $m) => ArchivedLogDto::fromModel($m),
+            static fn (ArchivedLog $m) => ArchivedLogDto::fromModel($m),
         );
     }
 
@@ -54,7 +54,7 @@ class ArchivedLogService implements ArchivedLogServiceInterface
                 $sortDir,
                 $perPage
             ),
-            static fn(ArchivedLog $m) => ArchivedLogDto::fromModel($m),
+            static fn (ArchivedLog $m) => ArchivedLogDto::fromModel($m),
         );
     }
 
@@ -90,11 +90,11 @@ class ArchivedLogService implements ArchivedLogServiceInterface
     {
         try {
             $sanitized = array_map(
-                static fn($value) => is_string($value) ? (blank($value) ? null : trim($value)) : $value,
+                static fn ($value) => is_string($value) ? (blank($value) ? null : trim($value)) : $value,
                 $fields
             );
 
-            if ($sanitized === [] || !$this->archivedLogSanitizedDiffersFromModel($archivedLog, $sanitized)) {
+            if ($sanitized === [] || ! $this->archivedLogSanitizedDiffersFromModel($archivedLog, $sanitized)) {
                 return;
             }
 
@@ -135,7 +135,7 @@ class ArchivedLogService implements ArchivedLogServiceInterface
             $archivedLogId = $archivedLog->id;
             $archivedByUserId = (string) $archivedLog->archived_by_id;
 
-            if (!$this->archivedLogRepository->delete($archivedLog)) {
+            if (! $this->archivedLogRepository->delete($archivedLog)) {
                 return;
             }
 

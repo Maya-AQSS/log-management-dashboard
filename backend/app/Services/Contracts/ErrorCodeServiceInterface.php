@@ -1,11 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services\Contracts;
 
 use App\Dtos\ErrorCodeDto;
-use Maya\Http\Pagination\PaginatedDto;
 use App\Models\ErrorCode;
+use Maya\Http\Pagination\PaginatedDto;
 
 interface ErrorCodeServiceInterface
 {

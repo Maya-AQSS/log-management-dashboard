@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
@@ -19,8 +20,7 @@ final class CommentService implements CommentServiceInterface
 
     public function __construct(
         private readonly CommentRepositoryInterface $commentRepository,
-    ) {
-    }
+    ) {}
 
     public function findOrFail(int $id): CommentDto
     {
@@ -140,7 +140,7 @@ final class CommentService implements CommentServiceInterface
                 ]);
             }
 
-            if (!$this->isAllowedImageByMagicBytes($decoded)) {
+            if (! $this->isAllowedImageByMagicBytes($decoded)) {
                 throw ValidationException::withMessages([
                     'content' => __('comments.editor.image_invalid_type'),
                 ]);

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
@@ -17,8 +18,7 @@ class CommentController extends Controller
     public function __construct(
         private readonly PanelUserService $panelUserService,
         private readonly CommentServiceInterface $commentService,
-    ) {
-    }
+    ) {}
 
     public function update(UpdateCommentRequest $request, int $id): JsonResponse
     {

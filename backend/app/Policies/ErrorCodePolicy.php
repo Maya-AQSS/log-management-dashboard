@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Policies;
@@ -7,6 +8,7 @@ use App\Models\ErrorCode;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Http\Request;
+use Maya\Profile\Controllers\MeController;
 use Maya\Profile\Services\Contracts\UserProfileServiceInterface;
 
 /**
@@ -66,7 +68,7 @@ class ErrorCodePolicy
     }
 
     /**
-     * Mismo criterio que {@see \Maya\Profile\Controllers\MeController::jwtContext()}.
+     * Mismo criterio que {@see MeController::jwtContext()}.
      *
      * @return array{0: string, 1: array<string, mixed>}
      */

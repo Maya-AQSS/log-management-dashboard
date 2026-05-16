@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Http\Requests\Api;
@@ -17,13 +18,13 @@ class ListArchivedLogsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'severity'       => ['nullable'], // string CSV o array — se normaliza en el controller
+            'severity' => ['nullable'], // string CSV o array — se normaliza en el controller
             'application_id' => ['nullable', 'integer', 'min:1'],
-            'date_from'      => ['nullable', 'date'],
-            'date_to'        => ['nullable', 'date'],
-            'sort_by'        => ['nullable', 'string', 'in:archived_at,original_created_at,severity,application'],
-            'sort_dir'       => ['nullable', 'string', 'in:asc,desc'],
-            'per_page'       => ['nullable', 'integer', 'min:1', 'max:100'],
+            'date_from' => ['nullable', 'date'],
+            'date_to' => ['nullable', 'date'],
+            'sort_by' => ['nullable', 'string', 'in:archived_at,original_created_at,severity,application'],
+            'sort_dir' => ['nullable', 'string', 'in:asc,desc'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ];
     }
 
@@ -38,7 +39,7 @@ class ListArchivedLogsRequest extends FormRequest
 
         $this->merge(array_filter([
             'date_from' => $from,
-            'date_to'   => $to,
+            'date_to' => $to,
         ], fn ($v) => $v !== null));
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
@@ -12,9 +13,11 @@ class LogIngestionService
     protected array $slugToId = [];
 
     private array $errorCodeIdCache = [];
+
     private array $logBuffer = [];
 
     private const MAX_ERROR_CODE_CACHE = 10_000;
+
     private const DEFAULT_BATCH_SIZE = 100;
 
     public function __construct(
@@ -58,17 +61,17 @@ class LogIngestionService
         }
 
         $this->logBuffer[] = [
-            'error_code_id'  => $errorCodeId,
+            'error_code_id' => $errorCodeId,
             'application_id' => $applicationId,
-            'severity'       => $log->severity,
-            'message'        => $log->message,
-            'file'           => $log->file,
-            'line'           => $log->line,
-            'metadata'       => is_array($log->metadata)
+            'severity' => $log->severity,
+            'message' => $log->message,
+            'file' => $log->file,
+            'line' => $log->line,
+            'metadata' => is_array($log->metadata)
                 ? (json_encode($log->metadata, JSON_UNESCAPED_UNICODE) ?: null)
                 : $log->metadata,
-            'resolved'       => false,
-            'created_at'     => $log->occurredAt !== null
+            'resolved' => false,
+            'created_at' => $log->occurredAt !== null
                 ? $this->parseTimestamp($log->occurredAt)
                 : now(),
         ];
@@ -109,10 +112,12 @@ class LogIngestionService
 
         if (! array_key_exists($slug, $this->slugToId)) {
             Log::warning('ConsumeLogs: dropping payload — app slug not registered in maya_auth', ['slug' => $slug]);
+
             return null;
         }
 
         $id = (int) $this->slugToId[$slug];
+
         return $id > 0 ? $id : null;
     }
 
@@ -123,7 +128,7 @@ class LogIngestionService
         }
 
         // Null byte separator avoids collisions between codes containing ':' and numeric appIds.
-        $cacheKey = $code . "\0" . $applicationId;
+        $cacheKey = $code."\0".$applicationId;
         if (isset($this->errorCodeIdCache[$cacheKey])) {
             return $this->errorCodeIdCache[$cacheKey];
         }
@@ -134,6 +139,7 @@ class LogIngestionService
 
         if ($id === null) {
             Log::error('ConsumeLogs: could not resolve id for error code', ['code' => $code, 'applicationId' => $applicationId]);
+
             return null;
         }
 
@@ -154,6 +160,7 @@ class LogIngestionService
         $unix = strtotime($value);
         if ($unix === false) {
             Log::warning('ConsumeLogs: malformed occurred_at, falling back to now()', ['value' => $value]);
+
             return now();
         }
 

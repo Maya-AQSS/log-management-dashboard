@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
@@ -10,7 +11,6 @@ use App\Http\Requests\Api\UpdateArchivedLogRequest;
 use App\Http\Resources\ArchivedLogResource;
 use App\Services\Contracts\ArchivedLogServiceInterface;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class ArchivedLogController extends Controller
 {
@@ -18,15 +18,14 @@ class ArchivedLogController extends Controller
 
     public function __construct(
         private ArchivedLogServiceInterface $archivedLogService,
-    ) {
-    }
+    ) {}
 
     public function index(ListArchivedLogsRequest $request): JsonResponse
     {
         $perPage = (int) $request->integer('per_page', 15);
         $severity = $request->input('severity');
         if (is_string($severity)) {
-            $severity = array_filter(array_map('trim', explode(',', $severity)), fn(string $v): bool => $v !== '');
+            $severity = array_filter(array_map('trim', explode(',', $severity)), fn (string $v): bool => $v !== '');
         }
 
         $page = $this->archivedLogService->searchAndFilter(

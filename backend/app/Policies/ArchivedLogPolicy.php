@@ -1,8 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Http\Controllers\Api\LogController;
 use App\Models\ArchivedLog;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
@@ -17,8 +19,7 @@ class ArchivedLogPolicy
 {
     public function __construct(
         private readonly Request $request,
-    ) {
-    }
+    ) {}
 
     /**
      * Verifica si el usuario puede actualizar el log archivado.
@@ -54,7 +55,7 @@ class ArchivedLogPolicy
     }
 
     /**
-     * Identificador de actor del token (misma clave que en {@see \App\Http\Controllers\Api\LogController::archive}).
+     * Identificador de actor del token (misma clave que en {@see LogController::archive}).
      */
     private function jwtSubject(): ?string
     {

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
@@ -15,7 +16,7 @@ class HealthCheckController extends AbstractHealthCheckController
     protected function checks(): array
     {
         return [
-            new DatabaseHealthCheck(),
+            new DatabaseHealthCheck,
         ];
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
@@ -20,7 +21,7 @@ final class PanelUserService
     /**
      * Resuelve el {@see User} del directorio (vista FDW `users`) a partir del JWT inyectado en la petición.
      * Si falta actor en token o no existe en `users`, lanza una excepción HTTP 403 con un JSON de error.
-     * 
+     *
      * @throws HttpResponseException 403 JSON si falta actor en token o no existe en `users`.
      */
     public function resolveFromJwtRequest(Request $request): User

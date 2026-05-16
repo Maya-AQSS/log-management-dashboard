@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
@@ -18,8 +19,7 @@ class ArchivedLogCommentController extends Controller
         private readonly PanelUserService $panelUserService,
         private readonly ArchivedLogServiceInterface $archivedLogService,
         private readonly CommentServiceInterface $commentService,
-    ) {
-    }
+    ) {}
 
     public function index(int $archivedLogId): AnonymousResourceCollection
     {

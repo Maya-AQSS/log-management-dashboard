@@ -19,13 +19,13 @@ class LogIngestionRepository implements LogIngestionRepositoryInterface
     {
         // INSERT ON CONFLICT DO NOTHING — atomic under concurrent workers.
         DB::table('error_codes')->insertOrIgnore([
-            'code'           => $code,
+            'code' => $code,
             'application_id' => $applicationId,
-            'name'           => $code,
-            'file'           => $file,
-            'line'           => $line,
-            'created_at'     => now(),
-            'updated_at'     => now(),
+            'name' => $code,
+            'file' => $file,
+            'line' => $line,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 

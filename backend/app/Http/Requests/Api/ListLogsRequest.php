@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Http\Requests\Api;
@@ -17,16 +18,16 @@ class ListLogsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'search'         => ['nullable', 'string', 'max:255'],
-            'severity'       => ['nullable'], // string CSV o array — se normaliza en el controller
+            'search' => ['nullable', 'string', 'max:255'],
+            'severity' => ['nullable'], // string CSV o array — se normaliza en el controller
             'application_id' => ['nullable', 'integer', 'min:1'],
-            'archived'       => ['nullable', 'string', 'in:only,without'],
-            'resolved'       => ['nullable', 'string', 'in:only,unresolved'],
-            'date_from'      => ['nullable', 'date'],
-            'date_to'        => ['nullable', 'date'],
-            'sort_by'        => ['nullable', 'string', 'in:created_at,severity,application,resolved'],
-            'sort_dir'       => ['nullable', 'string', 'in:asc,desc'],
-            'per_page'       => ['nullable', 'integer', 'min:1', 'max:100'],
+            'archived' => ['nullable', 'string', 'in:only,without'],
+            'resolved' => ['nullable', 'string', 'in:only,unresolved'],
+            'date_from' => ['nullable', 'date'],
+            'date_to' => ['nullable', 'date'],
+            'sort_by' => ['nullable', 'string', 'in:created_at,severity,application,resolved'],
+            'sort_dir' => ['nullable', 'string', 'in:asc,desc'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ];
     }
 
@@ -41,7 +42,7 @@ class ListLogsRequest extends FormRequest
 
         $this->merge(array_filter([
             'date_from' => $from,
-            'date_to'   => $to,
+            'date_to' => $to,
         ], fn ($v) => $v !== null));
     }
 }

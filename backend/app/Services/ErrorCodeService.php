@@ -1,14 +1,15 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
 
 use App\Dtos\ErrorCodeDto;
-use Maya\Http\Pagination\PaginatedDto;
 use App\Models\ErrorCode;
 use App\Repositories\Contracts\ErrorCodeRepositoryInterface;
 use App\Services\Contracts\ErrorCodeServiceInterface;
 use Illuminate\Support\Facades\DB;
+use Maya\Http\Pagination\PaginatedDto;
 
 class ErrorCodeService implements ErrorCodeServiceInterface
 {

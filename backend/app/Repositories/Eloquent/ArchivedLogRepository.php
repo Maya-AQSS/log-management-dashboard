@@ -1,10 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Repositories\Eloquent;
 
 use App\Models\ArchivedLog;
 use App\Models\Log;
+use App\Policies\ArchivedLogPolicy;
 use App\Repositories\Contracts\ArchivedLogRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -46,10 +48,10 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
 
         $query = ArchivedLog::query()
             ->withStandardRelations()
-            ->when($severities !== null && $severities !== [], fn($q) => $q->whereIn('severity', $severities))
-            ->when($applicationId !== null, fn($q) => $q->where('application_id', $applicationId))
-            ->when($dateFrom !== null, fn($q) => $q->where('archived_at', '>=', $dateFrom))
-            ->when($dateTo !== null, fn($q) => $q->where('archived_at', '<=', $dateTo));
+            ->when($severities !== null && $severities !== [], fn ($q) => $q->whereIn('severity', $severities))
+            ->when($applicationId !== null, fn ($q) => $q->where('application_id', $applicationId))
+            ->when($dateFrom !== null, fn ($q) => $q->where('archived_at', '>=', $dateFrom))
+            ->when($dateTo !== null, fn ($q) => $q->where('archived_at', '<=', $dateTo));
 
         $query = match ($sortBy) {
             'archived_at' => $query
@@ -74,7 +76,7 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
     {
         $dir = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
         $query->orderByRaw(
-            'CASE severity WHEN ? THEN 1 WHEN ? THEN 2 WHEN ? THEN 3 WHEN ? THEN 4 WHEN ? THEN 5 ELSE 99 END ' . $dir,
+            'CASE severity WHEN ? THEN 1 WHEN ? THEN 2 WHEN ? THEN 3 WHEN ? THEN 4 WHEN ? THEN 5 ELSE 99 END '.$dir,
             ['critical', 'high', 'medium', 'low', 'other']
         );
         $query->orderByDesc('archived_at');
@@ -96,7 +98,7 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
     /**
      * @param  array<string, mixed>  $fields
      *
-     * No valida actor; debe haberse pasado {@see \App\Policies\ArchivedLogPolicy} (p. ej. vía `authorize` en el controlador).
+     * No valida actor; debe haberse pasado {@see ArchivedLogPolicy} (p. ej. vía `authorize` en el controlador).
      */
     public function updateArchivedFields(ArchivedLog $archivedLog, array $fields): void
     {
@@ -104,7 +106,7 @@ class ArchivedLogRepository implements ArchivedLogRepositoryInterface
     }
 
     /**
-     * Soft delete. La autorización la define {@see \App\Policies\ArchivedLogPolicy}.
+     * Soft delete. La autorización la define {@see ArchivedLogPolicy}.
      */
     public function delete(ArchivedLog $archivedLog): bool
     {
