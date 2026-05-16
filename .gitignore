@@ -60,7 +60,7 @@ __MACOSX/
 # Claude Code — archivos generados (no commitear)
 .claude
 .agent/
-.github/
+.github/*
 !.github/workflows/
 .github/workflows/agent-*
 
