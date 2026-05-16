@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import DOMPurify from 'dompurify';
 import { Alert, Button } from '@maya/shared-ui-react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -290,7 +291,7 @@ export function CommentThread({ commentableType, commentableId }: CommentThreadP
               ) : (
                 <div
                   className="rte-content mt-3 text-sm text-text-primary dark:text-text-dark-primary"
-                  dangerouslySetInnerHTML={{ __html: comment.content }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(comment.content) }}
                 />
               )}
             </article>
