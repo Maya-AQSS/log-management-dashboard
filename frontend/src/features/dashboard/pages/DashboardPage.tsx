@@ -4,23 +4,21 @@ import { PageTitle } from '@maya/shared-ui-react';
 import {
   DashboardEditToggleButton,
   DashboardEditToolbar,
+  DashboardSkeleton,
   WidgetGrid,
   useDashboardLayoutLocal,
   type LayoutItem,
+  type SkeletonBlock,
 } from '@maya/shared-dashboard-react';
 import { DEFAULT_LAYOUT, WIDGET_REGISTRY } from '../widgets/registry';
 
 const STORAGE_KEY = 'maya:logs:dashboard-layout';
 
-function DashboardSkeleton() {
-  return (
-    <div className="p-4 sm:p-6 grid grid-cols-12 gap-4 animate-pulse">
-      <div className="col-span-12 sm:col-span-4 h-32 bg-ui-border-l dark:bg-ui-dark-border rounded-2xl" />
-      <div className="col-span-12 sm:col-span-8 h-32 bg-ui-border-l dark:bg-ui-dark-border rounded-2xl" />
-      <div className="col-span-12 h-32 bg-ui-border-l dark:bg-ui-dark-border rounded-2xl" />
-    </div>
-  );
-}
+const SKELETON_BLOCKS: SkeletonBlock[] = [
+  { colSpanClasses: 'col-span-12 sm:col-span-4', heightClass: 'h-32' },
+  { colSpanClasses: 'col-span-12 sm:col-span-8', heightClass: 'h-32' },
+  { colSpanClasses: 'col-span-12', heightClass: 'h-32' },
+];
 
 /**
  * Customizable dashboard for maya_logs. Layout persists to localStorage under
@@ -106,7 +104,7 @@ export function DashboardPage() {
   }, [resetToDefault]);
 
   if (loading) {
-    return <DashboardSkeleton />;
+    return <DashboardSkeleton blocks={SKELETON_BLOCKS} />;
   }
 
   return (

@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Dtos\LogDto;
-use App\Dtos\Pagination\PaginatedDto;
+use Maya\Http\Pagination\PaginatedDto;
 use App\Enums\Severity;
 use App\Models\Log;
 use App\Repositories\Contracts\LogRepositoryInterface;

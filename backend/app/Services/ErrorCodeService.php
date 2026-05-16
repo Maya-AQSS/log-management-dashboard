@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Dtos\ErrorCodeDto;
-use App\Dtos\Pagination\PaginatedDto;
+use Maya\Http\Pagination\PaginatedDto;
 use App\Models\ErrorCode;
 use App\Repositories\Contracts\ErrorCodeRepositoryInterface;
 use App\Services\Contracts\ErrorCodeServiceInterface;

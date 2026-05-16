@@ -3,14 +3,14 @@
 namespace App\Services;
 
 use App\Dtos\ArchivedLogDto;
-use App\Dtos\Pagination\PaginatedDto;
+use Maya\Http\Pagination\PaginatedDto;
 use App\Events\ArchivedLogFieldsWereUpdated;
 use App\Events\ArchivedLogWasDeleted;
 use App\Events\LogWasArchived;
 use App\Models\ArchivedLog;
 use App\Repositories\Contracts\ArchivedLogRepositoryInterface;
 use App\Services\Contracts\ArchivedLogServiceInterface;
-use App\Support\ResilientLogPublisher;
+use Maya\Messaging\Publishers\ResilientLogPublisher;
 use Throwable;
 
 class ArchivedLogService implements ArchivedLogServiceInterface

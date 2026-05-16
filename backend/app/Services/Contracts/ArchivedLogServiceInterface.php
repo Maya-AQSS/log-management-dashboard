@@ -3,7 +3,7 @@
 namespace App\Services\Contracts;
 
 use App\Dtos\ArchivedLogDto;
-use App\Dtos\Pagination\PaginatedDto;
+use Maya\Http\Pagination\PaginatedDto;
 use App\Models\ArchivedLog;
 
 interface ArchivedLogServiceInterface

@@ -10,7 +10,7 @@ use App\Events\LogWasArchived;
 use App\Models\ArchivedLog;
 use App\Repositories\Contracts\ArchivedLogRepositoryInterface;
 use App\Services\ArchivedLogService;
-use App\Support\ResilientLogPublisher;
+use Maya\Messaging\Publishers\ResilientLogPublisher;
 use Illuminate\Support\Facades\Event;
 use Maya\Messaging\Publishers\LogPublisher;
 use Mockery;
