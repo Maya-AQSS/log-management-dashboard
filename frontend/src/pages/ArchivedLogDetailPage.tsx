@@ -10,6 +10,8 @@ import {
 } from '@maya/shared-ui-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   deleteArchivedLog,
   fetchArchivedLog,
@@ -17,6 +19,11 @@ import {
 } from '../api/archivedLogs';
 import { ArchivedLogDetailView } from '../components/archived-logs';
 import { CommentThread } from '../components/comments';
+import {
+  archivedLogEditSchema,
+  emptyArchivedLogEdit,
+  type ArchivedLogEditInput,
+} from '../schemas/archivedLog';
 import type { ArchivedLog } from '../types/logs';
 import { createDataHook, createMutationHook } from '@maya/shared-auth-react';
 
@@ -39,12 +46,7 @@ const useDeleteArchivedLog = createMutationHook<number, void>({
   invalidates: () => [['archived-logs']],
 });
 
-type EditForm = {
-  description: string;
-  url_tutorial: string;
-};
-
-function toEditForm(log: ArchivedLog): EditForm {
+function toEditForm(log: ArchivedLog): ArchivedLogEditInput {
   return {
     description: log.description ?? '',
     url_tutorial: log.url_tutorial ?? '',
@@ -60,10 +62,20 @@ export function ArchivedLogDetailPage() {
   const validId = Number.isFinite(logId) && logId > 0;
 
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState<EditForm>({ description: '', url_tutorial: '' });
   const [saveError, setSaveError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ArchivedLogEditInput>({
+    mode: 'onSubmit',
+    resolver: zodResolver(archivedLogEditSchema),
+    defaultValues: emptyArchivedLogEdit,
+  });
 
   const logQuery = useArchivedLogDetailQuery(logId, { enabled: validId });
   const updateMutation = useUpdateArchivedLog();
@@ -85,31 +97,31 @@ export function ArchivedLogDetailPage() {
 
   const onStartEdit = useCallback(() => {
     if (!log) return;
-    setForm(toEditForm(log));
+    reset(toEditForm(log));
     setSaveError(null);
     setEditing(true);
-  }, [log]);
+  }, [log, reset]);
 
   const onCancelEdit = useCallback(() => {
     setEditing(false);
     setSaveError(null);
   }, []);
 
-  const onSave = useCallback(() => {
+  const onSubmit = handleSubmit((values) => {
     if (!validId) return;
     setSaveError(null);
     updateMutation.mutate(
       {
         id: logId,
-        description: form.description.trim() === '' ? null : form.description,
-        url_tutorial: form.url_tutorial.trim() === '' ? null : form.url_tutorial,
+        description: values.description.trim() === '' ? null : values.description,
+        url_tutorial: values.url_tutorial.trim() === '' ? null : values.url_tutorial,
       },
       {
         onSuccess: () => setEditing(false),
         onError: (e) => setSaveError(e instanceof Error ? e.message : String(e)),
       },
     );
-  }, [logId, validId, form, updateMutation]);
+  });
 
   const onDelete = useCallback(() => {
     if (!validId) return;
@@ -179,7 +191,7 @@ export function ArchivedLogDetailPage() {
             </h2>
 
             {editing ? (
-              <div className="mt-3 space-y-4">
+              <form className="mt-3 space-y-4" onSubmit={onSubmit} noValidate>
                 <div>
                   <FieldLabel htmlFor="archived-log-description">
                     {t('detail.fields.description')}
@@ -187,11 +199,13 @@ export function ArchivedLogDetailPage() {
                   <TextArea
                     id="archived-log-description"
                     fieldSize="comfortable"
-                    value={form.description}
-                    onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                     rows={4}
                     disabled={saving}
+                    {...register('description')}
                   />
+                  {errors.description && (
+                    <p className="mt-1 text-xs text-state-danger">{errors.description.message}</p>
+                  )}
                 </div>
 
                 <div>
@@ -202,11 +216,13 @@ export function ArchivedLogDetailPage() {
                     id="archived-log-url-tutorial"
                     type="url"
                     fieldSize="comfortable"
-                    value={form.url_tutorial}
-                    onChange={(e) => setForm((f) => ({ ...f, url_tutorial: e.target.value }))}
                     disabled={saving}
                     placeholder="https://…"
+                    {...register('url_tutorial')}
                   />
+                  {errors.url_tutorial && (
+                    <p className="mt-1 text-xs text-state-danger">{errors.url_tutorial.message}</p>
+                  )}
                 </div>
 
                 {saveError && (
@@ -214,14 +230,14 @@ export function ArchivedLogDetailPage() {
                 )}
 
                 <div className="flex justify-end gap-2">
-                  <Button variant="secondary" size="sm" onClick={onCancelEdit} disabled={saving}>
+                  <Button type="button" variant="secondary" size="sm" onClick={onCancelEdit} disabled={saving}>
                     {t('detail.cancel')}
                   </Button>
-                  <Button variant="primary" size="sm" onClick={onSave} disabled={saving} loading={saving}>
+                  <Button type="submit" variant="primary" size="sm" disabled={saving} loading={saving}>
                     {saving ? '…' : t('detail.save')}
                   </Button>
                 </div>
-              </div>
+              </form>
             ) : (
               <dl className="mt-3 grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
                 <div>
