@@ -21,8 +21,6 @@ const ChevronIcon = ({ open }: { open: boolean }) => (
   </svg>
 );
 
-const dateInputClass =
-  'w-full rounded-lg border border-ui-border bg-ui-card px-3 py-2 text-sm shadow-sm dark:border-ui-dark-border dark:bg-ui-dark-card dark:text-text-dark-primary focus:border-odoo-purple focus:outline-none focus:ring-2 focus:ring-odoo-purple/20';
 const labelClass =
   'mb-1 block text-xs font-semibold text-text-secondary dark:text-text-dark-secondary';
 
